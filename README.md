@@ -1,1 +1,2 @@
 # pratice_brain
+This repository contains a collection of practice exercises and projects aimed at enhancing programming skills and problem-solving abilities. The focus is on practical applications and hands-on experience in various programming languages and technologies.
