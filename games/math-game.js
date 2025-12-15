@@ -196,10 +196,13 @@ class MathGame {
                 operation = operations[Math.floor(Math.random() * operations.length)];
             }
             
-            // For division with 2 operands, ensure we get whole numbers
-            if (operation === '/' && operandCount === 2) {
-                numbers[1] = this.getRandomNumber(1, 10);
-                numbers[0] = numbers[1] * this.getRandomNumber(minNumber, maxNumber);
+            // For division, avoid division by zero and very small numbers
+            if (operation === '/') {
+                for (let j = 1; j < numbers.length; j++) {
+                    if (numbers[j] === 0) {
+                        numbers[j] = this.getRandomNumber(1, 10);
+                    }
+                }
             }
             
             const answer = this.calculateAnswer(numbers, operation);
@@ -219,6 +222,20 @@ class MathGame {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
     
+    parseFraction(input) {
+        // Try to parse as fraction (e.g., "1/2", "3/4")
+        const fractionMatch = input.trim().match(/^(-?\d+)\s*\/\s*(\d+)$/);
+        if (fractionMatch) {
+            const numerator = parseFloat(fractionMatch[1]);
+            const denominator = parseFloat(fractionMatch[2]);
+            if (denominator !== 0) {
+                return Math.round((numerator / denominator) * 100) / 100;
+            }
+        }
+        // Otherwise parse as regular number (decimal or integer)
+        return parseFloat(input);
+    }
+    
     calculateAnswer(numbers, operation) {
         if (numbers.length === 0) return 0;
         
@@ -228,8 +245,12 @@ class MathGame {
                 case '+': result += numbers[i]; break;
                 case '-': result -= numbers[i]; break;
                 case '*': result *= numbers[i]; break;
-                case '/': result = Math.round(result / numbers[i]); break;
+                case '/': result = result / numbers[i]; break;
             }
+        }
+        // Round to 2 decimal places for division
+        if (operation === '/') {
+            result = Math.round(result * 100) / 100;
         }
         return result;
     }
@@ -388,14 +409,23 @@ class MathGame {
         this.stopTimer();
         
         const answerInput = document.getElementById('answerInput');
-        const userAnswer = timeout ? null : parseInt(answerInput.value);
+        let userAnswer = null;
+        
+        if (!timeout && answerInput.value.trim() !== '') {
+            userAnswer = this.parseFraction(answerInput.value);
+        }
+        
         const question = this.gameState.questions[this.gameState.currentQuestionIndex];
         
         // Calculate time spent
         const timeSpent = this.config.timePerQuestion - this.gameState.timeRemaining;
         
-        // Check answer
-        const isCorrect = userAnswer === question.correctAnswer;
+        // Check answer with tolerance for floating point numbers
+        let isCorrect = false;
+        if (userAnswer !== null && !isNaN(userAnswer)) {
+            const tolerance = 0.01; // Allow small difference for decimal comparison
+            isCorrect = Math.abs(userAnswer - question.correctAnswer) < tolerance;
+        }
         
         // Update question data
         question.userAnswer = userAnswer;
