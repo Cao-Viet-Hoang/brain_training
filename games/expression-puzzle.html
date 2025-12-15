@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expression Puzzle - Brain Training</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/expression-puzzle.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-btn">← Back</a>
+            <h1>🧮 Expression Puzzle</h1>
+        </header>
+
+        <main>
+            <!-- Config Screen -->
+            <div id="configScreen" class="game-screen active">
+                <div class="config-card">
+                    <h2>Game Configuration</h2>
+                    
+                    <div class="config-group">
+                        <label>Difficulty:</label>
+                        <div class="difficulty-buttons">
+                            <button class="difficulty-btn" data-difficulty="easy">
+                                <span class="diff-icon">😊</span>
+                                <span class="diff-label">Easy</span>
+                                <span class="diff-desc">3-4 numbers, all ops</span>
+                            </button>
+                            <button class="difficulty-btn active" data-difficulty="medium">
+                                <span class="diff-icon">🤔</span>
+                                <span class="diff-label">Medium</span>
+                                <span class="diff-desc">4-5 numbers, complex</span>
+                            </button>
+                            <button class="difficulty-btn" data-difficulty="hard">
+                                <span class="diff-icon">🔥</span>
+                                <span class="diff-label">Hard</span>
+                                <span class="diff-desc">5-7 numbers, unique</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="puzzleCount">Number of puzzles:</label>
+                        <input type="number" id="puzzleCount" value="10" min="1" max="50">
+                    </div>
+
+                    <div class="config-group">
+                        <label for="timePerPuzzle">Time per puzzle (seconds):</label>
+                        <input type="number" id="timePerPuzzle" value="60" min="10" max="300">
+                    </div>
+
+                    <div class="config-group">
+                        <label>Target range:</label>
+                        <div class="range-inputs">
+                            <input type="number" id="minTarget" value="10" min="1" placeholder="From">
+                            <span>to</span>
+                            <input type="number" id="maxTarget" value="200" min="1" placeholder="To">
+                        </div>
+                    </div>
+
+                    <div class="config-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="requireUnique">
+                            <span>Require unique solution (may take longer to generate)</span>
+                        </label>
+                    </div>
+
+                    <button class="btn-primary" id="startGameBtn">Start</button>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="gameScreen" class="game-screen">
+                <!-- Progress Section -->
+                <div class="progress-section">
+                    <div class="progress-info">
+                        <span>Puzzle <strong id="currentPuzzle">1</strong> of <strong id="totalPuzzles">10</strong></span>
+                        <span class="timer-display">Time: <strong id="timerValue">60</strong>s</span>
+                        <span class="score-display">Score: <strong id="scoreValue">0</strong></span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <!-- Content Wrapper for horizontal layout -->
+                <div class="game-content-wrapper">
+                    <!-- Main Puzzle Area -->
+                    <div class="puzzle-container">
+                        <div class="expression-section">
+                            <div class="expression-label">Fill in the missing numbers:</div>
+                            <div class="expression-display" id="expressionDisplay">
+                                <!-- Expression with inline inputs will be inserted here -->
+                            </div>
+                        </div>
+
+                        <div class="feedback-area" id="feedbackArea">
+                            <!-- Feedback messages will appear here -->
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="btn-secondary" id="hintBtn">💡 Hint</button>
+                            <button class="btn-primary" id="checkAnswerBtn">Check Answer</button>
+                            <button class="btn-primary" id="nextPuzzleBtn" style="display: none;">Next Puzzle →</button>
+                        </div>
+                    </div>
+
+                    <!-- Info Panel -->
+                    <div class="info-panel">
+                        <div class="info-card">
+                            <h3>📝 Instructions</h3>
+                            <ul>
+                                <li>Enter numbers in the empty boxes</li>
+                                <li>Make the expression equal to the target</li>
+                                <li>Use the hint button if you're stuck</li>
+                                <li>Press Enter or click "Check Answer"</li>
+                            </ul>
+                        </div>
+
+                        <div class="info-card tips-card">
+                            <h3>💡 Tips</h3>
+                            <ul>
+                                <li>Consider operator precedence (× ÷ before + −)</li>
+                                <li>Pay attention to parentheses</li>
+                                <li>Try working backwards from the target</li>
+                                <li>Division results must be whole numbers</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="resultScreen" class="game-screen">
+                <div class="result-card">
+                    <h2>🎉 Challenge Complete!</h2>
+                    
+                    <div class="result-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon">✓</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Score</div>
+                                <div class="stat-value">
+                                    <strong id="finalScore">0</strong> / <span id="totalQuestions">10</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-item">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Accuracy</div>
+                                <div class="stat-value" id="accuracyRate">0%</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-item">
+                            <div class="stat-icon">⏱️</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Total Time</div>
+                                <div class="stat-value" id="totalTime">0s</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="performance-message" id="performanceMessage">
+                        Great job! Keep practicing!
+                    </div>
+
+                    <div class="result-actions">
+                        <button class="btn-primary" id="playAgainBtn">Play Again</button>
+                        <a href="../index.html" class="btn-secondary">Back to Menu</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Brain Training. Challenge your mathematical thinking!</p>
+        </footer>
+    </div>
+
+    <script src="expression-puzzle.js"></script>
+</body>
+</html>

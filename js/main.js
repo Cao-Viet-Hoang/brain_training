@@ -17,6 +17,14 @@ const games = [
         url: 'games/pixel-game.html'
     },
     {
+        id: 'expression',
+        title: 'Expression Puzzle',
+        description: 'Fill numbers to make equations equal target values',
+        icon: '🧮',
+        tag: 'Puzzle',
+        url: 'games/expression-puzzle.html'
+    },
+    {
         id: 'memory',
         title: 'Memory',
         description: 'Improve memory with image recognition exercises',
