@@ -59,29 +59,115 @@
 
             <!-- Game Screen -->
             <div id="gameScreen" class="game-screen">
-                <div class="game-info">
-                    <div class="info-item">
-                        <span class="label">Question:</span>
-                        <span id="currentQuestion">1</span>/<span id="totalQuestions">10</span>
+                <!-- Progress Bar -->
+                <div class="progress-section">
+                    <div class="progress-info">
+                        <span>Question <strong id="currentQuestion">1</strong> of <strong id="totalQuestions">10</strong></span>
+                        <span id="progressPercentage">10%</span>
                     </div>
-                    <div class="info-item timer">
-                        <span class="label">⏱️</span>
-                        <span id="timer">10</span>s
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Correct:</span>
-                        <span id="correctCount" class="correct">0</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Wrong:</span>
-                        <span id="wrongCount" class="wrong">0</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
                     </div>
                 </div>
 
-                <div class="question-card">
-                    <div class="question" id="question">5 + 3 = ?</div>
-                    <input type="number" id="answerInput" placeholder="Enter answer" autofocus>
-                    <button class="btn-primary" id="submitAnswerBtn">Submit</button>
+                <div class="game-layout">
+                    <!-- Left Panel: Statistics -->
+                    <div class="stats-panel">
+                        <h3>📊 Statistics</h3>
+                        <div class="stat-card correct-stat">
+                            <div class="stat-icon">✓</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Correct</div>
+                                <div class="stat-value" id="correctCount">0</div>
+                            </div>
+                        </div>
+                        <div class="stat-card wrong-stat">
+                            <div class="stat-icon">✗</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Wrong</div>
+                                <div class="stat-value" id="wrongCount">0</div>
+                            </div>
+                        </div>
+                        <div class="stat-card streak-stat">
+                            <div class="stat-icon">🔥</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Streak</div>
+                                <div class="stat-value" id="streakCount">0</div>
+                            </div>
+                        </div>
+                        <div class="stat-card accuracy-stat">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Accuracy</div>
+                                <div class="stat-value" id="accuracyPercent">0%</div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Answers -->
+                        <div class="recent-answers">
+                            <h4>Recent Answers</h4>
+                            <div id="recentAnswersList" class="recent-list">
+                                <div class="empty-state">No answers yet</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center: Question Card -->
+                    <div class="center-panel">
+                        <!-- Visual Timer -->
+                        <div class="visual-timer">
+                            <svg class="timer-ring" width="120" height="120" viewBox="0 0 120 120">
+                                <circle class="timer-ring-bg" cx="60" cy="60" r="52" stroke-width="8" fill="none"></circle>
+                                <circle class="timer-ring-progress" id="timerRing" cx="60" cy="60" r="52" stroke-width="8" fill="none"></circle>
+                            </svg>
+                            <div class="timer-text">
+                                <span id="timer">10</span>
+                                <small>sec</small>
+                            </div>
+                        </div>
+
+                        <div class="question-card">
+                            <div class="question" id="question">5 + 3 = ?</div>
+                            <input type="number" id="answerInput" placeholder="Your answer" autofocus>
+                            <button class="btn-primary" id="submitAnswerBtn">Submit Answer</button>
+                            <div class="keyboard-hint">Press <kbd>Enter</kbd> to submit</div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Achievements -->
+                    <div class="achievements-panel">
+                        <h3>🏆 Achievements</h3>
+                        <div id="achievementsList" class="achievements-list">
+                            <div class="achievement-badge" data-achievement="fast" title="Answer within 3 seconds">
+                                <div class="badge-icon">⚡</div>
+                                <div class="badge-name">Speed Demon</div>
+                                <div class="badge-count" id="fastCount">0</div>
+                            </div>
+                            <div class="achievement-badge" data-achievement="perfect" title="5 correct in a row">
+                                <div class="badge-icon">🎯</div>
+                                <div class="badge-name">Perfect 5</div>
+                                <div class="badge-count" id="perfectCount">0</div>
+                            </div>
+                            <div class="achievement-badge" data-achievement="master" title="10 correct in a row">
+                                <div class="badge-icon">👑</div>
+                                <div class="badge-name">Math Master</div>
+                                <div class="badge-count" id="masterCount">0</div>
+                            </div>
+                            <div class="achievement-badge" data-achievement="comeback" title="Correct after 3 wrong">
+                                <div class="badge-icon">💪</div>
+                                <div class="badge-name">Comeback</div>
+                                <div class="badge-count" id="comebackCount">0</div>
+                            </div>
+                        </div>
+
+                        <!-- Tips Section -->
+                        <div class="tips-section">
+                            <h4>💡 Tips</h4>
+                            <div id="tipText" class="tip-text">
+                                Take your time and double-check your answer!
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

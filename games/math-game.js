@@ -16,7 +16,17 @@ class MathGame {
             questions: [],
             answers: [],
             timer: null,
-            timeRemaining: 0
+            timeRemaining: 0,
+            streak: 0,
+            maxStreak: 0,
+            recentAnswers: [],
+            achievements: {
+                fast: 0,
+                perfect: 0,
+                master: 0,
+                comeback: 0
+            },
+            wrongStreak: 0
         };
         
         this.screens = {
@@ -128,7 +138,17 @@ class MathGame {
             questions: [],
             answers: [],
             timer: null,
-            timeRemaining: this.config.timePerQuestion
+            timeRemaining: this.config.timePerQuestion,
+            streak: 0,
+            maxStreak: 0,
+            recentAnswers: [],
+            achievements: {
+                fast: 0,
+                perfect: 0,
+                master: 0,
+                comeback: 0
+            },
+            wrongStreak: 0
         };
         
         // Generate questions
@@ -142,6 +162,12 @@ class MathGame {
         
         // Start timer
         this.startTimer();
+        
+        // Update progress
+        this.updateProgress();
+        
+        // Show initial tip
+        this.updateTip();
     }
     
     generateQuestions() {
@@ -211,8 +237,8 @@ class MathGame {
         
         document.getElementById('currentQuestion').textContent = this.gameState.currentQuestionIndex + 1;
         document.getElementById('totalQuestions').textContent = this.config.questionCount;
-        document.getElementById('correctCount').textContent = this.gameState.correctCount;
-        document.getElementById('wrongCount').textContent = this.gameState.wrongCount;
+        
+        this.updateStats();
         
         // Clear and focus answer input
         const answerInput = document.getElementById('answerInput');
@@ -220,13 +246,94 @@ class MathGame {
         answerInput.focus();
     }
     
+    updateStats() {
+        const correctEl = document.getElementById('correctCount');
+        const wrongEl = document.getElementById('wrongCount');
+        const streakEl = document.getElementById('streakCount');
+        const accuracyEl = document.getElementById('accuracyPercent');
+        
+        // Update values
+        const oldCorrect = parseInt(correctEl.textContent) || 0;
+        const oldWrong = parseInt(wrongEl.textContent) || 0;
+        const oldStreak = parseInt(streakEl.textContent) || 0;
+        
+        correctEl.textContent = this.gameState.correctCount;
+        wrongEl.textContent = this.gameState.wrongCount;
+        streakEl.textContent = this.gameState.streak;
+        
+        // Add pop animation if value changed
+        if (this.gameState.correctCount !== oldCorrect) {
+            correctEl.classList.add('updated');
+            setTimeout(() => correctEl.classList.remove('updated'), 400);
+        }
+        if (this.gameState.wrongCount !== oldWrong) {
+            wrongEl.classList.add('updated');
+            setTimeout(() => wrongEl.classList.remove('updated'), 400);
+        }
+        if (this.gameState.streak !== oldStreak) {
+            streakEl.classList.add('updated');
+            setTimeout(() => streakEl.classList.remove('updated'), 400);
+        }
+        
+        const total = this.gameState.correctCount + this.gameState.wrongCount;
+        const accuracy = total > 0 ? Math.round((this.gameState.correctCount / total) * 100) : 0;
+        accuracyEl.textContent = accuracy + '%';
+    }
+    
+    updateProgress() {
+        const progress = ((this.gameState.currentQuestionIndex + 1) / this.config.questionCount) * 100;
+        document.getElementById('progressFill').style.width = progress + '%';
+        document.getElementById('progressPercentage').textContent = Math.round(progress) + '%';
+    }
+    
     startTimer() {
         this.gameState.timeRemaining = this.config.timePerQuestion;
+        
+        const timerRing = document.getElementById('timerRing');
+        const circumference = 2 * Math.PI * 52; // radius = 52
+        
+        // Update timer display FIRST
         this.updateTimerDisplay();
+        
+        // Small delay to ensure number is rendered before ring resets
+        setTimeout(() => {
+            // Then reset timer ring immediately without transition
+            timerRing.classList.add('reset');
+            timerRing.classList.remove('warning', 'danger');
+            timerRing.style.strokeDashoffset = '0';
+            
+            // Force reflow to ensure reset is applied
+            void timerRing.offsetWidth;
+            
+            // Re-enable transitions
+            requestAnimationFrame(() => {
+                timerRing.classList.remove('reset');
+            });
+        }, 10);
         
         this.gameState.timer = setInterval(() => {
             this.gameState.timeRemaining--;
+            
+            // Update timer number FIRST
             this.updateTimerDisplay();
+            
+            // Then update circular timer ring after a tiny delay
+            requestAnimationFrame(() => {
+                const progress = this.gameState.timeRemaining / this.config.timePerQuestion;
+                const offset = circumference * (1 - progress);
+                timerRing.style.strokeDashoffset = offset;
+                
+                // Change color based on time
+                if (this.gameState.timeRemaining <= 3) {
+                    timerRing.classList.add('danger');
+                    timerRing.classList.remove('warning');
+                } else if (this.gameState.timeRemaining <= 5) {
+                    timerRing.classList.add('warning');
+                    timerRing.classList.remove('danger');
+                } else {
+                    timerRing.classList.remove('warning', 'danger');
+                }
+            });
             
             if (this.gameState.timeRemaining <= 0) {
                 this.submitAnswer(true); // Auto-submit when time runs out
@@ -237,12 +344,18 @@ class MathGame {
     updateTimerDisplay() {
         const timerElement = document.getElementById('timer');
         timerElement.textContent = this.gameState.timeRemaining;
-        
-        // Change color when time is running out
-        if (this.gameState.timeRemaining <= 3) {
-            timerElement.style.color = 'var(--accent-color)';
-        } else {
-            timerElement.style.color = '';
+    }
+    
+    resetTimerRing() {
+        const timerRing = document.getElementById('timerRing');
+        if (timerRing) {
+            timerRing.classList.add('reset');
+            timerRing.classList.remove('warning', 'danger');
+            timerRing.style.strokeDashoffset = '0';
+            
+            setTimeout(() => {
+                timerRing.classList.remove('reset');
+            }, 50);
         }
     }
     
@@ -271,28 +384,167 @@ class MathGame {
         question.isCorrect = isCorrect;
         question.timeSpent = timeSpent;
         
-        // Update counts
+        // Update counts and streak
         if (isCorrect) {
             this.gameState.correctCount++;
+            this.gameState.streak++;
+            this.gameState.wrongStreak = 0;
+            
+            if (this.gameState.streak > this.gameState.maxStreak) {
+                this.gameState.maxStreak = this.gameState.streak;
+            }
+            
+            // Check achievements
+            this.checkAchievements(timeSpent);
         } else {
             this.gameState.wrongCount++;
+            this.gameState.wrongStreak++;
+            this.gameState.streak = 0;
         }
+        
+        // Add to recent answers
+        this.addRecentAnswer(question, isCorrect);
+        
+        // Update stats display
+        this.updateStats();
         
         // Move to next question or show results
         this.gameState.currentQuestionIndex++;
         
         if (this.gameState.currentQuestionIndex < this.config.questionCount) {
-            // Next question
+            // Add transition class
+            const questionCard = document.querySelector('.question-card');
+            questionCard.classList.add('transitioning');
+            
+            // Update all elements after a short delay for smooth transition
             setTimeout(() => {
-                this.displayQuestion();
-                this.startTimer();
-            }, 500);
+                // Update everything in one batch using requestAnimationFrame
+                requestAnimationFrame(() => {
+                    this.updateProgress();
+                    this.updateTip();
+                    this.displayQuestion();
+                    
+                    // Remove transition class and start timer
+                    requestAnimationFrame(() => {
+                        questionCard.classList.remove('transitioning');
+                        this.startTimer();
+                    });
+                });
+            }, 200);
         } else {
             // Game finished
             setTimeout(() => {
                 this.showResults();
-            }, 500);
+            }, 300);
         }
+    }
+    
+    checkAchievements(timeSpent) {
+        // Speed Demon - answer within 3 seconds
+        if (timeSpent <= 3) {
+            this.gameState.achievements.fast++;
+            this.unlockBadge('fast');
+        }
+        
+        // Perfect 5 - 5 correct in a row
+        if (this.gameState.streak === 5) {
+            this.gameState.achievements.perfect++;
+            this.unlockBadge('perfect');
+        }
+        
+        // Math Master - 10 correct in a row
+        if (this.gameState.streak === 10) {
+            this.gameState.achievements.master++;
+            this.unlockBadge('master');
+        }
+        
+        // Comeback - correct after 3 wrong
+        if (this.gameState.wrongStreak >= 3) {
+            this.gameState.achievements.comeback++;
+            this.unlockBadge('comeback');
+        }
+    }
+    
+    unlockBadge(achievement) {
+        const badge = document.querySelector(`.achievement-badge[data-achievement="${achievement}"]`);
+        if (badge) {
+            badge.classList.add('unlocked');
+            const count = badge.querySelector('.badge-count');
+            if (count) {
+                count.textContent = this.gameState.achievements[achievement];
+            }
+        }
+    }
+    
+    addRecentAnswer(question, isCorrect) {
+        const operationSymbol = {
+            '+': '+',
+            '-': '−',
+            '*': '×',
+            '/': '÷'
+        };
+        
+        const recentItem = {
+            text: `${question.num1} ${operationSymbol[question.operation]} ${question.num2}`,
+            isCorrect: isCorrect
+        };
+        
+        this.gameState.recentAnswers.unshift(recentItem);
+        
+        // Keep only last 5
+        if (this.gameState.recentAnswers.length > 5) {
+            this.gameState.recentAnswers.pop();
+        }
+        
+        // Update display
+        const recentList = document.getElementById('recentAnswersList');
+        recentList.innerHTML = '';
+        
+        this.gameState.recentAnswers.forEach(item => {
+            const div = document.createElement('div');
+            div.className = `recent-item ${item.isCorrect ? 'correct' : 'wrong'}`;
+            div.innerHTML = `
+                <span class="item-icon">${item.isCorrect ? '✓' : '✗'}</span>
+                <span class="item-text">${item.text}</span>
+            `;
+            recentList.appendChild(div);
+        });
+    }
+    
+    updateTip() {
+        const tips = [
+            'Take your time and double-check your answer!',
+            'Break down complex problems into smaller steps.',
+            'Practice makes perfect! Keep going!',
+            'Focus on accuracy over speed.',
+            'Use mental math tricks to solve faster.',
+            'Stay calm and think logically.',
+            'Every mistake is a learning opportunity!',
+            'You\'re doing great! Keep it up!',
+            'Consistency beats intensity!',
+            'Challenge yourself with harder numbers!'
+        ];
+        
+        // Add dynamic tips based on performance
+        const total = this.gameState.correctCount + this.gameState.wrongCount;
+        if (total > 0) {
+            const accuracy = (this.gameState.correctCount / total) * 100;
+            
+            if (accuracy === 100) {
+                tips.push('Perfect score! You\'re on fire! 🔥');
+            } else if (accuracy >= 80) {
+                tips.push('Great accuracy! Keep it up!');
+            } else if (accuracy < 50) {
+                tips.push('Don\'t rush! Take your time to think.');
+            }
+        }
+        
+        if (this.gameState.streak >= 5) {
+            tips.push(`Amazing ${this.gameState.streak} streak! Don't break it!`);
+        }
+        
+        const randomTip = tips[Math.floor(Math.random() * tips.length)];
+        document.getElementById('tipText').textContent = randomTip;
     }
     
     showResults() {
