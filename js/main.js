@@ -9,6 +9,14 @@ const games = [
         url: 'games/math-game.html'
     },
     {
+        id: 'pixel',
+        title: 'Pixel Number',
+        description: 'Stack pixel cards to create target digits',
+        icon: '🎮',
+        tag: 'Logic',
+        url: 'games/pixel-game.html'
+    },
+    {
         id: 'memory',
         title: 'Memory',
         description: 'Improve memory with image recognition exercises',
