@@ -317,23 +317,21 @@ class MathGame {
             // Update timer number FIRST
             this.updateTimerDisplay();
             
-            // Then update circular timer ring after a tiny delay
-            requestAnimationFrame(() => {
-                const progress = this.gameState.timeRemaining / this.config.timePerQuestion;
-                const offset = circumference * (1 - progress);
-                timerRing.style.strokeDashoffset = offset;
-                
-                // Change color based on time
-                if (this.gameState.timeRemaining <= 3) {
-                    timerRing.classList.add('danger');
-                    timerRing.classList.remove('warning');
-                } else if (this.gameState.timeRemaining <= 5) {
-                    timerRing.classList.add('warning');
-                    timerRing.classList.remove('danger');
-                } else {
-                    timerRing.classList.remove('warning', 'danger');
-                }
-            });
+            // Then update circular timer ring - it will animate smoothly over 1 second
+            const nextProgress = (this.gameState.timeRemaining) / this.config.timePerQuestion;
+            const offset = circumference * (1 - nextProgress);
+            timerRing.style.strokeDashoffset = offset;
+            
+            // Change color based on time
+            if (this.gameState.timeRemaining <= 3) {
+                timerRing.classList.add('danger');
+                timerRing.classList.remove('warning');
+            } else if (this.gameState.timeRemaining <= 5) {
+                timerRing.classList.add('warning');
+                timerRing.classList.remove('danger');
+            } else {
+                timerRing.classList.remove('warning', 'danger');
+            }
             
             if (this.gameState.timeRemaining <= 0) {
                 this.submitAnswer(true); // Auto-submit when time runs out

@@ -394,7 +394,7 @@
     stroke-linecap: round;
     stroke-dasharray: 326.73;
     stroke-dashoffset: 0;
-    transition: stroke-dashoffset 0.3s linear, stroke 0.3s ease;
+    transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
 }
 
 .timer-ring-progress.warning {
