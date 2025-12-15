@@ -5,6 +5,7 @@ class MathGame {
             minNumber: 1,
             maxNumber: 100,
             operations: [],
+            operandCount: 2,
             questionCount: 10,
             timePerQuestion: 10
         };
@@ -86,6 +87,7 @@ class MathGame {
     validateConfig() {
         const minNumber = parseInt(document.getElementById('minNumber').value);
         const maxNumber = parseInt(document.getElementById('maxNumber').value);
+        const operandCount = parseInt(document.getElementById('operandCount').value);
         const questionCount = parseInt(document.getElementById('questionCount').value);
         const timePerQuestion = parseInt(document.getElementById('timePerQuestion').value);
         const selectedOperations = Array.from(document.querySelectorAll('.operation-btn.active'))
@@ -106,6 +108,11 @@ class MathGame {
             return false;
         }
         
+        if (isNaN(operandCount) || operandCount < 2 || operandCount > 5) {
+            alert('Number of operands must be between 2 and 5!');
+            return false;
+        }
+        
         if (isNaN(questionCount) || questionCount < 1 || questionCount > 100) {
             alert('Number of questions must be between 1 and 100!');
             return false;
@@ -120,6 +127,7 @@ class MathGame {
             minNumber,
             maxNumber,
             operations: selectedOperations,
+            operandCount,
             questionCount,
             timePerQuestion
         };
@@ -171,11 +179,14 @@ class MathGame {
     }
     
     generateQuestions() {
-        const { minNumber, maxNumber, operations, questionCount } = this.config;
+        const { minNumber, maxNumber, operations, operandCount, questionCount } = this.config;
         
         for (let i = 0; i < questionCount; i++) {
-            const num1 = this.getRandomNumber(minNumber, maxNumber);
-            const num2 = this.getRandomNumber(minNumber, maxNumber);
+            // Generate array of numbers based on operandCount
+            const numbers = [];
+            for (let j = 0; j < operandCount; j++) {
+                numbers.push(this.getRandomNumber(minNumber, maxNumber));
+            }
             
             let operation;
             if (operations.includes('mixed')) {
@@ -185,21 +196,16 @@ class MathGame {
                 operation = operations[Math.floor(Math.random() * operations.length)];
             }
             
-            // For division, ensure we get whole numbers
-            let finalNum1 = num1;
-            let finalNum2 = num2;
-            
-            if (operation === '/') {
-                // Make num1 a multiple of num2 to avoid decimals
-                finalNum2 = this.getRandomNumber(1, 10);
-                finalNum1 = finalNum2 * this.getRandomNumber(minNumber, maxNumber);
+            // For division with 2 operands, ensure we get whole numbers
+            if (operation === '/' && operandCount === 2) {
+                numbers[1] = this.getRandomNumber(1, 10);
+                numbers[0] = numbers[1] * this.getRandomNumber(minNumber, maxNumber);
             }
             
-            const answer = this.calculateAnswer(finalNum1, finalNum2, operation);
+            const answer = this.calculateAnswer(numbers, operation);
             
             this.gameState.questions.push({
-                num1: finalNum1,
-                num2: finalNum2,
+                numbers: numbers,
                 operation,
                 correctAnswer: answer,
                 userAnswer: null,
@@ -213,14 +219,19 @@ class MathGame {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
     
-    calculateAnswer(num1, num2, operation) {
-        switch (operation) {
-            case '+': return num1 + num2;
-            case '-': return num1 - num2;
-            case '*': return num1 * num2;
-            case '/': return Math.round(num1 / num2);
-            default: return 0;
+    calculateAnswer(numbers, operation) {
+        if (numbers.length === 0) return 0;
+        
+        let result = numbers[0];
+        for (let i = 1; i < numbers.length; i++) {
+            switch (operation) {
+                case '+': result += numbers[i]; break;
+                case '-': result -= numbers[i]; break;
+                case '*': result *= numbers[i]; break;
+                case '/': result = Math.round(result / numbers[i]); break;
+            }
         }
+        return result;
     }
     
     displayQuestion() {
@@ -232,8 +243,17 @@ class MathGame {
             '/': '÷'
         };
         
+        // Build equation string with multiple numbers
+        const equationParts = [];
+        for (let i = 0; i < question.numbers.length; i++) {
+            equationParts.push(question.numbers[i]);
+            if (i < question.numbers.length - 1) {
+                equationParts.push(operationSymbol[question.operation]);
+            }
+        }
+        
         document.getElementById('question').textContent = 
-            `${question.num1} ${operationSymbol[question.operation]} ${question.num2} = ?`;
+            `${equationParts.join(' ')} = ?`;
         
         document.getElementById('currentQuestion').textContent = this.gameState.currentQuestionIndex + 1;
         document.getElementById('totalQuestions').textContent = this.config.questionCount;
@@ -482,8 +502,17 @@ class MathGame {
             '/': '÷'
         };
         
+        // Build equation string with multiple numbers
+        const equationParts = [];
+        for (let i = 0; i < question.numbers.length; i++) {
+            equationParts.push(question.numbers[i]);
+            if (i < question.numbers.length - 1) {
+                equationParts.push(operationSymbol[question.operation]);
+            }
+        }
+        
         const recentItem = {
-            text: `${question.num1} ${operationSymbol[question.operation]} ${question.num2}`,
+            text: equationParts.join(' '),
             isCorrect: isCorrect
         };
         
@@ -571,9 +600,18 @@ class MathGame {
                 '/': '÷'
             };
             
+            // Build equation string with multiple numbers
+            const equationParts = [];
+            for (let i = 0; i < q.numbers.length; i++) {
+                equationParts.push(q.numbers[i]);
+                if (i < q.numbers.length - 1) {
+                    equationParts.push(operationSymbol[q.operation]);
+                }
+            }
+            
             reviewItem.innerHTML = `
                 <div class="review-question">
-                    Question ${index + 1}: ${q.num1} ${operationSymbol[q.operation]} ${q.num2} = ?
+                    Question ${index + 1}: ${equationParts.join(' ')} = ?
                 </div>
                 <div class="review-details">
                     <span>Your answer: 
