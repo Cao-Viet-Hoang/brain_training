@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Number - Brain Training</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/pixel-game.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-btn">← Back</a>
+            <h1>🎮 Pixel Number</h1>
+        </header>
+
+        <main>
+            <!-- Config Screen -->
+            <div id="configScreen" class="game-screen active">
+                <div class="config-card">
+                    <h2>Game Configuration</h2>
+                    
+                    <div class="config-group">
+                        <label for="gameMode">Game Mode:</label>
+                        <select id="gameMode" class="config-select">
+                            <option value="single">Single Player</option>
+                            <option value="buzzer">Multi-Player Buzzer</option>
+                        </select>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="cardCount">Number of Cards:</label>
+                        <input type="number" id="cardCount" value="15" min="10" max="20">
+                    </div>
+
+                    <div class="config-group">
+                        <label for="targetCount">Number of Targets:</label>
+                        <input type="number" id="targetCount" value="3" min="1" max="5">
+                    </div>
+
+                    <div class="config-group">
+                        <label for="roundTimeLimit">Round Time Limit (seconds):</label>
+                        <input type="number" id="roundTimeLimit" value="300" min="60" max="600">
+                        <small>Total time to complete all targets</small>
+                    </div>
+
+                    <div class="config-group" id="answerTimeLimitGroup" style="display: none;">
+                        <label for="answerTimeLimit">Answer Time Limit (seconds):</label>
+                        <input type="number" id="answerTimeLimit" value="10" min="5" max="30">
+                        <small>Time limit for buzzer mode answers</small>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="penaltyMode">Penalty for Wrong Answer:</label>
+                        <select id="penaltyMode" class="config-select">
+                            <option value="score">-1 Score</option>
+                            <option value="turn">Lose Turn</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-primary" id="startGameBtn">Start Game</button>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="gameScreen" class="game-screen">
+                <!-- Timer and Score -->
+                <div class="game-header">
+                    <div class="timer-section">
+                        <span class="timer-label">Time:</span>
+                        <span class="timer-value" id="timerValue">5:00</span>
+                    </div>
+                    <div class="score-section">
+                        <span class="score-label">Score:</span>
+                        <span class="score-value" id="scoreValue">0</span>
+                    </div>
+                </div>
+
+                <!-- Targets Panel -->
+                <div class="targets-panel">
+                    <h3>Targets to Complete:</h3>
+                    <div class="targets-grid" id="targetsGrid">
+                        <!-- Target digits will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Preview Area -->
+                <div class="preview-section">
+                    <h3>Preview (OR of selected cards):</h3>
+                    <div class="preview-container">
+                        <canvas id="previewCanvas" width="150" height="210"></canvas>
+                        <div class="preview-info">
+                            <p>Selected: <strong id="selectedCount">0</strong> cards</p>
+                            <button class="btn-secondary" id="resetSelectionBtn">Reset Selection</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cards Grid -->
+                <div class="cards-section">
+                    <h3>Available Cards:</h3>
+                    <div class="cards-grid" id="cardsGrid">
+                        <!-- Cards will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="actions-section">
+                    <div class="action-group">
+                        <label for="targetSelect">Submit for Target:</label>
+                        <select id="targetSelect" class="config-select">
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                    <button class="btn-primary" id="submitAnswerBtn">Submit Answer</button>
+                    <button class="btn-secondary" id="quitGameBtn">Quit Game</button>
+                </div>
+
+                <!-- Feedback Message -->
+                <div class="feedback-message" id="feedbackMessage"></div>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="resultScreen" class="game-screen">
+                <div class="result-card">
+                    <h2>Game Complete!</h2>
+                    
+                    <div class="result-summary">
+                        <div class="result-item">
+                            <span class="result-label">Final Score:</span>
+                            <span class="result-value" id="finalScore">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Targets Completed:</span>
+                            <span class="result-value" id="targetsCompleted">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Time Used:</span>
+                            <span class="result-value" id="timeUsed">0:00</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Correct Submissions:</span>
+                            <span class="result-value" id="correctSubmissions">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Wrong Submissions:</span>
+                            <span class="result-value" id="wrongSubmissions">0</span>
+                        </div>
+                    </div>
+
+                    <div class="result-performance" id="performanceMessage">
+                        <!-- Performance message will be displayed here -->
+                    </div>
+
+                    <div class="result-actions">
+                        <button class="btn-primary" id="playAgainBtn">Play Again</button>
+                        <a href="../index.html" class="btn-secondary">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="pixel-game.js"></script>
+</body>
+</html>
