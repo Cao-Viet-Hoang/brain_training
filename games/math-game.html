@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Game - Brain Training</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/math-game.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-btn">← Back</a>
+            <h1>🔢 Quick Math</h1>
+        </header>
+
+        <main>
+            <!-- Config Screen -->
+            <div id="configScreen" class="game-screen active">
+                <div class="config-card">
+                    <h2>Game Configuration</h2>
+                    
+                    <div class="config-group">
+                        <label>Number Range:</label>
+                        <div class="range-inputs">
+                            <input type="number" id="minNumber" value="1" min="0" placeholder="From">
+                            <span>to</span>
+                            <input type="number" id="maxNumber" value="100" min="1" placeholder="To">
+                        </div>
+                    </div>
+
+                    <div class="config-group">
+                        <label>Operations:</label>
+                        <div class="operation-buttons">
+                            <button class="operation-btn" data-operation="+" title="Addition">+</button>
+                            <button class="operation-btn" data-operation="-" title="Subtraction">−</button>
+                            <button class="operation-btn" data-operation="*" title="Multiplication">×</button>
+                            <button class="operation-btn" data-operation="/" title="Division">÷</button>
+                            <button class="operation-btn" data-operation="mixed" title="Mixed">Mixed</button>
+                        </div>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="questionCount">Number of questions:</label>
+                        <input type="number" id="questionCount" value="10" min="1" max="100">
+                    </div>
+
+                    <div class="config-group">
+                        <label for="timePerQuestion">Time per question (seconds):</label>
+                        <input type="number" id="timePerQuestion" value="10" min="5" max="60">
+                    </div>
+
+                    <button class="btn-primary" id="startGameBtn">Start</button>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="gameScreen" class="game-screen">
+                <div class="game-info">
+                    <div class="info-item">
+                        <span class="label">Question:</span>
+                        <span id="currentQuestion">1</span>/<span id="totalQuestions">10</span>
+                    </div>
+                    <div class="info-item timer">
+                        <span class="label">⏱️</span>
+                        <span id="timer">10</span>s
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Correct:</span>
+                        <span id="correctCount" class="correct">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Wrong:</span>
+                        <span id="wrongCount" class="wrong">0</span>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question" id="question">5 + 3 = ?</div>
+                    <input type="number" id="answerInput" placeholder="Enter answer" autofocus>
+                    <button class="btn-primary" id="submitAnswerBtn">Submit</button>
+                </div>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="resultScreen" class="game-screen">
+                <div class="result-card">
+                    <h2>Results</h2>
+                    <div class="score-summary">
+                        <div class="score-item correct">
+                            <div class="score-label">Correct</div>
+                            <div class="score-value" id="finalCorrect">0</div>
+                        </div>
+                        <div class="score-item wrong">
+                            <div class="score-label">Wrong</div>
+                            <div class="score-value" id="finalWrong">0</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-label">Accuracy</div>
+                            <div class="score-value" id="finalPercentage">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="review-section">
+                        <h3>Review Your Answers</h3>
+                        <div id="reviewList" class="review-list">
+                            <!-- Review items will be generated here -->
+                        </div>
+                    </div>
+
+                    <div class="result-actions">
+                        <button class="btn-secondary" id="playAgainBtn">Play Again</button>
+                        <a href="../index.html" class="btn-primary">Home</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="math-game.js"></script>
+</body>
+</html>

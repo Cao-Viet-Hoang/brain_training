@@ -1,0 +1,430 @@
+/* ===== Math Game Specific Styles ===== */
+
+/* ===== Game Screens ===== */
+.game-screen {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.game-screen.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== Config Screen ===== */
+.config-card {
+    max-width: 600px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.config-card h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-primary);
+    font-size: 1.8rem;
+}
+
+.config-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.config-group label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.config-group input[type="number"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.config-group input[type="number"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.range-inputs {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.range-inputs input {
+    flex: 1;
+}
+
+.range-inputs span {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.operation-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.operation-btn {
+    flex: 1;
+    min-width: 60px;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    background: var(--secondary-color);
+    border-radius: var(--radius-sm);
+    font-size: 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: 'Quicksand', sans-serif;
+}
+
+.operation-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.operation-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.operation-btn[data-operation="mixed"] {
+    font-size: 1rem;
+    flex-basis: 100%;
+}
+
+#startGameBtn {
+    width: 100%;
+    margin-top: var(--spacing-md);
+    padding: 1rem;
+    font-size: 1.1rem;
+}
+
+/* ===== Game Screen ===== */
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-bg);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-item .label {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.info-item.timer {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.correct {
+    color: var(--success-color);
+    font-weight: 700;
+}
+
+.wrong {
+    color: var(--accent-color);
+    font-weight: 700;
+}
+
+.question-card {
+    max-width: 500px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.question {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--secondary-color);
+    border-radius: var(--radius-md);
+}
+
+#answerInput {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    transition: var(--transition);
+}
+
+#answerInput:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+#submitAnswerBtn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+}
+
+/* ===== Result Screen ===== */
+.result-card {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.result-card h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    font-size: 2rem;
+    color: var(--text-primary);
+}
+
+.score-summary {
+    display: flex;
+    justify-content: space-around;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.score-item {
+    flex: 1;
+    min-width: 120px;
+    background: var(--secondary-color);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.score-item.correct {
+    background: #E8F8ED;
+}
+
+.score-item.wrong {
+    background: #FFE8E8;
+}
+
+.score-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+    font-weight: 600;
+}
+
+.score-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.review-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.review-section h3 {
+    font-size: 1.4rem;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.review-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: var(--spacing-sm);
+}
+
+.review-item {
+    background: var(--secondary-color);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-sm);
+    border-left: 4px solid var(--border-color);
+}
+
+.review-item.correct-answer {
+    border-left-color: var(--success-color);
+    background: #E8F8ED;
+}
+
+.review-item.wrong-answer {
+    border-left-color: var(--accent-color);
+    background: #FFE8E8;
+}
+
+.review-question {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-primary);
+}
+
+.review-details {
+    display: flex;
+    gap: var(--spacing-md);
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.review-details span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.review-details .user-answer {
+    font-weight: 600;
+}
+
+.review-details .correct-ans {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.review-details .wrong-ans {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.result-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    margin-top: var(--spacing-lg);
+}
+
+.result-actions button,
+.result-actions a {
+    flex: 1;
+    max-width: 200px;
+}
+
+/* ===== Scrollbar Styling ===== */
+.review-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.review-list::-webkit-scrollbar-track {
+    background: var(--secondary-color);
+    border-radius: 10px;
+}
+
+.review-list::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
+.review-list::-webkit-scrollbar-thumb:hover {
+    background: #8BC9CB;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+    .config-card,
+    .question-card,
+    .result-card {
+        padding: var(--spacing-md);
+    }
+    
+    .question {
+        font-size: 1.8rem;
+        padding: var(--spacing-sm);
+    }
+    
+    .score-summary {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .score-item {
+        min-width: 100%;
+    }
+    
+    .result-actions {
+        flex-direction: column;
+    }
+    
+    .result-actions button,
+    .result-actions a {
+        max-width: 100%;
+    }
+    
+    .game-info {
+        font-size: 0.9rem;
+        gap: var(--spacing-xs);
+    }
+}
+
+@media (max-width: 480px) {
+    .operation-buttons {
+        flex-direction: column;
+    }
+    
+    .operation-btn {
+        width: 100%;
+    }
+    
+    .question {
+        font-size: 1.5rem;
+        padding: var(--spacing-sm);
+    }
+    
+    .score-value {
+        font-size: 2rem;
+    }
+    
+    .config-card,
+    .question-card,
+    .result-card {
+        padding: var(--spacing-sm);
+    }
+    
+    .config-card h2,
+    .result-card h2 {
+        font-size: 1.5rem;
+    }
+}
