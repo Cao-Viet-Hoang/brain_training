@@ -194,7 +194,8 @@ footer {
 }
 
 .back-btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     padding: 0.5rem 1rem;
     background: var(--secondary-color);
     color: var(--text-primary);
@@ -202,11 +203,37 @@ footer {
     border-radius: var(--radius-sm);
     font-weight: 500;
     transition: var(--transition);
-    margin-bottom: var(--spacing-md);
 }
 
 .back-btn:hover {
     background: var(--border-color);
+}
+
+/* Game Header with Flex Layout */
+.game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) 0;
+    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-md);
+}
+
+.game-header h1 {
+    flex: 1;
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.game-header .back-btn {
+    margin: 0;
+}
+
+.game-header .help-btn {
+    margin: 0;
 }
 
 /* ===== Responsive Design ===== */
@@ -219,6 +246,19 @@ footer {
 @media (max-width: 768px) {
     header h1 {
         font-size: 2rem;
+    }
+    
+    .game-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .game-header {
+        gap: var(--spacing-sm);
+    }
+    
+    .help-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
     }
     
     .games-grid {
@@ -239,6 +279,29 @@ footer {
 @media (max-width: 480px) {
     header h1 {
         font-size: 1.75rem;
+    }
+    
+    .game-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .game-header {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .game-header .back-btn,
+    .game-header .help-btn {
+        order: 2;
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+    
+    .game-header h1 {
+        order: 1;
+        flex-basis: 100%;
+        margin-bottom: var(--spacing-sm);
     }
     
     .games-grid {

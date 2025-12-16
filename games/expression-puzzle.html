@@ -13,10 +13,68 @@
 </head>
 <body>
     <div class="container">
-        <header>
+        <header class="game-header">
             <a href="../index.html" class="back-btn">← Back</a>
             <h1>🧮 Expression Puzzle</h1>
+            <button class="help-btn" id="helpBtn">❓ How to Play</button>
         </header>
+
+        <!-- How to Play Modal -->
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeHelpModal">&times;</span>
+                <h2>📖 How to Play</h2>
+                <div class="help-content">
+                    <div class="help-section">
+                        <h3>🎯 Objective</h3>
+                        <p>Place mathematical operators (+, -, ×, ÷) between numbers to make the equation equal the target value!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>⚙️ Setup</h3>
+                        <ul>
+                            <li><strong>Easy:</strong> 3-4 numbers, allows one 0 or 1</li>
+                            <li><strong>Medium:</strong> 4-5 numbers, no 0 or 1</li>
+                            <li><strong>Hard:</strong> 5-7 numbers, no 0 or 1</li>
+                            <li><strong>Puzzles:</strong> Choose how many puzzles to solve (1-50)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 Gameplay</h3>
+                        <ul>
+                            <li>You'll see a series of numbers and a target value</li>
+                            <li>Click on the empty boxes between numbers to select operators</li>
+                            <li>Choose from: + (addition), - (subtraction), × (multiplication), ÷ (division)</li>
+                            <li>The equation is calculated left-to-right (no operator precedence)</li>
+                            <li>When all operators are placed, check if the result matches the target</li>
+                            <li>Click Submit to verify your answer</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>📊 Scoring</h3>
+                        <ul>
+                            <li>✅ Correct solutions increase your score</li>
+                            <li>❌ Wrong answers are tracked</li>
+                            <li>⏱️ Complete puzzles faster for better time</li>
+                            <li>🎯 Aim for perfect accuracy!</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>💡 Tips</h3>
+                        <ul>
+                            <li>Remember: calculation is done left-to-right</li>
+                            <li>Example: 2 + 3 × 4 = (2 + 3) × 4 = 20, not 14</li>
+                            <li>Try different combinations systematically</li>
+                            <li>Division must result in whole numbers (no decimals)</li>
+                            <li>Start with easier difficulties to learn the mechanics</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <main>
             <!-- Config Screen -->

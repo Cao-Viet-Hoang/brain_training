@@ -13,10 +13,82 @@
 </head>
 <body>
     <div class="container">
-        <header>
+        <header class="game-header">
             <a href="../index.html" class="back-btn">← Back</a>
             <h1>🎮 Pixel Number</h1>
+            <button class="help-btn" id="helpBtn">❓ How to Play</button>
         </header>
+
+        <!-- How to Play Modal -->
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeHelpModal">&times;</span>
+                <h2>📖 How to Play</h2>
+                <div class="help-content">
+                    <div class="help-section">
+                        <h3>🎯 Objective</h3>
+                        <p>Find all the target numbers among the pixelated cards before time runs out!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>⚙️ Setup</h3>
+                        <ul>
+                            <li><strong>Game Mode:</strong> Choose Single Player or Multi-Player Buzzer</li>
+                            <li><strong>Cards:</strong> Set how many cards to display (10-20)</li>
+                            <li><strong>Targets:</strong> Set how many numbers to find (1-5)</li>
+                            <li><strong>Time Limit:</strong> Total time to complete all targets (60-600 seconds)</li>
+                            <li><strong>Reveal Time:</strong> How long cards are revealed at start (3-10 seconds)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 Gameplay</h3>
+                        <ul>
+                            <li>At the start, all cards are revealed for a few seconds - memorize them!</li>
+                            <li>After the reveal time, cards turn into pixelated grids</li>
+                            <li>Look at the target number at the top</li>
+                            <li>Click on the card you think shows that number</li>
+                            <li>In Single Player mode, you can try multiple times</li>
+                            <li>In Buzzer mode, first player to find it wins the round</li>
+                            <li>Complete all targets before time runs out!</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 Multi-Player Buzzer Mode</h3>
+                        <ul>
+                            <li>Each player gets assigned keyboard keys</li>
+                            <li>Press your key when you spot the target number</li>
+                            <li>Only the first player to press gets to select a card</li>
+                            <li>Correct answer: +1 point, move to next target</li>
+                            <li>Wrong answer: -1 point, other players can buzz in</li>
+                            <li>Player with most points wins!</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>📊 Scoring</h3>
+                        <ul>
+                            <li>✅ Find targets quickly for better scores</li>
+                            <li>⏱️ Time bonus for fast completion</li>
+                            <li>🎯 Accuracy matters - avoid wrong guesses</li>
+                            <li>🏆 In buzzer mode, compete for the highest score</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>💡 Tips</h3>
+                        <ul>
+                            <li>Focus during the initial reveal time - memorize positions!</li>
+                            <li>Look for distinctive patterns in the pixels</li>
+                            <li>Each digit has a unique 5×3 pixel pattern</li>
+                            <li>Practice with fewer cards first</li>
+                            <li>In buzzer mode, speed and accuracy both matter</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <main>
             <!-- Config Screen -->

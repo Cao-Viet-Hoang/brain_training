@@ -744,7 +744,29 @@ class ExpressionPuzzleGame {
     
     init() {
         this.setupEventListeners();
+        this.setupHelpModal();
         this.showScreen('config');
+    }
+    
+    setupHelpModal() {
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const closeBtn = document.getElementById('closeHelpModal');
+        
+        helpBtn.addEventListener('click', () => {
+            helpModal.classList.add('active');
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            helpModal.classList.remove('active');
+        });
+        
+        // Close modal when clicking outside
+        helpModal.addEventListener('click', (e) => {
+            if (e.target === helpModal) {
+                helpModal.classList.remove('active');
+            }
+        });
     }
     
     setupEventListeners() {
