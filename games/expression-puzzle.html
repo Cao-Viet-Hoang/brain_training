@@ -33,9 +33,9 @@
                     <div class="help-section">
                         <h3>⚙️ Setup</h3>
                         <ul>
-                            <li><strong>Easy:</strong> 3-4 numbers, allows one 0 or 1</li>
-                            <li><strong>Medium:</strong> 4-5 numbers, no 0 or 1</li>
-                            <li><strong>Hard:</strong> 5-7 numbers, no 0 or 1</li>
+                            <li><strong>Easy:</strong> 3-4 numbers, may include 0 or 1 (max 1 occurrence). Note: 0 and 1 only appear in Easy mode!</li>
+                            <li><strong>Medium:</strong> 4-5 numbers, numbers from 2-9 only (no 0 or 1)</li>
+                            <li><strong>Hard:</strong> 5-7 numbers, numbers from 2-9 only (no 0 or 1)</li>
                             <li><strong>Puzzles:</strong> Choose how many puzzles to solve (1-50)</li>
                         </ul>
                     </div>
@@ -43,12 +43,13 @@
                     <div class="help-section">
                         <h3>🎮 Gameplay</h3>
                         <ul>
-                            <li>You'll see a series of numbers and a target value</li>
-                            <li>Click on the empty boxes between numbers to select operators</li>
+                            <li>You'll see a series of numbers and a target value to reach</li>
+                            <li>Click on the empty boxes (operators slots) between numbers</li>
                             <li>Choose from: + (addition), - (subtraction), × (multiplication), ÷ (division)</li>
-                            <li>The equation is calculated left-to-right (no operator precedence)</li>
-                            <li>When all operators are placed, check if the result matches the target</li>
-                            <li>Click Submit to verify your answer</li>
+                            <li><strong>IMPORTANT:</strong> Calculation is done strictly LEFT-TO-RIGHT (no operator precedence!)</li>
+                            <li>Example: 2 + 3 × 4 = (2 + 3) × 4 = 20, NOT 2 + 12 = 14</li>
+                            <li>When all operators are placed, the result is automatically calculated</li>
+                            <li>Click Submit to verify if your result matches the target</li>
                         </ul>
                     </div>
                     
@@ -65,11 +66,13 @@
                     <div class="help-section">
                         <h3>💡 Tips</h3>
                         <ul>
-                            <li>Remember: calculation is done left-to-right</li>
-                            <li>Example: 2 + 3 × 4 = (2 + 3) × 4 = 20, not 14</li>
-                            <li>Try different combinations systematically</li>
-                            <li>Division must result in whole numbers (no decimals)</li>
-                            <li>Start with easier difficulties to learn the mechanics</li>
+                            <li><strong>LEFT-TO-RIGHT RULE:</strong> Each operation applies to the result so far</li>
+                            <li>Think step-by-step: 5 - 2 + 3 = ((5 - 2) + 3) = 3 + 3 = 6</li>
+                            <li>Division must produce whole numbers only (no decimals allowed)</li>
+                            <li>Work backwards: think about what operations could produce the target</li>
+                            <li>Try multiplication/division first for larger jumps in value</li>
+                            <li>Use addition/subtraction for fine-tuning to reach the exact target</li>
+                            <li>Start with easier difficulties to master the left-to-right calculation</li>
                         </ul>
                     </div>
                 </div>
