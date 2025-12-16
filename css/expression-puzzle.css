@@ -313,6 +313,29 @@
     border: 2px solid #60a5fa;
 }
 
+/* Limit Info */
+.limit-info {
+    margin-top: 1rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+    animation: slideIn 0.3s ease;
+}
+
+.limit-info.limit-strict {
+    background: #fef3c7;
+    color: #92400e;
+    border: 2px solid #fbbf24;
+}
+
+.limit-info.limit-relaxed {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 2px solid #60a5fa;
+}
+
 @keyframes slideIn {
     from {
         opacity: 0;

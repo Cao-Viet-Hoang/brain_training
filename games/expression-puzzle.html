@@ -30,17 +30,17 @@
                             <button class="difficulty-btn" data-difficulty="easy">
                                 <span class="diff-icon">😊</span>
                                 <span class="diff-label">Easy</span>
-                                <span class="diff-desc">3-4 numbers, all ops</span>
+                                <span class="diff-desc">3-4 numbers, 0/1 limit: 1</span>
                             </button>
                             <button class="difficulty-btn active" data-difficulty="medium">
                                 <span class="diff-icon">🤔</span>
                                 <span class="diff-label">Medium</span>
-                                <span class="diff-desc">4-5 numbers, complex</span>
+                                <span class="diff-desc">4-5 numbers, no 0/1</span>
                             </button>
                             <button class="difficulty-btn" data-difficulty="hard">
                                 <span class="diff-icon">🔥</span>
                                 <span class="diff-label">Hard</span>
-                                <span class="diff-desc">5-7 numbers, unique</span>
+                                <span class="diff-desc">5-7 numbers, no 0/1</span>
                             </button>
                         </div>
                     </div>
@@ -98,6 +98,9 @@
                             <div class="expression-display" id="expressionDisplay">
                                 <!-- Expression with inline inputs will be inserted here -->
                             </div>
+                            <div class="limit-info" id="trivialNumberLimit">
+                                <!-- Limit information will appear here -->
+                            </div>
                         </div>
 
                         <div class="feedback-area" id="feedbackArea">
@@ -130,6 +133,7 @@
                                 <li>Pay attention to parentheses</li>
                                 <li>Try working backwards from the target</li>
                                 <li>Division results must be whole numbers</li>
+                                <li>⚠️ Be careful: 0 and 1 usage is limited!</li>
                             </ul>
                         </div>
                     </div>
