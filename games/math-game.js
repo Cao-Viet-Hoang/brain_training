@@ -108,8 +108,8 @@ class MathGame {
             return false;
         }
         
-        if (isNaN(operandCount) || operandCount < 2 || operandCount > 5) {
-            alert('Number of operands must be between 2 and 5!');
+        if (isNaN(operandCount) || operandCount < 2 || operandCount > 20) {
+            alert('Number of operands must be between 2 and 20!');
             return false;
         }
         
@@ -182,34 +182,84 @@ class MathGame {
         const { minNumber, maxNumber, operations, operandCount, questionCount } = this.config;
         
         for (let i = 0; i < questionCount; i++) {
-            // Generate array of numbers based on operandCount
+            const isMixed = operations.includes('mixed');
             const numbers = [];
-            for (let j = 0; j < operandCount; j++) {
-                numbers.push(this.getRandomNumber(minNumber, maxNumber));
-            }
+            const ops = []; // Array of operations for mixed mode
             
-            let operation;
-            if (operations.includes('mixed')) {
+            if (isMixed) {
+                // Mixed mode: generate different operations for each operand
                 const allOps = ['+', '-', '*', '/'];
-                operation = allOps[Math.floor(Math.random() * allOps.length)];
-            } else {
-                operation = operations[Math.floor(Math.random() * operations.length)];
-            }
-            
-            // For division, avoid division by zero and very small numbers
-            if (operation === '/') {
-                for (let j = 1; j < numbers.length; j++) {
-                    if (numbers[j] === 0) {
-                        numbers[j] = this.getRandomNumber(1, 10);
+                
+                // First, generate operations
+                for (let j = 1; j < operandCount; j++) {
+                    const op = allOps[Math.floor(Math.random() * allOps.length)];
+                    ops.push(op);
+                }
+                
+                // Then generate numbers based on operations
+                for (let j = 0; j < operandCount; j++) {
+                    if (j > 0 && ops[j - 1] === '/') {
+                        // For division, ensure divisibility
+                        // Generate a divisor first
+                        const divisor = this.getRandomNumber(2, 10);
+                        numbers.push(divisor);
+                        
+                        // Make the previous number (dividend) divisible by this divisor
+                        // Find a reasonable multiplier
+                        const maxMultiplier = Math.floor(maxNumber / divisor);
+                        const multiplier = this.getRandomNumber(2, Math.min(maxMultiplier, 20));
+                        numbers[j - 1] = divisor * multiplier;
+                    } else {
+                        // For other operations, generate normally
+                        // But keep numbers smaller for mixed mode to avoid very large results
+                        const adjustedMax = Math.min(maxNumber, 50);
+                        numbers.push(this.getRandomNumber(minNumber, adjustedMax));
                     }
+                }
+            } else {
+                // Single operation mode
+                let operation = operations[Math.floor(Math.random() * operations.length)];
+                
+                // For division, generate numbers that divide evenly
+                if (operation === '/') {
+                    // Start with the final result
+                    let result = this.getRandomNumber(Math.max(1, minNumber), Math.min(maxNumber, 20));
+                    numbers.push(result);
+                    
+                    // For each subsequent number, multiply to build the dividend
+                    for (let j = 1; j < operandCount; j++) {
+                        const divisor = this.getRandomNumber(2, 10);
+                        numbers[0] = numbers[0] * divisor;
+                        numbers.push(divisor);
+                    }
+                    
+                    // Make sure the first number doesn't exceed maxNumber
+                    if (numbers[0] > maxNumber) {
+                        // Scale down all numbers proportionally
+                        const scaleFactor = maxNumber / numbers[0];
+                        numbers[0] = maxNumber;
+                        for (let j = 1; j < numbers.length; j++) {
+                            numbers[j] = Math.max(2, Math.floor(numbers[j] * scaleFactor));
+                        }
+                    }
+                } else {
+                    // For other operations, generate numbers normally
+                    for (let j = 0; j < operandCount; j++) {
+                        numbers.push(this.getRandomNumber(minNumber, maxNumber));
+                    }
+                }
+                
+                // Fill ops array with the same operation
+                for (let j = 1; j < operandCount; j++) {
+                    ops.push(operation);
                 }
             }
             
-            const answer = this.calculateAnswer(numbers, operation);
+            const answer = this.calculateAnswer(numbers, ops);
             
             this.gameState.questions.push({
                 numbers: numbers,
-                operation,
+                operations: ops, // Changed from 'operation' to 'operations' (array)
                 correctAnswer: answer,
                 userAnswer: null,
                 isCorrect: null,
@@ -236,23 +286,52 @@ class MathGame {
         return parseFloat(input);
     }
     
-    calculateAnswer(numbers, operation) {
+    calculateAnswer(numbers, operations) {
         if (numbers.length === 0) return 0;
+        if (numbers.length === 1) return numbers[0];
         
-        let result = numbers[0];
-        for (let i = 1; i < numbers.length; i++) {
-            switch (operation) {
-                case '+': result += numbers[i]; break;
-                case '-': result -= numbers[i]; break;
-                case '*': result *= numbers[i]; break;
-                case '/': result = result / numbers[i]; break;
+        // Create a copy of numbers and operations arrays to avoid modifying originals
+        let nums = [...numbers];
+        let ops = [...operations];
+        
+        // First pass: handle multiplication and division (left to right)
+        let i = 0;
+        while (i < ops.length) {
+            if (ops[i] === '*' || ops[i] === '/') {
+                let result;
+                if (ops[i] === '*') {
+                    result = nums[i] * nums[i + 1];
+                } else {
+                    result = nums[i] / nums[i + 1];
+                }
+                // Replace the two numbers with the result
+                nums.splice(i, 2, result);
+                // Remove the operation
+                ops.splice(i, 1);
+                // Don't increment i, check the same position again
+            } else {
+                i++;
             }
         }
-        // Round to 2 decimal places for division
-        if (operation === '/') {
-            result = Math.round(result * 100) / 100;
+        
+        // Second pass: handle addition and subtraction (left to right)
+        i = 0;
+        while (i < ops.length) {
+            let result;
+            if (ops[i] === '+') {
+                result = nums[i] + nums[i + 1];
+            } else {
+                result = nums[i] - nums[i + 1];
+            }
+            // Replace the two numbers with the result
+            nums.splice(i, 2, result);
+            // Remove the operation
+            ops.splice(i, 1);
+            // Don't increment i, check the same position again
         }
-        return result;
+        
+        // Round to handle floating point precision issues
+        return Math.round(nums[0]);
     }
     
     displayQuestion() {
@@ -264,12 +343,12 @@ class MathGame {
             '/': '÷'
         };
         
-        // Build equation string with multiple numbers
+        // Build equation string with multiple numbers and operations
         const equationParts = [];
         for (let i = 0; i < question.numbers.length; i++) {
             equationParts.push(question.numbers[i]);
             if (i < question.numbers.length - 1) {
-                equationParts.push(operationSymbol[question.operation]);
+                equationParts.push(operationSymbol[question.operations[i]]);
             }
         }
         
@@ -532,12 +611,12 @@ class MathGame {
             '/': '÷'
         };
         
-        // Build equation string with multiple numbers
+        // Build equation string with multiple numbers and operations
         const equationParts = [];
         for (let i = 0; i < question.numbers.length; i++) {
             equationParts.push(question.numbers[i]);
             if (i < question.numbers.length - 1) {
-                equationParts.push(operationSymbol[question.operation]);
+                equationParts.push(operationSymbol[question.operations[i]]);
             }
         }
         
