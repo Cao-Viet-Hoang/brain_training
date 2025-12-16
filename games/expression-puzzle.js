@@ -744,7 +744,29 @@ class ExpressionPuzzleGame {
     
     init() {
         this.setupEventListeners();
+        this.setupHelpModal();
         this.showScreen('config');
+    }
+    
+    setupHelpModal() {
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const closeBtn = document.getElementById('closeHelpModal');
+        
+        helpBtn.addEventListener('click', () => {
+            helpModal.classList.add('active');
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            helpModal.classList.remove('active');
+        });
+        
+        // Close modal when clicking outside
+        helpModal.addEventListener('click', (e) => {
+            if (e.target === helpModal) {
+                helpModal.classList.remove('active');
+            }
+        });
     }
     
     setupEventListeners() {
@@ -810,6 +832,9 @@ class ExpressionPuzzleGame {
         config.requireUniqueSolution = requireUnique;
         config.targetRange = [minTarget, maxTarget];
         
+        // Lưu config để dùng trong validation
+        this.currentConfig = config;
+        
         // Generate all puzzles
         const generator = new PuzzleGenerator(config);
         for (let i = 0; i < puzzleCount; i++) {
@@ -835,7 +860,8 @@ class ExpressionPuzzleGame {
                 operatorsAllowed: ['+', '-', '*', '/'],
                 operatorWeights: { '+': 3, '-': 2, '*': 2, '/': 1 },
                 maxAttempts: 100,
-                timePerPuzzle: 90
+                timePerPuzzle: 90,
+                maxTrivialNumbers: 1  // Cho phép dùng 0 hoặc 1 tối đa 1 lần
             },
             medium: {
                 difficulty: 'medium',
@@ -848,7 +874,8 @@ class ExpressionPuzzleGame {
                 operatorsAllowed: ['+', '-', '*', '/'],
                 operatorWeights: { '+': 2, '-': 2, '*': 3, '/': 2 },
                 maxAttempts: 150,
-                timePerPuzzle: 60
+                timePerPuzzle: 60,
+                maxTrivialNumbers: 0  // Không cho phép dùng 0 và 1
             },
             hard: {
                 difficulty: 'hard',
@@ -861,7 +888,8 @@ class ExpressionPuzzleGame {
                 operatorsAllowed: ['+', '-', '*', '/'],
                 operatorWeights: { '+': 1, '-': 1, '*': 4, '/': 3 },
                 maxAttempts: 200,
-                timePerPuzzle: 45
+                timePerPuzzle: 45,
+                maxTrivialNumbers: 0  // Không cho phép dùng 0 và 1
             }
         };
         
@@ -919,6 +947,21 @@ class ExpressionPuzzleGame {
         targetSpan.className = 'expression-text target-number';
         targetSpan.textContent = puzzle.target;
         expressionContainer.appendChild(targetSpan);
+        
+        // Hiển thị giới hạn số 0 và 1
+        const limitInfo = document.getElementById('trivialNumberLimit');
+        if (this.currentConfig && this.currentConfig.maxTrivialNumbers !== undefined) {
+            const maxTrivial = this.currentConfig.maxTrivialNumbers;
+            if (maxTrivial === 0) {
+                limitInfo.textContent = '⚠️ Cannot use 0 or 1';
+                limitInfo.className = 'limit-info limit-strict';
+            } else {
+                limitInfo.textContent = `ℹ️ Can use 0 or 1 at most ${maxTrivial} time(s)`;
+                limitInfo.className = 'limit-info limit-relaxed';
+            }
+        } else {
+            limitInfo.textContent = '';
+        }
         
         // Update stats
         document.getElementById('scoreValue').textContent = this.score;
@@ -1009,6 +1052,20 @@ class ExpressionPuzzleGame {
                 return;
             }
             userNumbers.push(value);
+        }
+        
+        // Kiểm tra giới hạn số 0 và 1
+        if (this.currentConfig && this.currentConfig.maxTrivialNumbers !== undefined) {
+            const trivialCount = userNumbers.filter(num => num === 0 || num === 1).length;
+            const maxAllowed = this.currentConfig.maxTrivialNumbers;
+            
+            if (trivialCount > maxAllowed) {
+                const errorMsg = maxAllowed === 0 
+                    ? '❌ You cannot use 0 or 1 in this difficulty level!'
+                    : `❌ You can only use 0 or 1 at most ${maxAllowed} time(s)!`;
+                this.showFeedback(errorMsg, 'error');
+                return;
+            }
         }
         
         // Stop timer

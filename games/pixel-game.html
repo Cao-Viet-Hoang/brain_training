@@ -13,10 +13,84 @@
 </head>
 <body>
     <div class="container">
-        <header>
+        <header class="game-header">
             <a href="../index.html" class="back-btn">← Back</a>
             <h1>🎮 Pixel Number</h1>
+            <button class="help-btn" id="helpBtn">❓ How to Play</button>
         </header>
+
+        <!-- How to Play Modal -->
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeHelpModal">&times;</span>
+                <h2>📖 How to Play</h2>
+                <div class="help-content">
+                    <div class="help-section">
+                        <h3>🎯 Objective</h3>
+                        <p>Reconstruct the target numbers by combining pixelated card pieces before time runs out!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>⚙️ Setup</h3>
+                        <ul>
+                            <li><strong>Game Mode:</strong> Choose Single Player or Multi-Player Buzzer</li>
+                            <li><strong>Cards:</strong> Set total number of cards (10-20, includes both pieces and decoys)</li>
+                            <li><strong>Targets:</strong> Set how many numbers to reconstruct (1-5)</li>
+                            <li><strong>Round Time Limit:</strong> Total time to complete all targets (60-600 seconds)</li>
+                            <li><strong>Penalty Mode:</strong> Choose between losing points or losing turn for wrong answers</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 Gameplay</h3>
+                        <ul>
+                            <li>Each target number (0-9) is split into 2-4 pieces scattered among the cards</li>
+                            <li>Cards show pixelated patterns on a 5×7 grid (each digit has a unique pattern)</li>
+                            <li>Select multiple cards by clicking on them</li>
+                            <li>The Preview panel shows the combined result (OR operation of selected cards)</li>
+                            <li>When you think you've found all pieces of a target, choose that target from the dropdown</li>
+                            <li>Click "Submit Answer" to check if your combination is correct</li>
+                            <li>Correct: Target marked as completed, selected cards removed from play</li>
+                            <li>Wrong: Penalty applied based on penalty mode (-1 score or lose turn)</li>
+                            <li>Complete all targets before time runs out!</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🧩 How Cards Work</h3>
+                        <ul>
+                            <li>Each target digit is divided into 2-4 fragment cards</li>
+                            <li>When you combine the right fragments (using OR), they form the complete digit</li>
+                            <li>Not all cards are pieces - some are decoys to increase difficulty</li>
+                            <li>Use the Preview panel to see your combined selection before submitting</li>
+                            <li>Reset Selection button clears all selected cards to start over</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>📊 Scoring</h3>
+                        <ul>
+                            <li>✅ Each correct target found increases your score</li>
+                            <li>❌ Wrong answers: -1 score or lose turn (depending on penalty mode)</li>
+                            <li>⏱️ Complete faster to maximize your final score</li>
+                            <li>🎯 Track your correct/wrong submissions in the stats</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>💡 Tips</h3>
+                        <ul>
+                            <li>Study the target patterns at the top - each digit has a unique 5×7 pixel shape</li>
+                            <li>Look for cards that seem to be parts of the same digit</li>
+                            <li>Use the Preview panel frequently to check your combinations</li>
+                            <li>Start with easier settings (fewer cards and targets) to learn the patterns</li>
+                            <li>Don't rush - think carefully before submitting to avoid penalties</li>
+                            <li>Decoy cards often contain partial or distorted patterns - they won't complete a digit</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <main>
             <!-- Config Screen -->

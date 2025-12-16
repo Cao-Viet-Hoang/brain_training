@@ -13,10 +13,68 @@
 </head>
 <body>
     <div class="container">
-        <header>
+        <header class="game-header">
             <a href="../index.html" class="back-btn">← Back</a>
             <h1>🔢 Quick Math</h1>
+            <button class="help-btn" id="helpBtn">❓ How to Play</button>
         </header>
+
+        <!-- How to Play Modal -->
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeHelpModal">&times;</span>
+                <h2>📖 How to Play</h2>
+                <div class="help-content">
+                    <div class="help-section">
+                        <h3>🎯 Objective</h3>
+                        <p>Solve as many math problems as you can within the time limit!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>⚙️ Setup</h3>
+                        <ul>
+                            <li><strong>Number Range:</strong> Set the minimum and maximum numbers for the problems</li>
+                            <li><strong>Operations:</strong> Choose from addition (+), subtraction (-), multiplication (×), division (÷), or mixed operations</li>
+                            <li><strong>Operands:</strong> Select how many numbers should be in each problem (2-20)</li>
+                            <li><strong>Questions:</strong> Set how many problems you want to solve (1-100)</li>
+                            <li><strong>Time Limit:</strong> Choose how many seconds you have for EACH question (5-60 seconds per question)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 Gameplay</h3>
+                        <ul>
+                            <li>A math problem will appear on the screen</li>
+                            <li>Type your answer in the input box</li>
+                            <li>Press Enter or click Submit to check your answer</li>
+                            <li>The timer shows how much time you have left for the current question</li>
+                            <li>If time runs out, the question is marked as wrong and moves to the next one</li>
+                            <li>Track your progress with the statistics panel (correct/wrong/streak)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>📊 Scoring</h3>
+                        <ul>
+                            <li>✅ Correct answers increase your score</li>
+                            <li>❌ Wrong answers are tracked but don't penalize you</li>
+                            <li>🔥 Build a streak by answering correctly in a row</li>
+                            <li>⚡ Faster answers may earn bonus points</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>💡 Tips</h3>
+                        <ul>
+                            <li>Start with easier settings if you're new</li>
+                            <li>Use mental math strategies to solve faster</li>
+                            <li>Don't rush - accuracy is important too!</li>
+                            <li>Practice regularly to improve your speed</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <main>
             <!-- Config Screen -->
@@ -46,7 +104,7 @@
 
                     <div class="config-group">
                         <label for="operandCount">Number of operands:</label>
-                        <input type="number" id="operandCount" value="2" min="2" max="5">
+                        <input type="number" id="operandCount" value="2" min="2" max="20">
                     </div>
 
                     <div class="config-group">

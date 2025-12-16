@@ -13,10 +13,71 @@
 </head>
 <body>
     <div class="container">
-        <header>
+        <header class="game-header">
             <a href="../index.html" class="back-btn">← Back</a>
             <h1>🧮 Expression Puzzle</h1>
+            <button class="help-btn" id="helpBtn">❓ How to Play</button>
         </header>
+
+        <!-- How to Play Modal -->
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeHelpModal">&times;</span>
+                <h2>📖 How to Play</h2>
+                <div class="help-content">
+                    <div class="help-section">
+                        <h3>🎯 Objective</h3>
+                        <p>Place mathematical operators (+, -, ×, ÷) between numbers to make the equation equal the target value!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>⚙️ Setup</h3>
+                        <ul>
+                            <li><strong>Easy:</strong> 3-4 numbers, may include 0 or 1 (max 1 occurrence). Note: 0 and 1 only appear in Easy mode!</li>
+                            <li><strong>Medium:</strong> 4-5 numbers, numbers from 2-9 only (no 0 or 1)</li>
+                            <li><strong>Hard:</strong> 5-7 numbers, numbers from 2-9 only (no 0 or 1)</li>
+                            <li><strong>Puzzles:</strong> Choose how many puzzles to solve (1-50)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 Gameplay</h3>
+                        <ul>
+                            <li>You'll see a series of numbers and a target value to reach</li>
+                            <li>Click on the empty boxes (operators slots) between numbers</li>
+                            <li>Choose from: + (addition), - (subtraction), × (multiplication), ÷ (division)</li>
+                            <li><strong>IMPORTANT:</strong> Calculation is done strictly LEFT-TO-RIGHT (no operator precedence!)</li>
+                            <li>Example: 2 + 3 × 4 = (2 + 3) × 4 = 20, NOT 2 + 12 = 14</li>
+                            <li>When all operators are placed, the result is automatically calculated</li>
+                            <li>Click Submit to verify if your result matches the target</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>📊 Scoring</h3>
+                        <ul>
+                            <li>✅ Correct solutions increase your score</li>
+                            <li>❌ Wrong answers are tracked</li>
+                            <li>⏱️ Complete puzzles faster for better time</li>
+                            <li>🎯 Aim for perfect accuracy!</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>💡 Tips</h3>
+                        <ul>
+                            <li><strong>LEFT-TO-RIGHT RULE:</strong> Each operation applies to the result so far</li>
+                            <li>Think step-by-step: 5 - 2 + 3 = ((5 - 2) + 3) = 3 + 3 = 6</li>
+                            <li>Division must produce whole numbers only (no decimals allowed)</li>
+                            <li>Work backwards: think about what operations could produce the target</li>
+                            <li>Try multiplication/division first for larger jumps in value</li>
+                            <li>Use addition/subtraction for fine-tuning to reach the exact target</li>
+                            <li>Start with easier difficulties to master the left-to-right calculation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <main>
             <!-- Config Screen -->
@@ -30,17 +91,17 @@
                             <button class="difficulty-btn" data-difficulty="easy">
                                 <span class="diff-icon">😊</span>
                                 <span class="diff-label">Easy</span>
-                                <span class="diff-desc">3-4 numbers, all ops</span>
+                                <span class="diff-desc">3-4 numbers, 0/1 limit: 1</span>
                             </button>
                             <button class="difficulty-btn active" data-difficulty="medium">
                                 <span class="diff-icon">🤔</span>
                                 <span class="diff-label">Medium</span>
-                                <span class="diff-desc">4-5 numbers, complex</span>
+                                <span class="diff-desc">4-5 numbers, no 0/1</span>
                             </button>
                             <button class="difficulty-btn" data-difficulty="hard">
                                 <span class="diff-icon">🔥</span>
                                 <span class="diff-label">Hard</span>
-                                <span class="diff-desc">5-7 numbers, unique</span>
+                                <span class="diff-desc">5-7 numbers, no 0/1</span>
                             </button>
                         </div>
                     </div>
@@ -98,6 +159,9 @@
                             <div class="expression-display" id="expressionDisplay">
                                 <!-- Expression with inline inputs will be inserted here -->
                             </div>
+                            <div class="limit-info" id="trivialNumberLimit">
+                                <!-- Limit information will appear here -->
+                            </div>
                         </div>
 
                         <div class="feedback-area" id="feedbackArea">
@@ -130,6 +194,7 @@
                                 <li>Pay attention to parentheses</li>
                                 <li>Try working backwards from the target</li>
                                 <li>Division results must be whole numbers</li>
+                                <li>⚠️ Be careful: 0 and 1 usage is limited!</li>
                             </ul>
                         </div>
                     </div>

@@ -1,6 +1,125 @@
 /* Expression Puzzle Game Styles */
 
 /* ============================================================================
+   Help Button & Modal
+   ============================================================================ */
+
+.help-btn {
+    background: var(--secondary-color);
+    color: var(--text-primary);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.help-btn:hover {
+    background: var(--border-color);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.close-btn {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: var(--error-color);
+}
+
+.modal-content h2 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    font-size: 1.8rem;
+}
+
+.help-content {
+    color: var(--text-primary);
+}
+
+.help-section {
+    margin-bottom: var(--spacing-md);
+}
+
+.help-section h3 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.3rem;
+}
+
+.help-section p {
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.6;
+}
+
+.help-section ul {
+    margin-left: var(--spacing-md);
+    line-height: 1.8;
+}
+
+.help-section li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.help-section strong {
+    color: var(--primary-color);
+}
+
+/* ============================================================================
    Game Screens Control
    ============================================================================ */
 
@@ -308,6 +427,29 @@
 }
 
 .feedback.info {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 2px solid #60a5fa;
+}
+
+/* Limit Info */
+.limit-info {
+    margin-top: 1rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+    animation: slideIn 0.3s ease;
+}
+
+.limit-info.limit-strict {
+    background: #fef3c7;
+    color: #92400e;
+    border: 2px solid #fbbf24;
+}
+
+.limit-info.limit-relaxed {
     background: #dbeafe;
     color: #1e40af;
     border: 2px solid #60a5fa;
