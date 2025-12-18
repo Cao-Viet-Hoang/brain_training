@@ -108,23 +108,23 @@
 
                     <div class="config-group">
                         <label for="cardCount">Number of Cards:</label>
-                        <input type="number" id="cardCount" value="15" min="10" max="20">
+                        <input type="number" id="cardCount" value="15" min="10" max="20" inputmode="numeric" pattern="[0-9]*">
                     </div>
 
                     <div class="config-group">
                         <label for="targetCount">Number of Targets:</label>
-                        <input type="number" id="targetCount" value="3" min="1" max="5">
+                        <input type="number" id="targetCount" value="3" min="1" max="5" inputmode="numeric" pattern="[0-9]*">
                     </div>
 
                     <div class="config-group">
                         <label for="roundTimeLimit">Round Time Limit (seconds):</label>
-                        <input type="number" id="roundTimeLimit" value="300" min="60" max="600">
+                        <input type="number" id="roundTimeLimit" value="300" min="60" max="600" inputmode="numeric" pattern="[0-9]*">
                         <small>Total time to complete all targets</small>
                     </div>
 
                     <div class="config-group" id="answerTimeLimitGroup" style="display: none;">
                         <label for="answerTimeLimit">Answer Time Limit (seconds):</label>
-                        <input type="number" id="answerTimeLimit" value="10" min="5" max="30">
+                        <input type="number" id="answerTimeLimit" value="10" min="5" max="30" inputmode="numeric" pattern="[0-9]*">
                         <small>Time limit for buzzer mode answers</small>
                     </div>
 

@@ -85,9 +85,9 @@
                     <div class="config-group">
                         <label>Number Range:</label>
                         <div class="range-inputs">
-                            <input type="number" id="minNumber" value="1" min="0" placeholder="From">
+                            <input type="number" id="minNumber" value="1" min="0" placeholder="From" inputmode="numeric" pattern="[0-9]*">
                             <span>to</span>
-                            <input type="number" id="maxNumber" value="100" min="1" placeholder="To">
+                            <input type="number" id="maxNumber" value="100" min="1" placeholder="To" inputmode="numeric" pattern="[0-9]*">
                         </div>
                     </div>
 
@@ -104,17 +104,17 @@
 
                     <div class="config-group">
                         <label for="operandCount">Number of operands:</label>
-                        <input type="number" id="operandCount" value="2" min="2" max="20">
+                        <input type="number" id="operandCount" value="2" min="2" max="20" inputmode="numeric" pattern="[0-9]*">
                     </div>
 
                     <div class="config-group">
                         <label for="questionCount">Number of questions:</label>
-                        <input type="number" id="questionCount" value="10" min="1" max="100">
+                        <input type="number" id="questionCount" value="10" min="1" max="100" inputmode="numeric" pattern="[0-9]*">
                     </div>
 
                     <div class="config-group">
                         <label for="timePerQuestion">Time per question (seconds):</label>
-                        <input type="number" id="timePerQuestion" value="10" min="5" max="60">
+                        <input type="number" id="timePerQuestion" value="10" min="5" max="60" inputmode="numeric" pattern="[0-9]*">
                     </div>
 
                     <button class="btn-primary" id="startGameBtn">Start</button>
@@ -192,7 +192,7 @@
 
                         <div class="question-card">
                             <div class="question" id="question">5 + 3 = ?</div>
-                            <input type="text" id="answerInput" placeholder="Your answer (e.g., 2.5 or 1/2)" autofocus>
+                            <input type="text" id="answerInput" placeholder="Your answer (e.g., 2.5 or 1/2)" autofocus inputmode="decimal">
                             <button class="btn-primary" id="submitAnswerBtn">Submit Answer</button>
                             <div class="keyboard-hint">Press <kbd>Enter</kbd> to submit</div>
                         </div>

@@ -736,7 +736,7 @@ class MathGame {
             for (let i = 0; i < q.numbers.length; i++) {
                 equationParts.push(q.numbers[i]);
                 if (i < q.numbers.length - 1) {
-                    equationParts.push(operationSymbol[q.operation]);
+                    equationParts.push(operationSymbol[q.operations[i]]);
                 }
             }
             
