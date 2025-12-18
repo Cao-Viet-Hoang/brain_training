@@ -1068,25 +1068,25 @@ class ExpressionPuzzleGame {
             }
         }
         
-        // Stop timer
-        if (this.puzzleTimer) {
-            clearInterval(this.puzzleTimer);
-        }
-        
-        const timeSpent = Date.now() - this.puzzleStartTime;
-        
         // Validate
         const isCorrect = validateAnswer(this.currentPuzzle, userNumbers);
         
-        // Store answer
-        this.userAnswers.push({
-            puzzle: this.currentPuzzle,
-            userNumbers: userNumbers,
-            correct: isCorrect,
-            timeSpent: timeSpent
-        });
-        
         if (isCorrect) {
+            // Stop timer only when correct
+            if (this.puzzleTimer) {
+                clearInterval(this.puzzleTimer);
+            }
+            
+            const timeSpent = Date.now() - this.puzzleStartTime;
+            
+            // Store answer
+            this.userAnswers.push({
+                puzzle: this.currentPuzzle,
+                userNumbers: userNumbers,
+                correct: isCorrect,
+                timeSpent: timeSpent
+            });
+            
             this.score++;
             document.getElementById('scoreValue').textContent = this.score;
             this.showFeedback('🎉 Correct! Well done!', 'success');
@@ -1102,6 +1102,7 @@ class ExpressionPuzzleGame {
                 setTimeout(() => this.showResults(), 1500);
             }
         } else {
+            // Don't stop timer when incorrect - let user keep trying
             this.showFeedback('❌ Incorrect. Try again!', 'error');
         }
     }
@@ -1148,6 +1149,96 @@ class ExpressionPuzzleGame {
             message = '💪 Keep practicing! You\'ll get better!';
         }
         document.getElementById('performanceMessage').textContent = message;
+        
+        // Generate review list
+        const reviewList = document.getElementById('reviewList');
+        reviewList.innerHTML = '';
+        
+        this.userAnswers.forEach((answer, index) => {
+            const reviewItem = document.createElement('div');
+            reviewItem.className = `review-item ${answer.correct ? 'correct-answer' : 'wrong-answer'}`;
+            
+            // Build the expression string
+            const puzzle = answer.puzzle;
+            const parts = puzzle.expressionTemplate.split('{}');
+            let expressionStr = '';
+            
+            for (let i = 0; i < parts.length; i++) {
+                expressionStr += parts[i];
+                if (i < parts.length - 1) {
+                    expressionStr += '[ ]';
+                }
+            }
+            expressionStr += ' = ' + puzzle.target;
+            
+            // Build user's answer string
+            let userAnswerStr = '';
+            let userResult = 'N/A';
+            if (answer.timeout) {
+                userAnswerStr = 'Time\'s up!';
+            } else if (answer.userNumbers.length === 0) {
+                userAnswerStr = 'No answer';
+            } else {
+                const userParts = puzzle.expressionTemplate.split('{}');
+                for (let i = 0; i < userParts.length; i++) {
+                    userAnswerStr += userParts[i];
+                    if (i < userParts.length - 1) {
+                        userAnswerStr += answer.userNumbers[i];
+                    }
+                }
+                
+                // Calculate user's result
+                try {
+                    let userExpression = puzzle.expressionTemplate;
+                    for (const num of answer.userNumbers) {
+                        userExpression = userExpression.replace('{}', num);
+                    }
+                    userResult = Function('"use strict"; return (' + userExpression + ')')();
+                    userResult = Math.round(userResult * 100) / 100; // Round to 2 decimals
+                } catch (e) {
+                    userResult = 'Error';
+                }
+                
+                userAnswerStr += ' = ' + userResult;
+            }
+            
+            // Build solution string with hidden answer
+            let solutionStr = '';
+            const solutionParts = puzzle.expressionTemplate.split('{}');
+            for (let i = 0; i < solutionParts.length; i++) {
+                solutionStr += solutionParts[i];
+                if (i < solutionParts.length - 1) {
+                    solutionStr += puzzle.solutionNumbers[i];
+                }
+            }
+            solutionStr += ' = ' + puzzle.target;
+            
+            const timeSpentSeconds = Math.round(answer.timeSpent / 1000);
+            
+            reviewItem.innerHTML = `
+                <div class="review-question">
+                    Question ${index + 1}: ${expressionStr}
+                </div>
+                <div class="review-details">
+                    <span>Your answer: 
+                        <span class="${answer.correct ? 'correct-ans' : 'wrong-ans'}">
+                            ${userAnswerStr}
+                        </span>
+                    </span>
+                    ${!answer.correct ? `
+                        <span>Correct answer: 
+                            <span class="hidden-answer" onclick="this.classList.toggle('revealed')">
+                                <span class="answer-placeholder">🔒 Click to reveal</span>
+                                <span class="answer-value correct-ans">${solutionStr}</span>
+                            </span>
+                        </span>
+                    ` : ''}
+                    <span>Time: ${timeSpentSeconds}s</span>
+                </div>
+            `;
+            
+            reviewList.appendChild(reviewItem);
+        });
         
         this.showScreen('result');
     }
