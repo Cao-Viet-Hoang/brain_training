@@ -472,7 +472,7 @@ class PixelNumberGame {
         const cardsGrid = document.getElementById('cardsGrid');
         cardsGrid.innerHTML = '';
 
-        this.gameState.round.cards.forEach(card => {
+        this.gameState.round.cards.forEach((card, index) => {
             const cardDiv = document.createElement('div');
             cardDiv.className = 'card-item';
             cardDiv.dataset.cardId = card.id;
@@ -489,7 +489,7 @@ class PixelNumberGame {
             
             const label = document.createElement('div');
             label.className = 'card-label';
-            label.textContent = `Card ${card.id}`;
+            label.textContent = `Card ${index + 1}`;
             
             cardDiv.appendChild(canvas);
             cardDiv.appendChild(label);
@@ -603,6 +603,9 @@ class PixelNumberGame {
             select.appendChild(option);
             select.disabled = true;
             document.getElementById('submitAnswerBtn').disabled = true;
+        } else {
+            select.disabled = false;
+            document.getElementById('submitAnswerBtn').disabled = false;
         }
     }
 
