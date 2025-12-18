@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual N-Back - Brain Training</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔄</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dual-n-back.css">
+</head>
+<body>
+    <div class="container">
+        <header class="game-header">
+            <a href="../index.html" class="back-btn">← Back</a>
+            <h1>🔄 Dual N-Back</h1>
+            <button class="help-btn" id="helpBtn">❓ How to Play</button>
+        </header>
+
+        <!-- How to Play Modal -->
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeHelpModal">&times;</span>
+                <h2>📖 How to Play</h2>
+                <div class="help-content">
+                    <div class="help-section">
+                        <h3>🎯 Objective</h3>
+                        <p>Train your working memory by tracking two channels: <strong>Position</strong> (highlighted grid square) and <strong>Letter</strong> (displayed character).</p>
+                        <p>Press the matching button when the current stimulus matches the one from <strong>N steps back</strong>.</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>⚙️ Game Settings</h3>
+                        <ul>
+                            <li><strong>N-Back Level:</strong> How many steps back to remember (1-4)</li>
+                            <li><strong>Grid Size:</strong> Size of the position grid (3x3 recommended)</li>
+                            <li><strong>Total Trials:</strong> Number of stimuli to present</li>
+                            <li><strong>Stimulus Duration:</strong> How long each stimulus is shown</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 Gameplay</h3>
+                        <ul>
+                            <li><strong>Buffer Phase:</strong> First N trials are for memorization only (no scoring)</li>
+                            <li><strong>Active Phase:</strong> From trial N+1 onwards, you can score points</li>
+                            <li><strong>Position Match:</strong> Press when the highlighted square matches N steps back</li>
+                            <li><strong>Letter Match:</strong> Press when the letter matches N steps back</li>
+                            <li>You can press both buttons if both match!</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🏆 Scoring</h3>
+                        <ul>
+                            <li><strong>Hit:</strong> Correctly identified a match (+10 points)</li>
+                            <li><strong>Correct Reject:</strong> Correctly did not press when no match (0 points)</li>
+                            <li><strong>Miss:</strong> Failed to identify a match (-4 points)</li>
+                            <li><strong>False Alarm:</strong> Pressed when there was no match (-6 points)</li>
+                            <li><strong>Dual Match Bonus:</strong> Correctly identified both matches (+8 bonus points)</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>💡 Tips</h3>
+                        <ul>
+                            <li>Start with N=2 to learn the mechanics</li>
+                            <li>Focus on one channel first if dual tracking is too difficult</li>
+                            <li>Regular practice improves working memory capacity</li>
+                            <li>Higher accuracy is more important than speed</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Screen -->
+        <div id="configScreen" class="screen active">
+            <div class="config-card">
+                <h2>Game Configuration</h2>
+                
+                <div class="config-section">
+                    <div class="config-item">
+                        <label class="config-label">N-Back Level</label>
+                        <div class="option-buttons" id="nBackLevelButtons">
+                            <button class="option-btn" data-value="1">1<br><small>Easy</small></button>
+                            <button class="option-btn active" data-value="2">2<br><small>Normal</small></button>
+                            <button class="option-btn" data-value="3">3<br><small>Hard</small></button>
+                            <button class="option-btn" data-value="4">4<br><small>Expert</small></button>
+                        </div>
+                    </div>
+
+                    <div class="config-item">
+                        <label class="config-label">Grid Size</label>
+                        <div class="option-buttons" id="gridSizeButtons">
+                            <button class="option-btn active" data-value="3">3×3<br><small>9 cells</small></button>
+                            <button class="option-btn" data-value="4">4×4<br><small>16 cells</small></button>
+                        </div>
+                    </div>
+
+                    <div class="config-item">
+                        <label class="config-label" for="totalTrials">
+                            <span class="label-text">Total Trials</span>
+                            <span class="label-value" id="totalTrialsValue">40</span>
+                        </label>
+                        <input type="range" id="totalTrials" min="20" max="60" value="40" step="5" class="range-slider">
+                        <div class="range-labels">
+                            <span>20</span>
+                            <span>40</span>
+                            <span>60</span>
+                        </div>
+                    </div>
+
+                    <div class="config-item">
+                        <label class="config-label" for="stimulusDuration">
+                            <span class="label-text">Stimulus Duration</span>
+                            <span class="label-value" id="stimulusDurationValue">900ms</span>
+                        </label>
+                        <input type="range" id="stimulusDuration" min="500" max="1500" value="900" step="100" class="range-slider">
+                        <div class="range-labels">
+                            <span>500ms</span>
+                            <span>1000ms</span>
+                            <span>1500ms</span>
+                        </div>
+                    </div>
+
+                    <div class="config-item">
+                        <label class="config-label" for="interTrialInterval">
+                            <span class="label-text">Inter-Trial Interval</span>
+                            <span class="label-value" id="interTrialIntervalValue">600ms</span>
+                        </label>
+                        <input type="range" id="interTrialInterval" min="300" max="1000" value="600" step="100" class="range-slider">
+                        <div class="range-labels">
+                            <span>300ms</span>
+                            <span>650ms</span>
+                            <span>1000ms</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="startGameBtn" class="btn-primary">
+                    🚀 Start Game
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <div class="game-info">
+                <div class="info-item">
+                    <span class="info-label">Trial:</span>
+                    <span class="info-value" id="trialCounter">1 / 40</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">N-Back:</span>
+                    <span class="info-value" id="nBackDisplay">N=2</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Score:</span>
+                    <span class="info-value" id="scoreDisplay">0</span>
+                </div>
+                <div class="info-item phase-indicator" id="phaseIndicator">
+                    <span class="phase-text">Memorize...</span>
+                </div>
+            </div>
+
+            <div class="game-area">
+                <div class="letter-display" id="letterDisplay">A</div>
+                
+                <div class="grid-container" id="gridContainer">
+                    <!-- Grid will be generated dynamically -->
+                </div>
+
+                <div class="controls">
+                    <button id="positionMatchBtn" class="match-btn position-btn" disabled>
+                        <span class="btn-icon">📍</span>
+                        <span class="btn-text">Position Match</span>
+                        <span class="btn-key">[P]</span>
+                    </button>
+                    <button id="letterMatchBtn" class="match-btn letter-btn" disabled>
+                        <span class="btn-icon">🔤</span>
+                        <span class="btn-text">Letter Match</span>
+                        <span class="btn-key">[L]</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="resultScreen" class="screen">
+            <div class="result-container">
+                <h2>🎉 Game Complete!</h2>
+                
+                <div class="result-score">
+                    <div class="score-big" id="finalScore">0</div>
+                    <p>Total Score</p>
+                </div>
+
+                <div class="result-stats">
+                    <h3>📊 Performance Statistics</h3>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h4>Position Channel</h4>
+                            <div class="stat-row">
+                                <span>Accuracy:</span>
+                                <span id="posAccuracy">-</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>Hits:</span>
+                                <span id="posHits">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>Misses:</span>
+                                <span id="posMisses">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>False Alarms:</span>
+                                <span id="posFalseAlarms">0</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <h4>Letter Channel</h4>
+                            <div class="stat-row">
+                                <span>Accuracy:</span>
+                                <span id="letterAccuracy">-</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>Hits:</span>
+                                <span id="letterHits">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>Misses:</span>
+                                <span id="letterMisses">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>False Alarms:</span>
+                                <span id="letterFalseAlarms">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-overall">
+                        <div class="stat-row">
+                            <span>Dual Match Bonus Count:</span>
+                            <span id="dualMatchCount">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Average Reaction Time:</span>
+                            <span id="avgReactionTime">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="review-section">
+                    <h3>📋 Review All Trials</h3>
+                    <div class="review-info">
+                        <p><strong>Green border</strong> = Both correct | <strong>Red border</strong> = Both wrong | <strong>Orange border</strong> = Mixed results</p>
+                        <p><strong>Badges:</strong> ✓ = You pressed correctly | ✗ = You missed | ! = You pressed incorrectly</p>
+                    </div>
+                    <div id="reviewList" class="review-list">
+                        <!-- Review items will be generated here -->
+                    </div>
+                </div>
+                <button id="playAgainBtn" class="btn btn-primary btn-large">
+                    🔄 Play Again
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="dual-n-back.js"></script>
+</body>
+</html>

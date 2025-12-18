@@ -25,8 +25,16 @@ const games = [
         url: 'games/expression-puzzle.html'
     },
     {
+        id: 'dual-n-back',
+        title: 'Dual N-Back',
+        description: 'Train working memory by tracking positions and letters',
+        icon: '🔄',
+        tag: 'Memory',
+        url: 'games/dual-n-back.html'
+    },
+    {
         id: 'memory',
-        title: 'Memory',
+        title: 'Memory Cards',
         description: 'Improve memory with image recognition exercises',
         icon: '🧩',
         tag: 'Memory',
@@ -62,9 +70,9 @@ const games = [
     },
     {
         id: 'puzzle',
-        title: 'Puzzle Solving',
+        title: 'Logic Puzzles',
         description: 'Challenge yourself with difficult logic puzzles',
-        icon: '🧠',
+        icon: '🔮',
         tag: 'Puzzle',
         url: '#',
         comingSoon: true
