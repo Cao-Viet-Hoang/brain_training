@@ -102,18 +102,24 @@ class WordSelector {
      * Get difficulty range for round
      */
     getDifficultyRange(roundIndex) {
-        if (roundIndex < 3) return ['A1'];
-        if (roundIndex < 6) return ['A1', 'A2'];
-        if (roundIndex < 10) return ['A2'];
-        return ['A2', 'B1'];
+        if (roundIndex < 3) return ['A1'];                // Round 0-2: Beginner
+        if (roundIndex < 6) return ['A1', 'A2'];          // Round 3-5: Easy
+        if (roundIndex < 9) return ['A2'];                // Round 6-8: Elementary
+        if (roundIndex < 12) return ['A2', 'B1'];         // Round 9-11: Pre-Intermediate
+        if (roundIndex < 15) return ['B1'];               // Round 12-14: Intermediate
+        if (roundIndex < 18) return ['B1', 'B2'];         // Round 15-17: Upper-Intermediate
+        if (roundIndex < 21) return ['B2'];               // Round 18-20: Advanced
+        return ['B2', 'C1'];                              // Round 21+: Expert
     }
 
     /**
      * Get length range for round
      */
     getLengthRange(roundIndex) {
-        if (roundIndex < 5) return { min: 3, max: 7 };
-        return { min: 5, max: 10 };
+        if (roundIndex < 5) return { min: 3, max: 7 };    // Short words
+        if (roundIndex < 10) return { min: 4, max: 9 };   // Medium words
+        if (roundIndex < 15) return { min: 5, max: 11 };  // Long words
+        return { min: 5, max: 14 };                       // Very long words
     }
 
     /**
@@ -285,8 +291,12 @@ class DecoyGenerator {
                 const hasCommonSuffix = this.hasCommonSuffix(targetWord.word, word.word, 3);
 
                 if (distance <= 2 || hasCommonPrefix || hasCommonSuffix) {
+                    // Use percentage-based comparison for frequency rank (20% threshold)
+                    const avgRank = (word.frequencyRank + targetWord.frequencyRank) / 2;
+                    const threshold = avgRank * 0.2;
+                    
                     if (word.pos === targetWord.pos && 
-                        Math.abs(word.frequencyRank - targetWord.frequencyRank) < 200) {
+                        Math.abs(word.frequencyRank - targetWord.frequencyRank) < threshold) {
                         decoys.push(word.word);
                     }
                 }
@@ -352,9 +362,11 @@ class DecoyGenerator {
      * Get decoy difficulty strategy
      */
     getDecoyDifficulty(roundIndex) {
-        if (roundIndex < 4) return 'easy';
-        if (roundIndex < 8) return 'medium';
-        return 'hard';
+        if (roundIndex < 4) return 'easy';      // Round 0-3: Very different words
+        if (roundIndex < 8) return 'medium';    // Round 4-7: Somewhat similar
+        if (roundIndex < 12) return 'hard';     // Round 8-11: Very similar
+        if (roundIndex < 16) return 'hard';     // Round 12-15: Very similar
+        return 'hard';                          // Round 16+: Maximum difficulty
     }
 }
 
