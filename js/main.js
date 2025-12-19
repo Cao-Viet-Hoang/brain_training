@@ -41,6 +41,14 @@ const games = [
         url: 'games/memory-matrix.html'
     },
     {
+        id: 'word-recall',
+        title: 'Word Recall',
+        description: 'Train verbal memory by memorizing and recalling English words',
+        icon: '💭',
+        tag: 'Memory',
+        url: 'games/word-recall.html'
+    },
+    {
         id: 'memory',
         title: 'Memory Cards',
         description: 'Improve memory with image recognition exercises',
