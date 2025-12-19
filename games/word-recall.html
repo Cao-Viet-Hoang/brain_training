@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Recall - Brain Training</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💭</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/word-recall.css">
+</head>
+<body>
+    <div class="container">
+        <header class="game-header">
+            <a href="../index.html" class="back-btn">← Back</a>
+            <h1>💭 Word Recall</h1>
+            <button class="help-btn" id="helpBtn">❓ How to Play</button>
+        </header>
+
+        <!-- How to Play Modal -->
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeHelpModal">&times;</span>
+                <h2>📖 How to Play</h2>
+                <div class="help-content">
+                    <div class="help-section">
+                        <h3>🎯 Objective</h3>
+                        <p>Train your <strong>verbal memory</strong> and <strong>concentration</strong> by memorizing and recalling English words.</p>
+                        <p>This game uses words as memory objects - it's NOT about learning word meanings!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>⚙️ Game Settings</h3>
+                        <ul>
+                            <li><strong>Session Rounds:</strong> Number of rounds to play (default: 10)</li>
+                            <li><strong>Start K:</strong> Initial number of words to memorize (default: 5)</li>
+                            <li><strong>Max K:</strong> Maximum words per round (default: 12)</li>
+                            <li><strong>Memorize Time:</strong> Base time to study words (decreases each round)</li>
+                            <li><strong>Test Time Limit:</strong> Maximum time to select words (9 seconds)</li>
+                            <li><strong>Distractor:</strong> Optional mini-task between memorize and test phases</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 Game Flow</h3>
+                        <ol>
+                            <li><strong>MEMORIZE:</strong> Study the displayed words carefully</li>
+                            <li><strong>DISTRACTOR (optional):</strong> Complete a quick task to clear short-term memory</li>
+                            <li><strong>TEST:</strong> Select ONLY the words you memorized from a mixed list</li>
+                            <li><strong>RESULT:</strong> Review your performance and progress to next round</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🏆 Scoring</h3>
+                        <ul>
+                            <li><strong>Hit:</strong> Correctly selected a memorized word (+12 points)</li>
+                            <li><strong>False Alarm:</strong> Selected a decoy word (-10 points)</li>
+                            <li><strong>Miss:</strong> Failed to select a memorized word (-6 points)</li>
+                            <li><strong>Speed Bonus:</strong> Extra points for fast completion (up to +40)</li>
+                            <li><strong>Base Score:</strong> Increases with round difficulty</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>📈 Difficulty Progression</h3>
+                        <ul>
+                            <li><strong>Words to Remember:</strong> Increases every 2 rounds</li>
+                            <li><strong>Memorize Time:</strong> Decreases each round</li>
+                            <li><strong>Word Difficulty:</strong> Progresses from A1 → A2 → B1 → B2</li>
+                            <li><strong>Decoy Similarity:</strong> Becomes more challenging in later rounds</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>💡 Tips</h3>
+                        <ul>
+                            <li>Focus on word shapes and patterns, not meanings</li>
+                            <li>Try to create mental associations between words</li>
+                            <li>Don't rush - accuracy matters more than speed</li>
+                            <li>Practice regularly to improve verbal memory capacity</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Screen -->
+        <div id="configScreen" class="screen active">
+            <div class="config-panel">
+                <h2>⚙️ Game Configuration</h2>
+                
+                <div class="config-grid">
+                    <div class="config-group">
+                        <label for="sessionRounds">Session Rounds</label>
+                        <input type="number" id="sessionRounds" min="5" max="20" value="10">
+                        <span class="config-hint">Number of rounds to play</span>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="startK">Starting Words (K)</label>
+                        <input type="number" id="startK" min="3" max="8" value="5">
+                        <span class="config-hint">Initial words to memorize</span>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="maxK">Maximum Words</label>
+                        <input type="number" id="maxK" min="8" max="15" value="12">
+                        <span class="config-hint">Maximum words per round</span>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="memorizeMsBase">Memorize Time Base (ms)</label>
+                        <input type="number" id="memorizeMsBase" min="2000" max="5000" step="100" value="3500">
+                        <span class="config-hint">Base time to study words</span>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="testTimeLimitMs">Test Time Limit (ms)</label>
+                        <input type="number" id="testTimeLimitMs" min="5000" max="15000" step="1000" value="9000">
+                        <span class="config-hint">Maximum time to select words</span>
+                    </div>
+
+                    <div class="config-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="distractorEnabled" checked>
+                            <span>Enable Distractor Task</span>
+                        </label>
+                        <span class="config-hint">Mini-task between memorize and test</span>
+                    </div>
+                </div>
+
+                <div class="config-actions">
+                    <button id="startGameBtn" class="primary-btn">🚀 Start Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <!-- Round Info -->
+            <div class="round-info">
+                <div class="info-item">
+                    <span class="info-label">Round</span>
+                    <span class="info-value" id="currentRound">1 / 10</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Score</span>
+                    <span class="info-value" id="currentScore">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Phase</span>
+                    <span class="info-value phase-indicator" id="phaseIndicator">READY</span>
+                </div>
+            </div>
+
+            <!-- Memorize Phase -->
+            <div id="memorizePhase" class="phase-container hidden">
+                <div class="phase-header">
+                    <h2>📝 Memorize These Words</h2>
+                    <div class="timer-display" id="memorizeTimer">3.5s</div>
+                </div>
+                <div class="word-grid" id="wordGrid"></div>
+                <div class="phase-hint">Study these words carefully - you'll need to identify them shortly!</div>
+            </div>
+
+            <!-- Distractor Phase -->
+            <div id="distractorPhase" class="phase-container hidden">
+                <div class="phase-header">
+                    <h2>⚡ Quick Task</h2>
+                    <div class="timer-display" id="distractorTimer">0.8s</div>
+                </div>
+                <div class="distractor-content">
+                    <div id="distractorTask" class="distractor-task">
+                        <p class="distractor-question" id="distractorQuestion">What is 7 + 5?</p>
+                        <div class="distractor-options" id="distractorOptions"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Phase -->
+            <div id="testPhase" class="phase-container hidden">
+                <div class="phase-header">
+                    <h2>🔍 Select the Words You Memorized</h2>
+                    <div class="timer-display warning" id="testTimer">9.0s</div>
+                </div>
+                <div class="test-progress">
+                    <span id="selectionCount">Selected: 0 / 5</span>
+                </div>
+                <div class="word-options" id="wordOptions"></div>
+                <div class="test-actions">
+                    <button id="submitTestBtn" class="primary-btn" disabled>Submit Selection</button>
+                </div>
+            </div>
+
+            <!-- Result Phase -->
+            <div id="resultPhase" class="phase-container hidden">
+                <div class="result-header">
+                    <h2 id="resultTitle">🎯 Round Results</h2>
+                    <div class="result-status" id="resultStatus">PASS</div>
+                </div>
+                
+                <div class="result-layout">
+                    <!-- Left Column -->
+                    <div class="result-left">
+                        <div class="result-stats">
+                            <div class="stat-card hit">
+                                <div class="stat-icon">✅</div>
+                                <div class="stat-label">Hits</div>
+                                <div class="stat-value" id="statHits">0</div>
+                            </div>
+                            <div class="stat-card false">
+                                <div class="stat-icon">❌</div>
+                                <div class="stat-label">False Alarms</div>
+                                <div class="stat-value" id="statFalse">0</div>
+                            </div>
+                            <div class="stat-card miss">
+                                <div class="stat-icon">⚠️</div>
+                                <div class="stat-label">Misses</div>
+                                <div class="stat-value" id="statMiss">0</div>
+                            </div>
+                        </div>
+
+                        <div class="result-word-review">
+                            <h3>Word Review</h3>
+                            <div class="word-review-grid">
+                                <div class="review-column">
+                                    <h4>Your Selections</h4>
+                                    <div id="yourSelections" class="word-list"></div>
+                                </div>
+                                <div class="review-column">
+                                    <h4>Correct Words</h4>
+                                    <div id="correctWords" class="word-list"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="result-right">
+                        <div class="result-score-breakdown">
+                            <h3>Score Breakdown</h3>
+                            <div class="score-item">
+                                <span>Base Score:</span>
+                                <span id="scoreBase">+50</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Hit Bonus:</span>
+                                <span id="scoreHit">+60</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Speed Bonus:</span>
+                                <span id="scoreSpeed">+40</span>
+                            </div>
+                            <div class="score-item penalty">
+                                <span>Penalties:</span>
+                                <span id="scorePenalty">-0</span>
+                            </div>
+                            <div class="score-item total">
+                                <span>Round Score:</span>
+                                <span id="scoreTotal">+150</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-actions">
+                    <button id="nextRoundBtn" class="primary-btn">Next Round →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final Results Screen -->
+        <div id="finalScreen" class="screen">
+            <div class="final-panel">
+                <h2>🏆 Game Complete!</h2>
+                
+                <div class="final-score">
+                    <div class="final-score-label">Total Score</div>
+                    <div class="final-score-value" id="finalScore">0</div>
+                </div>
+
+                <div class="final-stats">
+                    <div class="final-stat">
+                        <span class="final-stat-label">Rounds Played</span>
+                        <span class="final-stat-value" id="finalRounds">10</span>
+                    </div>
+                    <div class="final-stat">
+                        <span class="final-stat-label">Total Hits</span>
+                        <span class="final-stat-value" id="finalHits">0</span>
+                    </div>
+                    <div class="final-stat">
+                        <span class="final-stat-label">Accuracy</span>
+                        <span class="final-stat-value" id="finalAccuracy">0%</span>
+                    </div>
+                    <div class="final-stat">
+                        <span class="final-stat-label">Average Time</span>
+                        <span class="final-stat-value" id="finalAvgTime">0s</span>
+                    </div>
+                </div>
+
+                <div class="final-message" id="finalMessage">
+                    <p>Great job! Your verbal memory is improving!</p>
+                </div>
+
+                <div class="final-actions">
+                    <button id="playAgainBtn" class="primary-btn">🔄 Play Again</button>
+                    <button id="backToMenuBtn" class="secondary-btn">← Back to Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="word-recall.js"></script>
+</body>
+</html>

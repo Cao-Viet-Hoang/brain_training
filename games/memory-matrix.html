@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Matrix - Brain Training</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/memory-matrix.css">
+</head>
+<body>
+    <div class="container">
+        <header class="game-header">
+            <a href="../index.html" class="back-btn">← Back</a>
+            <h1>🔲 Memory Matrix</h1>
+            <button class="help-btn" id="helpBtn">❓ How to Play</button>
+        </header>
+
+        <!-- How to Play Modal -->
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeHelpModal">&times;</span>
+                <h2>📖 How to Play</h2>
+                <div class="help-content">
+                    <div class="help-section">
+                        <h3>🎯 Objective</h3>
+                        <p>Train your visual memory by remembering which cells flash on a grid.</p>
+                        <p>Watch the pattern carefully, then tap the cells that were highlighted!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>⚙️ Game Modes</h3>
+                        <ul>
+                            <li><strong>Classic:</strong> Remember which cells flash (order doesn't matter)</li>
+                            <li><strong>Sequence:</strong> Remember the exact order of flashing cells</li>
+                            <li><strong>Timed:</strong> Classic mode with a time limit for input</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 Gameplay</h3>
+                        <ul>
+                            <li><strong>Show Phase:</strong> Watch the cells that flash/highlight</li>
+                            <li><strong>Input Phase:</strong> Tap the cells you remember</li>
+                            <li><strong>Result Phase:</strong> See your accuracy and score</li>
+                            <li>Green ✓ = Correct selection</li>
+                            <li>Red ✗ = Wrong selection</li>
+                            <li>Orange ! = Missed (correct answer you didn't select)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>📈 Difficulty Progression</h3>
+                        <ul>
+                            <li><strong>Grid Size:</strong> Starts at 3×3, grows to 7×7</li>
+                            <li><strong>Target Cells:</strong> More cells to remember as you progress</li>
+                            <li><strong>Show Time:</strong> Less time to memorize at higher levels</li>
+                            <li><strong>Lives:</strong> 3 lives in Arcade mode (optional)</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>🏆 Scoring</h3>
+                        <ul>
+                            <li><strong>Base Score:</strong> 100 + level × 15</li>
+                            <li><strong>Speed Bonus:</strong> Up to 120 points for fast answers</li>
+                            <li><strong>Streak Bonus:</strong> Up to 150 points for consecutive perfects</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>💡 Tips</h3>
+                        <ul>
+                            <li>Focus on the pattern during the show phase</li>
+                            <li>Try to visualize or group cells mentally</li>
+                            <li>Start with Classic mode to learn the mechanics</li>
+                            <li>Practice regularly to improve visual memory</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Screen -->
+        <div id="configScreen" class="screen active">
+            <div class="config-card">
+                <h2>Game Configuration</h2>
+                
+                <div class="config-section">
+                    <div class="config-item">
+                        <label class="config-label">Game Mode</label>
+                        <div class="option-buttons" id="gameModeButtons">
+                            <button class="option-btn active" data-value="classic">Classic<br><small>Remember set</small></button>
+                            <button class="option-btn" data-value="sequence">Sequence<br><small>Remember order</small></button>
+                            <button class="option-btn" data-value="timed">Timed<br><small>Time limit</small></button>
+                        </div>
+                    </div>
+
+                    <div class="config-item">
+                        <label class="config-label">Difficulty Policy</label>
+                        <div class="option-buttons" id="mistakePolicyButtons">
+                            <button class="option-btn active" data-value="fail_level">Hardcore<br><small>One mistake ends</small></button>
+                            <button class="option-btn" data-value="lose_life">Arcade<br><small>3 lives</small></button>
+                        </div>
+                    </div>
+
+                    <div class="config-item">
+                        <label class="config-label">Starting Grid</label>
+                        <div class="option-buttons" id="startGridButtons">
+                            <button class="option-btn active" data-value="3">3×3<br><small>Beginner</small></button>
+                            <button class="option-btn" data-value="4">4×4<br><small>Intermediate</small></button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="start-btn" id="startGameBtn">🚀 Start Game</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <!-- Stats -->
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <div class="stat-label">Level</div>
+                    <div class="stat-value" id="levelDisplay">1</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="scoreDisplay">0</div>
+                </div>
+                <div class="stat-item" id="livesContainer" style="display: none;">
+                    <div class="stat-label">Lives</div>
+                    <div class="stat-value" id="livesDisplay">3</div>
+                </div>
+                <div class="stat-item" id="timerContainer" style="display: none;">
+                    <div class="stat-label">Time</div>
+                    <div class="stat-value" id="timerDisplay">0.0s</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Streak</div>
+                    <div class="stat-value" id="streakDisplay">0</div>
+                </div>
+            </div>
+
+            <!-- Game Info -->
+            <div class="game-info">
+                <div id="phaseDisplay">Ready</div>
+                <div id="instructionDisplay">Watch carefully...</div>
+            </div>
+
+            <!-- Grid Container -->
+            <div class="grid-container">
+                <div id="memoryGrid" class="memory-grid">
+                    <!-- Grid cells will be generated dynamically -->
+                </div>
+            </div>
+
+            <!-- Continue Button (hidden by default) -->
+            <div class="controls" id="continueContainer" style="display: none;">
+                <button class="control-btn" id="continueBtn">➡️ Continue</button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="resultScreen" class="screen">
+            <div class="result-card">
+                <div id="resultIcon" class="result-icon">🏆</div>
+                <h2 id="resultTitle">Game Over!</h2>
+                
+                <div class="result-stats">
+                    <div class="result-stat">
+                        <div class="result-stat-label">Final Level</div>
+                        <div class="result-stat-value" id="finalLevel">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Final Score</div>
+                        <div class="result-stat-value" id="finalScore">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Best Streak</div>
+                        <div class="result-stat-value" id="bestStreak">0</div>
+                    </div>
+                </div>
+
+                <div class="result-actions">
+                    <button class="result-btn" id="playAgainBtn">🎮 Play Again</button>
+                    <button class="result-btn secondary" id="backToMenuBtn">📋 Main Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="memory-matrix.js"></script>
+</body>
+</html>
