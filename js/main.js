@@ -33,6 +33,14 @@ const games = [
         url: 'games/dual-n-back.html'
     },
     {
+        id: 'memory-matrix',
+        title: 'Memory Matrix',
+        description: 'Remember highlighted cells and tap them back',
+        icon: '🔲',
+        tag: 'Memory',
+        url: 'games/memory-matrix.html'
+    },
+    {
         id: 'memory',
         title: 'Memory Cards',
         description: 'Improve memory with image recognition exercises',
