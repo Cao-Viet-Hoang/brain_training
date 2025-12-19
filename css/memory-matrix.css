@@ -602,92 +602,454 @@
 }
 
 /* ===== Responsive Design ===== */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+    .config-card {
+        max-width: 550px;
+    }
+    
+    .modal-content {
+        max-width: 550px;
+        padding: var(--spacing-md);
+    }
+}
+
+/* Mobile Landscape / Small Tablet (600px - 767px) */
 @media (max-width: 768px) {
+    /* Game Header */
+    .game-header {
+        gap: var(--spacing-xs);
+    }
+    
     .game-header h1 {
         font-size: 1.5rem;
+        flex: none;
+        width: 100%;
+        order: -1;
+    }
+    
+    .back-btn,
+    .help-btn {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
     }
 
+    /* Config Screen */
     .config-card {
         padding: var(--spacing-md);
+        max-width: 100%;
+    }
+    
+    .config-card h2 {
+        font-size: 1.6rem;
     }
 
     .option-buttons {
         grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: var(--spacing-xs);
+    }
+    
+    .option-btn {
+        padding: var(--spacing-xs);
+        font-size: 0.9rem;
+    }
+    
+    .option-btn small {
+        font-size: 0.75rem;
+    }
+    
+    .start-btn {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 1.1rem;
     }
 
+    /* Stats Panel - All Phases */
     .stats-panel {
         padding: var(--spacing-sm);
+        gap: var(--spacing-xs);
+    }
+    
+    .stat-item {
+        min-width: 70px;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
     }
 
     .stat-value {
         font-size: 1.2rem;
     }
 
+    /* Game Info - Show/Input/Result Phases */
+    .game-info {
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    #phaseDisplay {
+        font-size: 1.1rem;
+    }
+    
+    #instructionDisplay {
+        font-size: 0.9rem;
+    }
+
+    /* Memory Grid - All Game Phases */
+    .grid-container {
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .memory-grid {
+        gap: 6px;
+        padding: var(--spacing-sm);
+    }
+    
     .memory-grid.size-3 .grid-cell {
         width: 75px;
         height: 75px;
+        font-size: 1.1rem;
     }
 
     .memory-grid.size-4 .grid-cell {
         width: 60px;
         height: 60px;
+        font-size: 1rem;
     }
 
     .memory-grid.size-5 .grid-cell {
         width: 50px;
         height: 50px;
+        font-size: 0.9rem;
     }
 
     .memory-grid.size-6 .grid-cell {
         width: 42px;
         height: 42px;
+        font-size: 0.8rem;
     }
 
     .memory-grid.size-7 .grid-cell {
         width: 38px;
         height: 38px;
+        font-size: 0.75rem;
+    }
+    
+    .grid-cell.correct,
+    .grid-cell.wrong,
+    .grid-cell.missed {
+        font-size: 1.5rem;
     }
 
-    .result-card {
-        padding: var(--spacing-lg);
-    }
-
-    .result-icon {
-        font-size: 3rem;
-    }
-
+    /* Controls - Game Phase */
     .controls {
         flex-direction: column;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm);
     }
 
     .control-btn {
         width: 100%;
+        padding: var(--spacing-sm);
+        font-size: 1rem;
+    }
+
+    /* Result Screen */
+    .result-card {
+        padding: var(--spacing-lg);
+        margin: var(--spacing-sm);
+    }
+    
+    .result-card h2 {
+        font-size: 1.7rem;
+    }
+
+    .result-icon {
+        font-size: 3rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .result-stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-sm);
+    }
+    
+    .result-stat {
+        padding: var(--spacing-sm);
+    }
+    
+    .result-stat-label {
+        font-size: 0.75rem;
+    }
+    
+    .result-stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .result-message {
+        padding: var(--spacing-sm);
+        font-size: 1rem;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .result-btn {
+        padding: var(--spacing-sm);
+        font-size: 1rem;
+    }
+    
+    /* Modal */
+    .modal-content {
+        max-width: 90%;
+        padding: var(--spacing-md);
+        margin: var(--spacing-sm);
+    }
+    
+    .modal-content h2 {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .help-section h3 {
+        font-size: 1.1rem;
+    }
+    
+    .help-section ul {
+        font-size: 0.9rem;
     }
 }
 
+/* Mobile Portrait (480px - 599px) */
+@media (max-width: 599px) {
+    /* Config Screen */
+    .config-card {
+        padding: var(--spacing-sm);
+    }
+    
+    .config-card h2 {
+        font-size: 1.4rem;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .option-buttons {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
+    }
+    
+    /* Stats Panel - Vertical Layout for Mobile */
+    .stats-panel {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-xs);
+    }
+    
+    .stat-item {
+        padding: var(--spacing-xs);
+    }
+}
+
+/* Small Mobile (320px - 479px) */
 @media (max-width: 480px) {
+    /* Game Header */
+    .game-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .back-btn,
+    .help-btn {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.7rem;
+    }
+
+    /* Config Screen */
+    .config-card {
+        padding: var(--spacing-xs);
+    }
+    
+    .config-card h2 {
+        font-size: 1.2rem;
+    }
+    
+    .config-label {
+        font-size: 1rem;
+    }
+    
+    .start-btn {
+        padding: var(--spacing-sm);
+        font-size: 1rem;
+    }
+
+    /* Stats Panel */
+    .stats-panel {
+        padding: var(--spacing-xs);
+        gap: 0.3rem;
+    }
+    
+    .stat-label {
+        font-size: 0.7rem;
+    }
+    
+    .stat-value {
+        font-size: 1.1rem;
+    }
+
+    /* Game Info */
+    .game-info {
+        padding: var(--spacing-xs);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    #phaseDisplay {
+        font-size: 1rem;
+    }
+    
+    #instructionDisplay {
+        font-size: 0.85rem;
+    }
+
+    /* Memory Grid - Smaller cells for small screens */
+    .grid-container {
+        padding: var(--spacing-xs);
+    }
+    
+    .memory-grid {
+        gap: 4px;
+        padding: var(--spacing-xs);
+    }
+    
     .memory-grid.size-3 .grid-cell {
         width: 65px;
         height: 65px;
+        font-size: 1rem;
     }
 
     .memory-grid.size-4 .grid-cell {
         width: 50px;
         height: 50px;
+        font-size: 0.9rem;
     }
 
     .memory-grid.size-5 .grid-cell {
         width: 42px;
         height: 42px;
+        font-size: 0.8rem;
     }
 
     .memory-grid.size-6 .grid-cell {
         width: 36px;
         height: 36px;
+        font-size: 0.7rem;
     }
 
     .memory-grid.size-7 .grid-cell {
         width: 32px;
         height: 32px;
+        font-size: 0.65rem;
+    }
+    
+    .grid-cell.correct,
+    .grid-cell.wrong,
+    .grid-cell.missed {
+        font-size: 1.3rem;
+    }
+    
+    .grid-cell.selected {
+        font-size: 1rem;
+    }
+
+    /* Controls */
+    .controls {
+        gap: var(--spacing-xs);
+    }
+    
+    .control-btn {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.95rem;
+    }
+
+    /* Result Screen */
+    .result-card {
+        padding: var(--spacing-md);
+        margin: var(--spacing-xs);
+    }
+    
+    .result-card h2 {
+        font-size: 1.4rem;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .result-icon {
+        font-size: 2.5rem;
+    }
+    
+    .result-stats {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
+    }
+    
+    .result-stat {
+        padding: var(--spacing-xs);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .result-stat-label {
+        font-size: 0.8rem;
+        text-align: left;
+    }
+    
+    .result-stat-value {
+        font-size: 1.3rem;
+        text-align: right;
+    }
+    
+    .result-message {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.9rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .result-btn {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.95rem;
+    }
+    
+    /* Modal */
+    .modal-content {
+        padding: var(--spacing-sm);
+        max-width: 95%;
+        max-height: 85vh;
+    }
+    
+    .modal-content h2 {
+        font-size: 1.3rem;
+        margin-bottom: var(--spacing-sm);
+        padding-right: var(--spacing-lg);
+    }
+    
+    .close-btn {
+        font-size: 1.8rem;
+        right: 0.5rem;
+        top: 0.5rem;
+    }
+    
+    .help-section {
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .help-section h3 {
+        font-size: 1rem;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .help-section p,
+    .help-section ul {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+    
+    .help-section li {
+        margin-bottom: 0.3rem;
     }
 }
