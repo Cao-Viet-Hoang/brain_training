@@ -134,37 +134,47 @@
 
 .room-id-section .label {
     font-size: 0.9rem;
-    opacity: 0.9;
+    font-weight: 600;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .room-id-section .room-id {
     font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: 0.1em;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--primary-color, #6366f1);
     padding: 0.5rem 1rem;
     border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .room-id-section .btn-icon {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.95);
     border: none;
     padding: 0.5rem 0.75rem;
     border-radius: 8px;
     cursor: pointer;
     font-size: 1.2rem;
     transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .room-id-section .btn-icon:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 1);
     transform: scale(1.05);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
 }
 
 .room-status-section {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .status-indicator {
@@ -172,21 +182,104 @@
     height: 12px;
     border-radius: 50%;
     background: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
     animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
     0%, 100% {
         opacity: 1;
+        transform: scale(1);
     }
     50% {
-        opacity: 0.5;
+        opacity: 0.7;
+        transform: scale(0.95);
     }
 }
 
 #statusText {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--text-primary, #1f2937);
+}
+
+/* ============================================================================
+   PLAYERS SECTION
+   ============================================================================ */
+
+.players-section {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+    border: 2px solid var(--border-color, #e5e7eb);
+    border-radius: 16px;
+}
+
+.players-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary, #1f2937);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.players-section h3::before {
+    content: "👥";
+    font-size: 1.3rem;
+}
+
+.players-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.player-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: white;
+    border-radius: 10px;
+    transition: all 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.player-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.player-item.online {
+    border-left: 3px solid #10b981;
+}
+
+.player-item.offline {
+    opacity: 0.6;
+    border-left: 3px solid #ef4444;
+}
+
+.player-status {
+    font-size: 0.8rem;
+}
+
+.player-item.online .player-status {
+    color: #10b981;
+}
+
+.player-item.offline .player-status {
+    color: #ef4444;
+}
+
+.player-name {
+    flex: 1;
+    font-weight: 500;
+    color: var(--text-primary, #1f2937);
+}
+
+.host-badge {
+    font-size: 1rem;
 }
 
 /* ============================================================================
@@ -194,8 +287,8 @@
    ============================================================================ */
 
 .game-selection-section {
-    margin-bottom: 2rem;
-    padding: 2rem;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
     background: var(--bg-secondary, #f9fafb);
     border-radius: 16px;
 }
@@ -298,71 +391,6 @@
 
 .selected-game-info p {
     color: var(--text-secondary, #6b7280);
-}
-
-/* ============================================================================
-   PLAYERS SECTION
-   ============================================================================ */
-
-.players-section {
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: white;
-    border: 2px solid var(--border-color, #e5e7eb);
-    border-radius: 16px;
-}
-
-.players-section h3 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    color: var(--text-primary, #1f2937);
-}
-
-.players-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 0.75rem;
-}
-
-.player-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    background: var(--bg-secondary, #f9fafb);
-    border-radius: 8px;
-    transition: all 0.2s;
-}
-
-.player-item.online {
-    border-left: 3px solid #10b981;
-}
-
-.player-item.offline {
-    opacity: 0.6;
-    border-left: 3px solid #ef4444;
-}
-
-.player-status {
-    font-size: 0.8rem;
-}
-
-.player-item.online .player-status {
-    color: #10b981;
-}
-
-.player-item.offline .player-status {
-    color: #ef4444;
-}
-
-.player-name {
-    flex: 1;
-    font-weight: 500;
-    color: var(--text-primary, #1f2937);
-}
-
-.host-badge {
-    font-size: 1rem;
 }
 
 /* ============================================================================
