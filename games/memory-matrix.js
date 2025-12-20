@@ -1130,6 +1130,129 @@ class GameCoordinator {
 // ============================================================================
 // INITIALIZE GAME
 // ============================================================================
+let gameCoordinator;
+
 document.addEventListener('DOMContentLoaded', () => {
-    const game = new GameCoordinator();
+    gameCoordinator = new GameCoordinator();
 });
+
+// ============================================================================
+// MULTIPLAYER ADAPTER
+// ============================================================================
+window.memoryMatrixGameAdapter = {
+    /**
+     * Collect current game configuration
+     */
+    collectConfig() {
+        if (!gameCoordinator || !gameCoordinator.ui) {
+            return {
+                mode: 'classic',
+                mistakePolicy: 'fail_level',
+                startGridSize: 3
+            };
+        }
+        
+        return gameCoordinator.ui.getConfigValues();
+    },
+
+    /**
+     * Build complete question set for multiplayer session
+     */
+    buildQuestionSet(config, seed) {
+        const questionSet = {
+            mode: config.mode || 'classic',
+            mistakePolicy: config.mistakePolicy || 'fail_level',
+            startGridSize: config.startGridSize || 3,
+            seed: seed || Date.now(),
+            levels: []
+        };
+
+        // Pre-generate 50 levels worth of patterns
+        const tempConfig = new GameConfig({
+            mode: questionSet.mode,
+            mistakePolicy: questionSet.mistakePolicy,
+            startGridSize: questionSet.startGridSize,
+            seed: questionSet.seed
+        });
+        const levelManager = new LevelManager(tempConfig);
+        const patternGenerator = new PatternGenerator(tempConfig);
+
+        for (let level = 1; level <= 50; level++) {
+            const params = levelManager.getLevelParams(level);
+            const pattern = patternGenerator.generate(
+                params.gridSize,
+                params.targetsCount,
+                level
+            );
+
+            questionSet.levels.push({
+                level,
+                gridSize: params.gridSize,
+                targetsCount: params.targetsCount,
+                showDurationMs: params.showDurationMs,
+                pattern: pattern
+            });
+        }
+
+        return questionSet;
+    },
+
+    /**
+     * Start game with provided question set
+     */
+    startGameWithQuestionSet(questionSet) {
+        if (!gameCoordinator || !gameCoordinator.engine) {
+            console.error('Game not initialized');
+            return;
+        }
+
+        // Apply configuration
+        gameCoordinator.engine.config.mode = questionSet.mode;
+        gameCoordinator.engine.config.mistakePolicy = questionSet.mistakePolicy;
+        gameCoordinator.engine.config.startGridSize = questionSet.startGridSize;
+        gameCoordinator.engine.config.seed = questionSet.seed;
+
+        // Override pattern generator to use pre-generated patterns
+        gameCoordinator.engine.patternGenerator.generate = (gridSize, targetsCount, level) => {
+            const levelData = questionSet.levels.find(l => l.level === level);
+            if (levelData) {
+                return levelData.pattern;
+            }
+            // Fallback to normal generation if level not found
+            return gameCoordinator.engine.patternGenerator.generateRandom(gridSize, targetsCount, level);
+        };
+
+        // Update UI
+        gameCoordinator.ui.showScreen('game');
+        
+        // Start game
+        gameCoordinator.engine.startGame();
+        gameCoordinator.ui.renderLevel();
+    },
+
+    /**
+     * Setup callback for game end
+     */
+    onGameEnd(callback) {
+        if (!gameCoordinator || !gameCoordinator.ui) {
+            console.error('Game not initialized');
+            return;
+        }
+
+        // Intercept showResultScreen to trigger callback
+        const originalShowResult = gameCoordinator.ui.showResultScreen.bind(gameCoordinator.ui);
+        gameCoordinator.ui.showResultScreen = (reason) => {
+            originalShowResult(reason);
+            
+            // Call multiplayer callback with final score
+            if (callback) {
+                callback({
+                    score: gameCoordinator.engine.score,
+                    level: gameCoordinator.engine.level,
+                    bestStreak: gameCoordinator.engine.bestStreak,
+                    reason: reason
+                });
+            }
+        };
+    }
+};

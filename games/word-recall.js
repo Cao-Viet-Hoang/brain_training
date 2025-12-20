@@ -1189,7 +1189,162 @@ class WordRecallApp {
 }
 
 // Start the application
+let wordRecallApp;
+
 document.addEventListener('DOMContentLoaded', async () => {
-    const app = new WordRecallApp();
-    await app.initialize();
+    wordRecallApp = new WordRecallApp();
+    await wordRecallApp.initialize();
 });
+
+// ============================================================================
+// MULTIPLAYER ADAPTER
+// ============================================================================
+window.wordRecallGameAdapter = {
+    /**
+     * Collect current game configuration
+     */
+    collectConfig() {
+        if (!wordRecallApp || !wordRecallApp.gameEngine) {
+            return {
+                sessionRounds: 5,
+                startK: 5,
+                maxK: 15,
+                memorizeMsBase: 3000,
+                testTimeLimitMs: 30000,
+                distractorEnabled: true
+            };
+        }
+
+        return {
+            sessionRounds: wordRecallApp.gameEngine.config.sessionRounds,
+            startK: wordRecallApp.gameEngine.config.startK,
+            maxK: wordRecallApp.gameEngine.config.maxK,
+            memorizeMsBase: wordRecallApp.gameEngine.config.memorizeMsBase,
+            testTimeLimitMs: wordRecallApp.gameEngine.config.testTimeLimitMs,
+            distractorEnabled: wordRecallApp.gameEngine.config.distractorEnabled
+        };
+    },
+
+    /**
+     * Build complete question set for multiplayer session
+     */
+    buildQuestionSet(config, seed) {
+        if (!wordRecallApp || !wordRecallApp.wordBankService || !wordRecallApp.wordBankService.loaded) {
+            throw new Error('Word bank not loaded');
+        }
+
+        const questionSet = {
+            sessionRounds: config.sessionRounds || 5,
+            startK: config.startK || 5,
+            maxK: config.maxK || 15,
+            memorizeMsBase: config.memorizeMsBase || 3000,
+            testTimeLimitMs: config.testTimeLimitMs || 30000,
+            distractorEnabled: config.distractorEnabled !== false,
+            seed: seed || Date.now(),
+            rounds: []
+        };
+
+        // Create temporary selector with seed
+        const tempConfig = new GameConfig({
+            ...config,
+            seed: questionSet.seed
+        });
+        const selector = new WordSelector(wordRecallApp.wordBankService, tempConfig);
+
+        // Pre-generate words for all rounds
+        for (let round = 1; round <= questionSet.sessionRounds; round++) {
+            const K = Math.min(
+                questionSet.startK + Math.floor((round - 1) * 1.5),
+                questionSet.maxK
+            );
+
+            const targetWords = selector.selectWords(K, round);
+            let distractorWords = [];
+            
+            if (questionSet.distractorEnabled) {
+                const distractorCount = Math.max(2, Math.ceil(K * 0.4));
+                distractorWords = selector.selectWords(distractorCount, round);
+            }
+
+            questionSet.rounds.push({
+                round,
+                K,
+                targetWords,
+                distractorWords
+            });
+        }
+
+        return questionSet;
+    },
+
+    /**
+     * Start game with provided question set
+     */
+    startGameWithQuestionSet(questionSet) {
+        if (!wordRecallApp || !wordRecallApp.gameEngine) {
+            console.error('Game not initialized');
+            return;
+        }
+
+        // Apply configuration
+        wordRecallApp.gameEngine.config.sessionRounds = questionSet.sessionRounds;
+        wordRecallApp.gameEngine.config.startK = questionSet.startK;
+        wordRecallApp.gameEngine.config.maxK = questionSet.maxK;
+        wordRecallApp.gameEngine.config.memorizeMsBase = questionSet.memorizeMsBase;
+        wordRecallApp.gameEngine.config.testTimeLimitMs = questionSet.testTimeLimitMs;
+        wordRecallApp.gameEngine.config.distractorEnabled = questionSet.distractorEnabled;
+        wordRecallApp.gameEngine.config.seed = questionSet.seed;
+
+        // Override word selection to use pre-generated words
+        let roundIndex = 0;
+        const originalSelectWords = wordRecallApp.gameEngine.wordSelector.selectWords.bind(
+            wordRecallApp.gameEngine.wordSelector
+        );
+        wordRecallApp.gameEngine.wordSelector.selectWords = (K, round) => {
+            const roundData = questionSet.rounds[roundIndex];
+            if (roundData) {
+                roundIndex++;
+                return roundData.targetWords;
+            }
+            return originalSelectWords(K, round);
+        };
+
+        // Start game
+        wordRecallApp.gameEngine.startGame();
+        wordRecallApp.uiController.showScreen('game');
+        wordRecallApp.uiController.renderMemorizePhase();
+    },
+
+    /**
+     * Setup callback for game end
+     */
+    onGameEnd(callback) {
+        if (!wordRecallApp || !wordRecallApp.uiController) {
+            console.error('Game not initialized');
+            return;
+        }
+
+        // Intercept renderFinalScreen to trigger callback
+        const originalRenderFinal = wordRecallApp.uiController.renderFinalScreen.bind(
+            wordRecallApp.uiController
+        );
+        wordRecallApp.uiController.renderFinalScreen = () => {
+            originalRenderFinal();
+            
+            // Call multiplayer callback with final score
+            if (callback) {
+                const stats = wordRecallApp.gameEngine.stats;
+                const totalWords = wordRecallApp.gameEngine.roundData.reduce((sum, r) => sum + r.K, 0);
+                const accuracy = totalWords > 0 ? 
+                    Math.round((stats.totalHits / totalWords) * 100) : 0;
+
+                callback({
+                    score: wordRecallApp.gameEngine.totalScore,
+                    rounds: wordRecallApp.gameEngine.config.sessionRounds,
+                    hits: stats.totalHits,
+                    accuracy: accuracy
+                });
+            }
+        };
+    }
+};

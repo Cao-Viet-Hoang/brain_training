@@ -1,0 +1,111 @@
+<!-- ============================================================================
+     HTML INTEGRATION TEMPLATE FOR MULTIPLAYER
+     
+     Add these sections to each game HTML file
+     ============================================================================ -->
+
+<!-- 1. In the <head> section, add CSS for multiplayer UI: -->
+<link rel="stylesheet" href="../shared/roomUI.css">
+
+<!-- 2. Before </body>, replace existing game script section with: -->
+
+<!-- Firebase SDK (compat version for easier setup) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<!-- Multiplayer SDK -->
+<script src="../shared/firebaseConfig.js"></script>
+<script src="../shared/firebaseClient.js"></script>
+<script src="../shared/roomClient.js"></script>
+<script src="../shared/roomUI.js"></script>
+<script src="../shared/multiplayerInit.js"></script>
+
+<!-- Game Script -->
+<script src="your-game-name.js"></script>
+
+<!-- Initialize Multiplayer -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Wait a moment for game adapter to be registered
+        setTimeout(() => {
+            // Replace 'yourGameAdapter' with actual adapter name:
+            // - dualNBackGameAdapter
+            // - mathGameAdapter
+            // - memoryMatrixGameAdapter
+            // - wordRecallGameAdapter
+            // - expressionPuzzleGameAdapter
+            if (window.yourGameAdapter) {
+                initializeMultiplayer(window.yourGameAdapter);
+            } else {
+                console.warn('Game adapter not found, multiplayer disabled');
+            }
+        }, 100);
+    });
+</script>
+
+<!-- ============================================================================
+     COMPLETE EXAMPLE FOR MATH GAME
+     ============================================================================ -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Game - Brain Training</title>
+    <!-- ... other head content ... -->
+    
+    <!-- Original CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/math-game.css">
+    
+    <!-- ADD THIS: Multiplayer CSS -->
+    <link rel="stylesheet" href="../shared/roomUI.css">
+</head>
+<body>
+    <!-- ... game content ... -->
+
+    <!-- ADD THESE SCRIPTS BEFORE </body>: -->
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- Multiplayer SDK -->
+    <script src="../shared/firebaseConfig.js"></script>
+    <script src="../shared/firebaseClient.js"></script>
+    <script src="../shared/roomClient.js"></script>
+    <script src="../shared/roomUI.js"></script>
+    <script src="../shared/multiplayerInit.js"></script>
+    
+    <!-- Game Script -->
+    <script src="math-game.js"></script>
+    
+    <!-- Initialize Multiplayer -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (window.mathGameAdapter) {
+                    initializeMultiplayer(window.mathGameAdapter);
+                } else {
+                    console.warn('Math game adapter not found, multiplayer disabled');
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
+
+<!-- ============================================================================
+     NOTES
+     ============================================================================ -->
+
+<!--
+1. The multiplayer panel will automatically appear in the top-right corner
+2. No additional HTML structure needed - RoomUI creates its own DOM
+3. Panel can be collapsed/expanded by clicking the toggle button
+4. Make sure Firebase config is set up in shared/firebaseConfig.js
+5. The 100ms timeout ensures game adapter is registered before initialization
+-->

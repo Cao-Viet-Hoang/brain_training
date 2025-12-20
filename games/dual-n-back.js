@@ -706,6 +706,41 @@ class UIController {
         }
     }
 
+    /**
+     * Start game with pre-generated sequence (for multiplayer)
+     * @param {Object} sequence - Pre-generated sequence
+     */
+    startGameWithSequence(sequence) {
+        this.showScreen('game');
+        this.setupGameGrid();
+        this.updateGameInfo();
+        this.startNextTrial();
+    }
+
+    /**
+     * Collect current configuration from UI
+     * @returns {Object} Configuration object
+     */
+    collectConfig() {
+        const nBackBtn = document.querySelector('#nBackLevelButtons .option-btn.active');
+        const gridSizeBtn = document.querySelector('#gridSizeButtons .option-btn.active');
+        
+        const config = {
+            N: parseInt(nBackBtn?.dataset.value || '2'),
+            gridSize: parseInt(gridSizeBtn?.dataset.value || '3'),
+            totalTrials: parseInt(document.getElementById('totalTrials')?.value || '40'),
+            stimulusDurationMs: parseInt(document.getElementById('stimulusDuration')?.value || '900'),
+            interTrialIntervalMs: parseInt(document.getElementById('interTrialInterval')?.value || '600'),
+            lettersPool: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
+            targetMatchRatePosition: 0.25,
+            targetMatchRateLetter: 0.25,
+            targetDualMatchRate: 0.07
+        };
+
+        config.responseWindowMs = config.stimulusDurationMs + config.interTrialIntervalMs;
+        return config;
+    }
+
     // ========================================================================
     // GAME SCREEN
     // ========================================================================
@@ -927,6 +962,17 @@ class UIController {
         this.generateReviewList(results.trialRecords);
         
         this.showScreen('result');
+        
+        // Call multiplayer callback if exists
+        if (this.gameEngine.onGameEndCallback) {
+            const finalScore = results.score;
+            const extra = {
+                accuracy: results.accuracy,
+                posAccuracy: results.posAccuracy,
+                letAccuracy: results.letAccuracy
+            };
+            this.gameEngine.onGameEndCallback(finalScore, extra);
+        }
     }
 
     generateReviewList(trialRecords) {
@@ -1064,6 +1110,115 @@ class UIController {
 }
 
 // ============================================================================
+// MULTIPLAYER GAME ADAPTER
+// Provides interface for multiplayer room functionality
+// ============================================================================
+const dualNBackGameAdapter = {
+    /**
+     * Get game metadata
+     * @returns {Object} Game metadata
+     */
+    getGameMeta() {
+        return {
+            gameId: 'dual-n-back',
+            version: '1.0.0',
+            title: 'Dual N-Back'
+        };
+    },
+
+    /**
+     * Build question set from configuration
+     * @param {Object} config - Game configuration
+     * @returns {Object} Question set (JSON-serializable)
+     */
+    buildQuestionSet(config) {
+        // Use current UI config if not provided
+        if (!config || Object.keys(config).length === 0) {
+            config = window.uiController ? window.uiController.collectConfig() : {
+                N: 2,
+                gridSize: 3,
+                totalTrials: 40,
+                stimulusDurationMs: 900,
+                interTrialIntervalMs: 600,
+                responseWindowMs: 1500,
+                lettersPool: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
+                targetMatchRatePosition: 0.25,
+                targetMatchRateLetter: 0.25,
+                targetDualMatchRate: 0.07
+            };
+        }
+
+        // Generate sequence
+        const generator = new SequenceGenerator(config);
+        const sequence = generator.generate();
+
+        // Return JSON-safe questionSet
+        return {
+            config: config,
+            sequence: {
+                positions: sequence.positions,
+                letters: sequence.letters
+            }
+        };
+    },
+
+    /**
+     * Start game from question set
+     * @param {Object} questionSet - Question set data
+     * @param {Object} roomContext - Room context { roomId, isHost }
+     */
+    startGameFromQuestionSet(questionSet, roomContext) {
+        if (!window.uiController || !window.gameEngine) {
+            console.error('Game not initialized');
+            return;
+        }
+
+        // Update game config
+        window.gameEngine.config = questionSet.config;
+        window.gameEngine.sequence = questionSet.sequence;
+        window.gameEngine.state = 'RUNNING';
+        window.gameEngine.reset();
+        window.gameEngine.sequence = questionSet.sequence;
+
+        // Store room context
+        window.gameEngine.roomContext = roomContext;
+
+        // Start game UI
+        window.uiController.startGameWithSequence(questionSet.sequence);
+    },
+
+    /**
+     * Register callback for game end
+     * @param {Function} callback - Callback function(score, extra)
+     */
+    onGameEnd(callback) {
+        if (!window.gameEngine) {
+            console.error('Game engine not initialized');
+            return;
+        }
+
+        // Store callback reference
+        window.gameEngine.onGameEndCallback = callback;
+    },
+
+    /**
+     * Get current game configuration (optional)
+     * @returns {Object} Current configuration
+     */
+    getConfig() {
+        if (window.uiController) {
+            return window.uiController.collectConfig();
+        }
+        return null;
+    }
+};
+
+// Make adapter globally available
+if (typeof window !== 'undefined') {
+    window.dualNBackGameAdapter = dualNBackGameAdapter;
+}
+
+// ============================================================================
 // MAIN GAME INITIALIZATION
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -1085,6 +1240,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const analytics = new Analytics();
     const gameEngine = new GameEngine(initialConfig, analytics);
     const uiController = new UIController(gameEngine);
+    
+    // Make globally accessible for adapter
+    window.analytics = analytics;
+    window.gameEngine = gameEngine;
+    window.uiController = uiController;
     
     console.log('Dual N-Back game initialized successfully!');
 });

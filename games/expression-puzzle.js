@@ -1272,3 +1272,136 @@ let game;
 document.addEventListener('DOMContentLoaded', () => {
     game = new ExpressionPuzzleGame();
 });
+
+// ============================================================================
+// MULTIPLAYER ADAPTER
+// ============================================================================
+window.expressionPuzzleGameAdapter = {
+    /**
+     * Collect current game configuration
+     */
+    collectConfig() {
+        if (!game) {
+            return {
+                difficulty: 'medium',
+                puzzleCount: 10,
+                requireUnique: false,
+                minTarget: 1,
+                maxTarget: 100,
+                timePerPuzzle: 60
+            };
+        }
+
+        const difficulty = document.querySelector('.difficulty-btn.active')?.dataset.difficulty || 'medium';
+        
+        return {
+            difficulty,
+            puzzleCount: parseInt(document.getElementById('puzzleCount')?.value) || 10,
+            requireUnique: document.getElementById('requireUnique')?.checked || false,
+            minTarget: parseInt(document.getElementById('minTarget')?.value) || 1,
+            maxTarget: parseInt(document.getElementById('maxTarget')?.value) || 100,
+            timePerPuzzle: parseInt(document.getElementById('timePerPuzzle')?.value) || 60
+        };
+    },
+
+    /**
+     * Build complete question set for multiplayer session
+     */
+    buildQuestionSet(config, seed) {
+        const questionSet = {
+            difficulty: config.difficulty || 'medium',
+            puzzleCount: config.puzzleCount || 10,
+            requireUnique: config.requireUnique || false,
+            minTarget: config.minTarget || 1,
+            maxTarget: config.maxTarget || 100,
+            timePerPuzzle: config.timePerPuzzle || 60,
+            seed: seed || Date.now(),
+            puzzles: []
+        };
+
+        // Get difficulty configuration
+        const difficultyConfig = game.getConfigForDifficulty(questionSet.difficulty);
+        difficultyConfig.targetRange = [questionSet.minTarget, questionSet.maxTarget];
+        difficultyConfig.requireUnique = questionSet.requireUnique;
+        difficultyConfig.seed = questionSet.seed;
+
+        // Generate puzzles
+        const generator = new PuzzleGenerator(difficultyConfig);
+        const generatedPuzzles = generator.generate(questionSet.puzzleCount);
+
+        // Store puzzles in serializable format
+        questionSet.puzzles = generatedPuzzles.map(puzzle => ({
+            expressionTemplate: puzzle.expressionTemplate,
+            target: puzzle.target,
+            solutionNumbers: puzzle.solutionNumbers,
+            numSlots: puzzle.numSlots,
+            metadata: puzzle.metadata
+        }));
+
+        return questionSet;
+    },
+
+    /**
+     * Start game with provided question set
+     */
+    startGameWithQuestionSet(questionSet) {
+        if (!game) {
+            console.error('Game not initialized');
+            return;
+        }
+
+        // Reconstruct puzzle objects
+        const puzzles = questionSet.puzzles.map(p => {
+            const diffConfig = game.getConfigForDifficulty(questionSet.difficulty);
+            return new Puzzle(
+                p.expressionTemplate,
+                p.target,
+                p.solutionNumbers,
+                diffConfig
+            );
+        });
+
+        // Initialize game state
+        game.puzzleCount = questionSet.puzzleCount;
+        game.currentPuzzleIndex = 0;
+        game.score = 0;
+        game.puzzles = puzzles;
+        game.userAnswers = [];
+        game.startTime = Date.now();
+        game.timePerPuzzle = questionSet.timePerPuzzle;
+
+        // Start game
+        game.showScreen('game');
+        game.currentPuzzle = game.puzzles[0];
+        game.displayPuzzle();
+    },
+
+    /**
+     * Setup callback for game end
+     */
+    onGameEnd(callback) {
+        if (!game) {
+            console.error('Game not initialized');
+            return;
+        }
+
+        // Intercept showResults to trigger callback
+        const originalShowResults = game.showResults.bind(game);
+        game.showResults = () => {
+            originalShowResults();
+            
+            // Call multiplayer callback with final score
+            if (callback) {
+                const totalTime = Math.floor((Date.now() - game.startTime) / 1000);
+                const accuracy = Math.round((game.score / game.puzzleCount) * 100);
+
+                callback({
+                    score: game.score,
+                    puzzleCount: game.puzzleCount,
+                    accuracy: accuracy,
+                    totalTime: totalTime
+                });
+            }
+        };
+    }
+};

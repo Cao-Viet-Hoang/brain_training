@@ -1,0 +1,97 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": false,
+    
+    "rooms": {
+      "$roomId": {
+        ".read": "auth != null",
+        ".validate": "newData.hasChildren(['meta', 'players'])",
+        
+        "meta": {
+          ".validate": "newData.hasChildren(['gameId', 'gameVersion', 'title', 'status', 'createdAt', 'hostUid'])",
+          
+          "gameId": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+          },
+          
+          "gameVersion": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20"
+          },
+          
+          "title": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+          },
+          
+          "status": {
+            ".write": "auth.uid === data.parent().child('hostUid').val()",
+            ".validate": "newData.isString() && (newData.val() === 'waiting' || newData.val() === 'playing' || newData.val() === 'ended')"
+          },
+          
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          
+          "hostUid": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          }
+        },
+        
+        "game": {
+          ".write": "auth.uid === data.parent().child('meta/hostUid').val()",
+          ".validate": "newData.hasChildren(['questionSet', 'startedAt'])",
+          
+          "questionSet": {
+            ".validate": "newData.exists()"
+          },
+          
+          "startedAt": {
+            ".validate": "newData.isNumber()"
+          }
+        },
+        
+        "players": {
+          "$uid": {
+            ".write": "auth.uid === $uid",
+            ".validate": "newData.hasChildren(['name', 'joinedAt', 'online'])",
+            
+            "name": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20"
+            },
+            
+            "joinedAt": {
+              ".validate": "newData.isNumber()"
+            },
+            
+            "online": {
+              ".validate": "newData.isBoolean()"
+            }
+          }
+        },
+        
+        "scores": {
+          "$uid": {
+            ".write": "auth.uid === $uid",
+            ".validate": "newData.hasChildren(['name', 'score', 'submittedAt'])",
+            
+            "name": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20"
+            },
+            
+            "score": {
+              ".validate": "newData.isNumber() && newData.val() >= -10000 && newData.val() <= 1000000"
+            },
+            
+            "submittedAt": {
+              ".validate": "newData.isNumber()"
+            },
+            
+            "extra": {
+              ".validate": "newData.exists()"
+            }
+          }
+        }
+      }
+    }
+  }
+}

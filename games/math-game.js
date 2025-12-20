@@ -760,6 +760,19 @@ class MathGame {
         
         // Show result screen
         this.showScreen('result');
+        
+        // Call multiplayer callback if exists
+        if (this.onGameEndCallback) {
+            const finalScore = correctCount * 100 + streakBonus + speedBonus;
+            const accuracy = ((correctCount / this.config.questionCount) * 100).toFixed(1);
+            const extra = {
+                accuracy: parseFloat(accuracy),
+                correctCount: correctCount,
+                wrongCount: this.gameState.wrongCount,
+                maxStreak: this.gameState.maxStreak
+            };
+            this.onGameEndCallback(finalScore, extra);
+        }
     }
     
     resetGame() {
@@ -778,7 +791,216 @@ class MathGame {
     }
 }
 
+// ============================================================================
+// MULTIPLAYER GAME ADAPTER
+// Provides interface for multiplayer room functionality
+// ============================================================================
+const mathGameAdapter = {
+    /**
+     * Get game metadata
+     * @returns {Object} Game metadata
+     */
+    getGameMeta() {
+        return {
+            gameId: 'math-game',
+            version: '1.0.0',
+            title: 'Math Game'
+        };
+    },
+
+    /**
+     * Build question set from configuration
+     * @param {Object} config - Game configuration
+     * @returns {Object} Question set (JSON-serializable)
+     */
+    buildQuestionSet(config) {
+        if (!window.mathGameInstance) {
+            console.error('Math game not initialized');
+            return null;
+        }
+
+        // Use provided config or current config
+        let gameConfig = config && Object.keys(config).length > 0 
+            ? config 
+            : window.mathGameInstance.config;
+
+        // If no valid config, try to validate and get current
+        if (!gameConfig || Object.keys(gameConfig).length === 0) {
+            if (window.mathGameInstance.validateConfig()) {
+                gameConfig = window.mathGameInstance.config;
+            } else {
+                // Use default config
+                gameConfig = {
+                    minNumber: 1,
+                    maxNumber: 100,
+                    operations: ['+', '-'],
+                    operandCount: 2,
+                    questionCount: 10,
+                    timePerQuestion: 10
+                };
+            }
+        }
+
+        // Generate questions using a temporary game instance
+        const questions = [];
+        const tempState = {
+            questions: []
+        };
+        
+        const { minNumber, maxNumber, operations, operandCount, questionCount } = gameConfig;
+        
+        // Use the same generation logic from generateQuestions
+        for (let i = 0; i < questionCount; i++) {
+            const isMixed = operations.includes('mixed');
+            const numbers = [];
+            const ops = [];
+            
+            if (isMixed) {
+                const allOps = ['+', '-', '*', '/'];
+                for (let j = 1; j < operandCount; j++) {
+                    const op = allOps[Math.floor(Math.random() * allOps.length)];
+                    ops.push(op);
+                }
+                
+                for (let j = 0; j < operandCount; j++) {
+                    if (j > 0 && ops[j - 1] === '/') {
+                        const divisor = window.mathGameInstance.getRandomNumber(2, 10);
+                        numbers.push(divisor);
+                        const maxMultiplier = Math.floor(maxNumber / divisor);
+                        const multiplier = window.mathGameInstance.getRandomNumber(2, Math.min(maxMultiplier, 20));
+                        numbers[j - 1] = divisor * multiplier;
+                    } else {
+                        const adjustedMax = Math.min(maxNumber, 50);
+                        numbers.push(window.mathGameInstance.getRandomNumber(minNumber, adjustedMax));
+                    }
+                }
+            } else {
+                let operation = operations[Math.floor(Math.random() * operations.length)];
+                
+                if (operation === '/') {
+                    let result = window.mathGameInstance.getRandomNumber(Math.max(1, minNumber), Math.min(maxNumber, 20));
+                    numbers.push(result);
+                    
+                    for (let j = 1; j < operandCount; j++) {
+                        const divisor = window.mathGameInstance.getRandomNumber(2, 10);
+                        numbers[0] = numbers[0] * divisor;
+                        numbers.push(divisor);
+                    }
+                    
+                    if (numbers[0] > maxNumber) {
+                        const scaleFactor = maxNumber / numbers[0];
+                        numbers[0] = maxNumber;
+                        for (let j = 1; j < numbers.length; j++) {
+                            numbers[j] = Math.max(2, Math.floor(numbers[j] * scaleFactor));
+                        }
+                    }
+                } else {
+                    for (let j = 0; j < operandCount; j++) {
+                        numbers.push(window.mathGameInstance.getRandomNumber(minNumber, maxNumber));
+                    }
+                }
+                
+                for (let j = 1; j < operandCount; j++) {
+                    ops.push(operation);
+                }
+            }
+            
+            const answer = window.mathGameInstance.calculateAnswer(numbers, ops);
+            
+            questions.push({
+                numbers: numbers,
+                operations: ops,
+                correctAnswer: answer,
+                userAnswer: null,
+                isCorrect: null,
+                timeSpent: 0
+            });
+        }
+
+        return {
+            config: gameConfig,
+            questions: questions
+        };
+    },
+
+    /**
+     * Start game from question set
+     * @param {Object} questionSet - Question set data
+     * @param {Object} roomContext - Room context { roomId, isHost }
+     */
+    startGameFromQuestionSet(questionSet, roomContext) {
+        if (!window.mathGameInstance) {
+            console.error('Math game not initialized');
+            return;
+        }
+
+        const game = window.mathGameInstance;
+        
+        // Update config and questions
+        game.config = questionSet.config;
+        game.gameState = {
+            currentQuestionIndex: 0,
+            correctCount: 0,
+            wrongCount: 0,
+            questions: questionSet.questions,
+            answers: [],
+            timer: null,
+            timeRemaining: questionSet.config.timePerQuestion,
+            streak: 0,
+            maxStreak: 0,
+            recentAnswers: [],
+            achievements: {
+                fast: 0,
+                perfect: 0,
+                master: 0,
+                comeback: 0
+            },
+            wrongStreak: 0
+        };
+
+        // Store room context
+        game.roomContext = roomContext;
+
+        // Show game screen and start
+        game.showScreen('game');
+        game.displayQuestion();
+        game.startTimer();
+        game.updateProgress();
+        game.updateTip();
+    },
+
+    /**
+     * Register callback for game end
+     * @param {Function} callback - Callback function(score, extra)
+     */
+    onGameEnd(callback) {
+        if (window.mathGameInstance) {
+            window.mathGameInstance.onGameEndCallback = callback;
+        }
+    },
+
+    /**
+     * Get current game configuration (optional)
+     * @returns {Object} Current configuration
+     */
+    getConfig() {
+        if (window.mathGameInstance) {
+            // Validate and return current config
+            if (window.mathGameInstance.validateConfig()) {
+                return window.mathGameInstance.config;
+            }
+        }
+        return null;
+    }
+};
+
+// Make adapter globally available
+if (typeof window !== 'undefined') {
+    window.mathGameAdapter = mathGameAdapter;
+}
+
 // Initialize game when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new MathGame();
+    const game = new MathGame();
+    window.mathGameInstance = game;
 });

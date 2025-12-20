@@ -1,0 +1,494 @@
+/* ============================================================================
+   MULTIPLAYER PANEL STYLES
+   ============================================================================ */
+
+.multiplayer-panel {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    width: 320px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(245, 245, 255, 0.95));
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    z-index: 1000;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.multiplayer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    cursor: pointer;
+}
+
+.multiplayer-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.toggle-panel-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.toggle-panel-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.multiplayer-content {
+    padding: 20px;
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+}
+
+/* ============================================================================
+   SCREENS
+   ============================================================================ */
+
+.multiplayer-screen {
+    display: block;
+}
+
+.multiplayer-screen.hidden {
+    display: none;
+}
+
+/* ============================================================================
+   LOBBY SCREEN
+   ============================================================================ */
+
+.lobby-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.join-room-form {
+    display: flex;
+    gap: 8px;
+}
+
+.join-room-form input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Quicksand', sans-serif;
+    transition: all 0.2s;
+}
+
+.join-room-form input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* ============================================================================
+   ROOM SCREEN
+   ============================================================================ */
+
+.room-info {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: rgba(99, 102, 241, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.room-id-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.room-id-display .label {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.room-id {
+    font-size: 20px;
+    font-weight: 700;
+    color: #6366f1;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+}
+
+.btn-icon {
+    background: rgba(99, 102, 241, 0.1);
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: rgba(99, 102, 241, 0.2);
+}
+
+.room-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ffa500;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.room-status span {
+    font-size: 14px;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+/* ============================================================================
+   PLAYERS SECTION
+   ============================================================================ */
+
+.players-section {
+    margin-bottom: 20px;
+}
+
+.players-section h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.players-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.player-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s;
+}
+
+.player-item:hover {
+    border-color: #6366f1;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+}
+
+.player-status {
+    font-size: 10px;
+    color: #10b981;
+}
+
+.player-item.offline .player-status {
+    color: #9ca3af;
+}
+
+.player-name {
+    flex: 1;
+    font-size: 14px;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+.host-badge {
+    font-size: 16px;
+}
+
+/* ============================================================================
+   LEADERBOARD SECTION
+   ============================================================================ */
+
+.leaderboard-section {
+    margin-bottom: 20px;
+}
+
+.leaderboard-section h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.leaderboard {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s;
+}
+
+.leaderboard-item.rank-1 {
+    background: linear-gradient(135deg, #ffd700 10%, #fff 10%);
+    border-color: #ffd700;
+}
+
+.leaderboard-item.rank-2 {
+    background: linear-gradient(135deg, #c0c0c0 10%, #fff 10%);
+    border-color: #c0c0c0;
+}
+
+.leaderboard-item.rank-3 {
+    background: linear-gradient(135deg, #cd7f32 10%, #fff 10%);
+    border-color: #cd7f32;
+}
+
+.leaderboard-item .rank {
+    font-size: 16px;
+    font-weight: 700;
+    color: #6366f1;
+    min-width: 30px;
+}
+
+.leaderboard-item .player-name {
+    flex: 1;
+    font-size: 14px;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+.leaderboard-item .score {
+    font-size: 16px;
+    font-weight: 700;
+    color: #059669;
+}
+
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Quicksand', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.room-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ============================================================================
+   LOADING & ERROR
+   ============================================================================ */
+
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 16px;
+}
+
+.loading-indicator.hidden {
+    display: none;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-indicator p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.error-message {
+    padding: 12px 16px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #dc2626;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.error-message.hidden {
+    display: none;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    color: #dc2626;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.btn-close:hover {
+    background: rgba(220, 38, 38, 0.1);
+}
+
+/* ============================================================================
+   SCROLLBAR
+   ============================================================================ */
+
+.multiplayer-content::-webkit-scrollbar,
+.players-list::-webkit-scrollbar,
+.leaderboard::-webkit-scrollbar {
+    width: 6px;
+}
+
+.multiplayer-content::-webkit-scrollbar-track,
+.players-list::-webkit-scrollbar-track,
+.leaderboard::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+}
+
+.multiplayer-content::-webkit-scrollbar-thumb,
+.players-list::-webkit-scrollbar-thumb,
+.leaderboard::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+.multiplayer-content::-webkit-scrollbar-thumb:hover,
+.players-list::-webkit-scrollbar-thumb:hover,
+.leaderboard::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .multiplayer-panel {
+        right: 10px;
+        width: 280px;
+        top: 70px;
+    }
+    
+    .multiplayer-content {
+        max-height: calc(100vh - 150px);
+    }
+}

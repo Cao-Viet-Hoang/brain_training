@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Room - Brain Training</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧠</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/room-lobby.css">
+</head>
+<body>
+    <div class="container">
+        <header class="game-header" style="display: block; text-align: center;">
+            <h1>🎮 Multiplayer Room</h1>
+            <a href="index.html" class="back-btn" style="font-size: 0.85rem; margin-top: 0.5rem; padding: 0.4rem 0.8rem;">← Back to Home</a>
+        </header>
+
+        <!-- Lobby Screen -->
+        <div class="room-screen" id="lobbyScreen">
+                <div class="welcome-section">
+                    <h2>Welcome to Multiplayer!</h2>
+                    <p>Create a room or join an existing one to play with friends</p>
+                </div>
+
+                <div class="lobby-actions">
+                    <button class="btn btn-primary btn-large" id="createRoomBtn">
+                        <span class="btn-icon">➕</span>
+                        Create New Room
+                    </button>
+                    
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+                    
+                    <div class="join-room-section">
+                        <h3>Join Existing Room</h3>
+                        <div class="join-room-form">
+                            <input 
+                                type="text" 
+                                id="roomIdInput" 
+                                placeholder="Enter Room ID (e.g. ABC123)" 
+                                maxlength="8"
+                            />
+                            <button class="btn btn-secondary btn-large" id="joinRoomBtn">
+                                Join Room
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Screen -->
+            <div class="room-screen hidden" id="roomScreen">
+                <div class="room-header">
+                    <div class="room-info-card">
+                        <div class="room-id-section">
+                            <span class="label">Room ID:</span>
+                            <span class="room-id" id="displayRoomId">------</span>
+                            <button class="btn-icon" id="copyRoomIdBtn" title="Copy Room ID">📋</button>
+                        </div>
+                        <div class="room-status-section">
+                            <span class="status-indicator" id="statusIndicator"></span>
+                            <span id="statusText">Lobby</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Selection (Only visible in lobby status and for host) -->
+                <div class="game-selection-section" id="gameSelectionSection">
+                    <h3>Select a Game</h3>
+                    <p class="section-description">Choose which game to play</p>
+                    <div class="games-grid" id="gamesGrid">
+                        <!-- Games will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Game Config Section (Only visible after game selected) -->
+                <div class="game-config-section hidden" id="gameConfigSection">
+                    <div class="selected-game-info">
+                        <span class="game-icon-large" id="selectedGameIcon"></span>
+                        <div>
+                            <h3 id="selectedGameTitle">Game Name</h3>
+                            <p id="selectedGameDescription">Game description</p>
+                        </div>
+                    </div>
+                    <div id="gameConfigContainer">
+                        <!-- Game-specific config will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Players Section -->
+                <div class="players-section">
+                    <h3>Players (<span id="playerCount">0</span>)</h3>
+                    <div class="players-list" id="playersList">
+                        <!-- Players will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Leaderboard Section -->
+                <div class="leaderboard-section hidden" id="leaderboardSection">
+                    <h3>🏆 Leaderboard</h3>
+                    <div class="leaderboard" id="leaderboard">
+                        <!-- Scores will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Room Actions -->
+                <div class="room-actions">
+                    <button class="btn btn-success btn-large hidden" id="startGameBtn">
+                        ▶️ Start Game
+                    </button>
+                    <button class="btn btn-danger hidden" id="endRoomBtn">
+                        🛑 End Room
+                    </button>
+                    <button class="btn btn-secondary" id="leaveRoomBtn">
+                        ← Leave Room
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div class="loading-overlay hidden" id="loadingIndicator">
+                <div class="loading-spinner"></div>
+                <p id="loadingText">Loading...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-toast hidden" id="errorMessage">
+                <span id="errorText"></span>
+                <button class="btn-close" id="closeErrorBtn">×</button>
+            </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="shared/firebaseConfig.js"></script>
+    <script src="shared/firebaseClient.js"></script>
+    <script src="shared/roomClient.js"></script>
+    
+    <!-- Room Lobby Script -->
+    <script src="js/room-lobby.js"></script>
+</body>
+</html>
