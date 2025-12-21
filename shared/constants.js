@@ -8,7 +8,8 @@ const MP_CONSTANTS = {
         GENERATING: 'generating',
         READY: 'ready',
         PLAYING: 'playing',
-        FINISHED: 'finished'
+        FINISHED: 'finished',
+        CLOSED: 'closed'
     },
 
     // Player statuses

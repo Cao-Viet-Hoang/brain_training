@@ -58,6 +58,24 @@ class MultiplayerCore {
             throw new Error('Firebase database not initialized. Please check firebase-config.js');
         }
 
+        // Validate player name
+        if (typeof RoomValidator !== 'undefined') {
+            const nameValidation = RoomValidator.validatePlayerName(playerName);
+            if (!nameValidation.valid) {
+                throw new Error(nameValidation.error);
+            }
+            playerName = nameValidation.name;
+        }
+
+        // Validate config
+        if (typeof RoomValidator !== 'undefined' && config) {
+            const configValidation = RoomValidator.validateRoomConfig(config);
+            if (!configValidation.valid) {
+                throw new Error(configValidation.error);
+            }
+            config = configValidation.config;
+        }
+
         await this.initAuth();
         this.playerName = playerName;
 
@@ -106,6 +124,7 @@ class MultiplayerCore {
         this.isHost = true;
         this.setupRoomListeners();
         this.setupDisconnectHandler();
+        this.startHeartbeat();
 
         console.log('✅ Room created:', roomCode);
         return roomCode;
@@ -114,6 +133,24 @@ class MultiplayerCore {
     async joinRoom(roomCode, playerName) {
         if (!database) {
             throw new Error('Firebase database not initialized. Please check firebase-config.js');
+        }
+
+        // Validate room code
+        if (typeof RoomValidator !== 'undefined') {
+            const codeValidation = RoomValidator.validateRoomCode(roomCode);
+            if (!codeValidation.valid) {
+                throw new Error(codeValidation.error);
+            }
+            roomCode = codeValidation.code;
+        }
+
+        // Validate player name
+        if (typeof RoomValidator !== 'undefined') {
+            const nameValidation = RoomValidator.validatePlayerName(playerName);
+            if (!nameValidation.valid) {
+                throw new Error(nameValidation.error);
+            }
+            playerName = nameValidation.name;
         }
 
         await this.initAuth();
@@ -128,19 +165,31 @@ class MultiplayerCore {
 
         const roomData = snapshot.val();
 
-        // Validations
-        if (roomData.meta.status !== MP_CONSTANTS.ROOM_STATUS.WAITING) {
-            throw new Error('Game already in progress');
-        }
+        // Use RoomValidator for comprehensive validation
+        if (typeof RoomValidator !== 'undefined') {
+            const joinValidation = RoomValidator.canJoinRoom(roomData);
+            if (!joinValidation.canJoin) {
+                throw new Error(joinValidation.error);
+            }
 
-        const playerCount = Object.keys(roomData.players || {}).length;
-        if (playerCount >= roomData.meta.maxPlayers) {
-            throw new Error('Room is full');
-        }
+            // Check if player already in room
+            if (RoomValidator.isPlayerInRoom(roomData, this.playerId)) {
+                throw new Error('You are already in this room');
+            }
+        } else {
+            // Fallback validations
+            if (roomData.meta.status !== MP_CONSTANTS.ROOM_STATUS.WAITING) {
+                throw new Error('Game already in progress');
+            }
 
-        // Check if already in room
-        if (roomData.players[this.playerId]) {
-            throw new Error('You are already in this room');
+            const playerCount = Object.keys(roomData.players || {}).length;
+            if (playerCount >= roomData.meta.maxPlayers) {
+                throw new Error('Room is full');
+            }
+
+            if (roomData.players[this.playerId]) {
+                throw new Error('You are already in this room');
+            }
         }
 
         // Add player
@@ -158,6 +207,7 @@ class MultiplayerCore {
         this.isHost = false;
         this.setupRoomListeners();
         this.setupDisconnectHandler();
+        this.startHeartbeat();
 
         console.log('✅ Joined room:', roomCode);
         return roomData;
@@ -171,25 +221,26 @@ class MultiplayerCore {
 
         console.log('👋 Leaving room:', this.roomId);
 
-        // Remove player
-        await this.roomRef.child(`players/${this.playerId}`).remove();
+        // Stop heartbeat
+        this.stopHeartbeat();
 
-        // If host, handle host transfer or room deletion
+        // If host leaves, delete the entire room and kick all players
         if (this.isHost) {
-            const playersSnap = await this.roomRef.child('players').once('value');
-            const players = playersSnap.val();
-
-            if (!players || Object.keys(players).length === 0) {
-                // Delete empty room
-                console.log('🗑️ Deleting empty room');
-                await this.roomRef.remove();
-            } else {
-                // Transfer host to first remaining player
-                const newHostId = Object.keys(players)[0];
-                console.log('👑 Transferring host to:', newHostId);
-                await this.roomRef.child('meta/hostId').set(newHostId);
-                await this.roomRef.child(`players/${newHostId}/isHost`).set(true);
-            }
+            console.log('👑 Host is leaving - closing room for all players');
+            
+            // Set room status to closed to notify other players
+            await this.roomRef.child('meta/status').set('closed');
+            await this.roomRef.child('meta/closedReason').set('Host left the room');
+            
+            // Give a moment for other clients to receive the status change
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Delete the entire room
+            console.log('🗑️ Deleting room:', this.roomId);
+            await this.roomRef.remove();
+        } else {
+            // Non-host just removes themselves
+            await this.roomRef.child(`players/${this.playerId}`).remove();
         }
 
         this.cleanup();
@@ -272,6 +323,13 @@ class MultiplayerCore {
         this.listeners.status = this.roomRef.child('meta/status').on('value', (snapshot) => {
             const status = snapshot.val();
             console.log('📡 Status updated:', status);
+            
+            // Handle room closed by host
+            if (status === 'closed') {
+                console.log('🚪 Room closed by host');
+                this.callbacks.onRoomClosed?.();
+            }
+            
             this.callbacks.onStatusChange?.(status);
         });
 
@@ -372,6 +430,245 @@ class MultiplayerCore {
     
     onGameStateChange(callback) { 
         this.callbacks.onGameStateChange = callback; 
+    }
+
+    onRoomClosed(callback) {
+        this.callbacks.onRoomClosed = callback;
+    }
+
+    // ==================== ENHANCED ROOM MANAGEMENT ====================
+
+    /**
+     * Kick a player from the room (host only)
+     */
+    async kickPlayer(playerId) {
+        if (!this.roomRef || !this.isHost) {
+            throw new Error('Only host can kick players');
+        }
+
+        if (playerId === this.playerId) {
+            throw new Error('Cannot kick yourself');
+        }
+
+        await this.roomRef.child(`players/${playerId}`).remove();
+        console.log('👢 Kicked player:', playerId);
+    }
+
+    /**
+     * Transfer host to another player
+     */
+    async transferHost(newHostId) {
+        if (!this.roomRef || !this.isHost) {
+            throw new Error('Only host can transfer host role');
+        }
+
+        if (newHostId === this.playerId) {
+            throw new Error('You are already the host');
+        }
+
+        const playerSnapshot = await this.roomRef.child(`players/${newHostId}`).once('value');
+        if (!playerSnapshot.exists()) {
+            throw new Error('Player not found in room');
+        }
+
+        // Update host flags
+        await this.roomRef.child(`players/${this.playerId}/isHost`).set(false);
+        await this.roomRef.child(`players/${newHostId}/isHost`).set(true);
+        await this.roomRef.child('meta/hostId').set(newHostId);
+
+        this.isHost = false;
+        console.log('👑 Transferred host to:', newHostId);
+    }
+
+    /**
+     * Update room settings (host only)
+     */
+    async updateRoomSettings(settings) {
+        if (!this.roomRef || !this.isHost) {
+            throw new Error('Only host can update room settings');
+        }
+
+        const updates = {};
+        if (settings.maxPlayers !== undefined) {
+            updates['meta/maxPlayers'] = settings.maxPlayers;
+        }
+        if (settings.config !== undefined) {
+            updates['meta/config'] = settings.config;
+        }
+
+        await this.roomRef.update(updates);
+        console.log('⚙️ Updated room settings:', settings);
+    }
+
+    /**
+     * Get current room data
+     */
+    async getRoomData() {
+        if (!this.roomRef) {
+            throw new Error('Not in a room');
+        }
+
+        const snapshot = await this.roomRef.once('value');
+        return snapshot.val();
+    }
+
+    /**
+     * Get player list
+     */
+    async getPlayers() {
+        if (!this.roomRef) {
+            throw new Error('Not in a room');
+        }
+
+        const snapshot = await this.roomRef.child('players').once('value');
+        return snapshot.val() || {};
+    }
+
+    /**
+     * Update player's last seen timestamp
+     */
+    async updateLastSeen() {
+        if (!this.roomRef) {
+            return;
+        }
+
+        await this.roomRef.child(`players/${this.playerId}/lastSeen`)
+            .set(firebase.database.ServerValue.TIMESTAMP);
+    }
+
+    /**
+     * Start heartbeat to keep player active
+     */
+    startHeartbeat(intervalMs = 30000) {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+        }
+
+        this.heartbeatInterval = setInterval(() => {
+            this.updateLastSeen().catch(err => {
+                console.error('❌ Heartbeat error:', err);
+            });
+        }, intervalMs);
+
+        console.log('💓 Started heartbeat');
+    }
+
+    /**
+     * Stop heartbeat
+     */
+    stopHeartbeat() {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+            this.heartbeatInterval = null;
+            console.log('💔 Stopped heartbeat');
+        }
+    }
+
+    /**
+     * Send chat message (if implemented)
+     */
+    async sendMessage(message) {
+        if (!this.roomRef) {
+            throw new Error('Not in a room');
+        }
+
+        const messageData = {
+            playerId: this.playerId,
+            playerName: this.playerName,
+            message: message,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        await this.roomRef.child('messages').push(messageData);
+        console.log('💬 Sent message');
+    }
+
+    /**
+     * Listen for chat messages
+     */
+    listenToMessages(callback) {
+        if (!this.roomRef) {
+            return;
+        }
+
+        this.listeners.messages = this.roomRef.child('messages')
+            .limitToLast(50)
+            .on('child_added', (snapshot) => {
+                callback(snapshot.val());
+            });
+    }
+
+    /**
+     * Validate room before joining
+     */
+    async validateRoomForJoin(roomCode) {
+        const roomRef = database.ref(`rooms/${roomCode}`);
+        const snapshot = await roomRef.once('value');
+
+        if (!snapshot.exists()) {
+            return { valid: false, error: 'Room not found' };
+        }
+
+        const roomData = snapshot.val();
+
+        // Use RoomValidator if available
+        if (typeof RoomValidator !== 'undefined') {
+            return RoomValidator.canJoinRoom(roomData);
+        }
+
+        // Fallback validation
+        if (roomData.meta.status !== MP_CONSTANTS.ROOM_STATUS.WAITING) {
+            return { valid: false, error: 'Game already started' };
+        }
+
+        const playerCount = Object.keys(roomData.players || {}).length;
+        if (playerCount >= roomData.meta.maxPlayers) {
+            return { valid: false, error: 'Room is full' };
+        }
+
+        return { valid: true, roomData };
+    }
+
+    /**
+     * Get room list (for lobby browser feature)
+     */
+    async getAvailableRooms(gameType = null) {
+        if (!database) {
+            throw new Error('Database not initialized');
+        }
+
+        const snapshot = await database.ref('rooms').once('value');
+        const allRooms = snapshot.val() || {};
+
+        const availableRooms = [];
+        for (const [roomId, roomData] of Object.entries(allRooms)) {
+            // Filter by game type if specified
+            if (gameType && roomData.meta.gameType !== gameType) {
+                continue;
+            }
+
+            // Only show waiting rooms
+            if (roomData.meta.status !== MP_CONSTANTS.ROOM_STATUS.WAITING) {
+                continue;
+            }
+
+            // Check if not full
+            const playerCount = Object.keys(roomData.players || {}).length;
+            if (playerCount >= roomData.meta.maxPlayers) {
+                continue;
+            }
+
+            availableRooms.push({
+                roomId,
+                gameType: roomData.meta.gameType,
+                playerCount,
+                maxPlayers: roomData.meta.maxPlayers,
+                hostName: roomData.players[roomData.meta.hostId]?.name || 'Unknown',
+                createdAt: roomData.meta.createdAt
+            });
+        }
+
+        return availableRooms;
     }
 }
 

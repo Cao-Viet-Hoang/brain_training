@@ -99,6 +99,7 @@ const games = [
 document.addEventListener('DOMContentLoaded', () => {
     initializeGames();
     initializeMultiplayer();
+    initializeRoomCleanup();
 });
 
 // Create game cards
@@ -109,6 +110,15 @@ function initializeGames() {
         const gameCard = createGameCard(game);
         gamesGrid.appendChild(gameCard);
     });
+}
+
+// Initialize room cleanup
+function initializeRoomCleanup() {
+    if (typeof roomCleanup !== 'undefined') {
+        // Start automatic cleanup (runs every 5 minutes)
+        roomCleanup.startAutoCleanup();
+        console.log('✅ Room cleanup service started');
+    }
 }
 
 // Initialize multiplayer UI
@@ -166,6 +176,14 @@ function initializeMultiplayer() {
             // Listen for player changes
             mpCore.onPlayersChange((updatedPlayers) => {
                 mpUI.updatePlayers(updatedPlayers);
+            });
+            
+            // Listen for room closed event
+            mpCore.onRoomClosed(() => {
+                console.log('⚠️ Room closed by host');
+                mpUI.reset();
+                alert('The host has left and closed the room. You have been disconnected.');
+                mpUI.renderMenuView();
             });
             
         } catch (error) {
