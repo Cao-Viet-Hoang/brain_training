@@ -25,10 +25,11 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
      */
     async initAsHost(roomId) {
         console.log('[MathGameAdapter] Initializing as HOST for room:', roomId);
-        
+
         this.multiplayerState.isMultiplayerMode = true;
         this.multiplayerState.role = 'host';
-        
+        this.isMultiplayerMode = true; // Set base class flag
+
         // Initialize core and UI without container (we're in game page)
         await this.init(null, roomId);
         
@@ -52,10 +53,11 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
      */
     async initAsPlayer(roomId) {
         console.log('[MathGameAdapter] Initializing as PLAYER for room:', roomId);
-        
+
         this.multiplayerState.isMultiplayerMode = true;
         this.multiplayerState.role = 'player';
-        
+        this.isMultiplayerMode = true; // Set base class flag
+
         // Initialize core and UI without container
         await this.init(null, roomId);
         
@@ -299,7 +301,10 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
      */
     startMultiplayerGame(gameData) {
         console.log('[MathGameAdapter] Starting multiplayer game with shared questions');
-        
+
+        // Set game start time for tracking
+        this.setGameStartTime();
+
         // Load questions into game
         this.game.gameState.questions = gameData.questions.map(q => ({
             numbers: q.numbers,
@@ -309,10 +314,10 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
             isCorrect: null,
             timeSpent: 0
         }));
-        
+
         // Set config from shared data
         this.game.config = gameData.config;
-        
+
         // Reset other game state
         this.game.gameState.currentQuestionIndex = 0;
         this.game.gameState.correctCount = 0;
@@ -323,22 +328,22 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
         this.game.gameState.maxStreak = 0;
         this.game.gameState.recentAnswers = [];
         this.game.gameState.wrongStreak = 0;
-        
+
         // Show game screen
         this.game.showScreen('game');
-        
+
         // Display first question
         this.game.displayQuestion();
-        
+
         // Start timer
         this.game.startTimer();
-        
+
         // Update progress
         this.game.updateProgress();
-        
+
         // Show initial tip
         this.game.updateTip();
-        
+
         console.log('[MathGameAdapter] Game started with', gameData.questions.length, 'questions');
     }
 
@@ -392,19 +397,32 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
      */
     async onMultiplayerGameEnd() {
         console.log('[MathGameAdapter] Multiplayer game ended');
-        
+
         // Sync final score
         const finalScore = this.getCurrentScore();
         await this.syncScore(finalScore.correct);
-        
-        // End multiplayer game
+
+        // Calculate accuracy
+        const totalQuestions = finalScore.correct + finalScore.wrong;
+        const accuracy = totalQuestions > 0
+            ? Math.round((finalScore.correct / totalQuestions) * 100)
+            : 0;
+
+        // End multiplayer game with detailed results
         await this.endMultiplayerGame({
+            score: finalScore.correct,
             correct: finalScore.correct,
             wrong: finalScore.wrong,
-            streak: finalScore.streak,
-            accuracy: Math.round((finalScore.correct / (finalScore.correct + finalScore.wrong)) * 100)
+            streak: this.game.gameState.maxStreak || finalScore.streak,
+            accuracy: accuracy,
+            details: {
+                correct: finalScore.correct,
+                wrong: finalScore.wrong,
+                streak: this.game.gameState.maxStreak || finalScore.streak,
+                accuracy: accuracy
+            }
         });
-        
+
         console.log('[MathGameAdapter] Final scores synced');
     }
 

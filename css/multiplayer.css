@@ -721,3 +721,326 @@
         left: 20px;
     }
 }
+
+/* ========================================
+   MULTIPLAYER RESULT MODAL
+   ======================================== */
+.mp-result-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 10001;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.mp-result-modal.active {
+    display: flex;
+}
+
+.mp-result-modal-content {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 500px;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.4s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Result Modal Header */
+.mp-result-header {
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #4a90a4, #3a7a8a);
+    color: white;
+    text-align: center;
+}
+
+.mp-result-header h2 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.mp-result-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.mp-result-status.complete {
+    opacity: 1;
+}
+
+.mp-waiting-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ffd93d;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.mp-complete-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #70b088;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* Result Modal Body */
+.mp-result-body {
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+    background: var(--secondary-color);
+}
+
+.mp-result-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Result Item */
+.mp-result-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--card-bg);
+    border-radius: var(--radius-md);
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.mp-result-item.is-you {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.2);
+}
+
+.mp-result-item.gold {
+    background: linear-gradient(135deg, #fff9e6, #fff3cd);
+    border-color: #ffd700;
+}
+
+.mp-result-item.silver {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-color: #c0c0c0;
+}
+
+.mp-result-item.bronze {
+    background: linear-gradient(135deg, #fff5f0, #ffe8d6);
+    border-color: #cd7f32;
+}
+
+.mp-result-item.waiting {
+    opacity: 0.7;
+}
+
+/* Rank */
+.mp-result-rank {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.mp-result-item.gold .mp-result-rank,
+.mp-result-item.silver .mp-result-rank,
+.mp-result-item.bronze .mp-result-rank {
+    font-size: 1.75rem;
+}
+
+/* Waiting Spinner */
+.mp-waiting-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Player Info */
+.mp-result-player-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mp-result-player-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.mp-result-player-name .host-badge {
+    font-size: 0.9rem;
+}
+
+.mp-result-player-name .you-badge {
+    font-size: 0.65rem;
+    background: var(--primary-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.mp-result-player-details {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mp-result-player-details .detail-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.mp-result-player-details .waiting-text {
+    font-style: italic;
+}
+
+/* Score */
+.mp-result-score {
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.mp-result-score .score-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.mp-result-score .score-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Kick Button */
+.mp-kick-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    background: transparent;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.mp-kick-btn:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+/* Result Modal Footer */
+.mp-result-footer {
+    padding: 1rem 1.5rem;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.75rem;
+}
+
+.mp-result-footer button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.mp-result-footer .btn-icon {
+    font-size: 1.1rem;
+}
+
+.mp-btn-exit {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.mp-btn-exit:hover {
+    background: #3a7a8a;
+    transform: translateY(-2px);
+}
+
+/* Result Modal Responsive */
+@media (max-width: 768px) {
+    .mp-result-modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .mp-result-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .mp-result-item {
+        padding: 0.75rem;
+        gap: 0.75rem;
+    }
+
+    .mp-result-rank {
+        width: 32px;
+        height: 32px;
+        font-size: 1.25rem;
+    }
+
+    .mp-result-score .score-value {
+        font-size: 1.25rem;
+    }
+
+    .mp-result-footer {
+        flex-direction: column;
+    }
+
+    .mp-result-footer button {
+        padding: 0.75rem;
+    }
+}

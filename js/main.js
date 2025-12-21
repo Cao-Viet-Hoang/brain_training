@@ -122,10 +122,10 @@ function initializeRoomCleanup() {
 }
 
 // Initialize multiplayer UI
-function initializeMultiplayer() {
+async function initializeMultiplayer() {
     const mpUI = new MultiplayerUI('multiplayerContainer');
     const mpCore = new MultiplayerCore();
-    
+
     // Set up callbacks
     mpUI.onCreateRoom(async (playerName, gameType, gameConfig) => {
         console.log('Create room requested:', playerName, 'Game:', gameType, gameConfig);

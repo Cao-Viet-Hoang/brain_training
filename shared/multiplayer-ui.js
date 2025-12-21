@@ -369,14 +369,15 @@ class MultiplayerUI {
             const isYou = id === currentPlayerId;
             const isReady = player.isReady;
             const isHost = player.isHost;
+            const playerName = player.name || `Player_${id.substring(0, 6)}`;
 
             return `
                 <div class="mp-player-item ${isYou ? 'is-you' : ''} ${isReady ? 'is-ready' : ''}"
                      data-player-id="${id}">
                     <div class="mp-player-info">
-                        <div class="mp-player-avatar">${player.name.charAt(0).toUpperCase()}</div>
+                        <div class="mp-player-avatar">${playerName.charAt(0).toUpperCase()}</div>
                         <span class="mp-player-name">
-                            ${player.name}
+                            ${playerName}
                             ${isHost ? '<span class="host-badge">👑</span>' : ''}
                             ${isYou ? '<span class="you-badge">YOU</span>' : ''}
                         </span>

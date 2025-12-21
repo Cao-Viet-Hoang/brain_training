@@ -31,6 +31,7 @@ class WordRecallMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.multiplayerState.isMultiplayerMode = true;
         this.multiplayerState.role = 'host';
+        this.isMultiplayerMode = true; // Set base class flag
 
         await this.init(null, roomId);
 
@@ -52,6 +53,7 @@ class WordRecallMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.multiplayerState.isMultiplayerMode = true;
         this.multiplayerState.role = 'player';
+        this.isMultiplayerMode = true; // Set base class flag
 
         await this.init(null, roomId);
 
@@ -279,6 +281,9 @@ class WordRecallMultiplayerAdapter extends MultiplayerGameAdapter {
     startMultiplayerGame(gameData) {
         console.log('[WordRecallAdapter] Starting multiplayer game with shared data');
 
+        // Set game start time for tracking
+        this.setGameStartTime();
+
         // Set config
         Object.assign(this.engine.config, gameData.config);
 
@@ -403,10 +408,11 @@ class WordRecallMultiplayerAdapter extends MultiplayerGameAdapter {
 
         await this.endMultiplayerGame({
             score: finalScore.score,
-            hits: finalScore.hits,
-            misses: finalScore.misses,
-            falseAlarms: finalScore.falseAlarms,
-            accuracy: accuracy
+            accuracy: accuracy,
+            details: {
+                accuracy: accuracy,
+                correct: finalScore.hits
+            }
         });
 
         console.log('[WordRecallAdapter] Final scores synced');

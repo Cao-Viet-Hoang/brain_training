@@ -8,8 +8,10 @@ class MultiplayerGameAdapter {
         this.gameType = gameType;
         this.core = new MultiplayerCore();
         this.ui = null;
+        this.resultModal = null;
         this.isMultiplayerMode = false;
         this.currentRoomData = null;
+        this.gameStartTime = null;
     }
 
     // ==================== INITIALIZATION ====================
@@ -349,28 +351,134 @@ class MultiplayerGameAdapter {
     }
 
     /**
-     * End multiplayer game
+     * End multiplayer game and show results modal
      */
     async endMultiplayerGame(results) {
         if (!this.isMultiplayerMode) return;
 
         try {
-            // Update final score
+            // Calculate total time if game tracks it
+            const totalTime = this.gameStartTime ? Date.now() - this.gameStartTime : null;
+
+            // Prepare result data
+            const resultData = {
+                score: results.score || 0,
+                time: results.time !== undefined ? results.time : totalTime,
+                details: {
+                    accuracy: results.accuracy,
+                    correct: results.correct,
+                    wrong: results.wrong,
+                    streak: results.streak,
+                    ...results.details
+                }
+            };
+
+            // Initialize and show result modal
+            this.showResultModal(resultData);
+
+            // Update final score in players node
             await this.core.updatePlayerState({
                 score: results.score,
                 finished: true,
                 finishedAt: Date.now()
             });
 
-            // Host updates room status
-            if (this.core.isRoomHost()) {
-                await this.core.setRoomStatus(MP_CONSTANTS.ROOM_STATUS.FINISHED);
-            }
-
             console.log('🏁 Game ended:', results);
         } catch (error) {
             console.error('❌ Failed to end game:', error);
         }
+    }
+
+    /**
+     * Initialize and show the result modal
+     */
+    showResultModal(resultData) {
+        // Create result modal if it doesn't exist
+        if (!this.resultModal) {
+            this.resultModal = new MultiplayerResultModal();
+            this.resultModal.init({
+                playerId: this.core.getPlayerId(),
+                roomRef: this.core.roomRef,
+                gameType: this.gameType,
+                isHost: this.core.isRoomHost()
+            });
+
+            // Setup callbacks
+            this.resultModal.setOnExitRoom(() => this.handleExitRoom());
+            this.resultModal.setOnKickPlayer((playerId) => this.handleKickPlayer(playerId));
+        }
+
+        // Submit result and show modal
+        this.resultModal.submitResult(resultData);
+        this.resultModal.show();
+    }
+
+    /**
+     * Handle exit room action
+     */
+    async handleExitRoom() {
+        console.log('[MultiplayerAdapter] Exiting room...');
+
+        try {
+            // Hide result modal first
+            if (this.resultModal) {
+                this.resultModal.destroy();
+                this.resultModal = null;
+            }
+
+            // Cancel disconnect handler BEFORE cleanup to prevent Firebase from removing player
+            // This keeps the results visible for other players
+            this.core.cancelDisconnectHandler();
+
+            // Stop heartbeat and cleanup listeners without removing player from room
+            this.core.stopHeartbeat();
+            this.core.cleanup();
+
+            // Clear all multiplayer session storage
+            sessionStorage.removeItem('multiplayerRoomId');
+            sessionStorage.removeItem('multiplayerRole');
+            sessionStorage.removeItem('multiplayerReturnToLobby');
+            sessionStorage.removeItem('multiplayerPlayerName');
+
+            // Navigate to home
+            window.location.href = '../index.html';
+        } catch (error) {
+            console.error('[MultiplayerAdapter] Failed to exit room:', error);
+            alert('Failed to exit room: ' + error.message);
+        }
+    }
+
+    /**
+     * Handle kick player action (host only)
+     */
+    async handleKickPlayer(playerId) {
+        console.log('[MultiplayerAdapter] Kicking player:', playerId);
+
+        try {
+            if (!this.core.isRoomHost()) {
+                console.warn('Only host can kick players');
+                return;
+            }
+
+            // Remove player from room
+            await this.core.kickPlayer(playerId);
+
+            // Remove their results
+            if (this.core.roomRef) {
+                await this.core.roomRef.child(`results/${playerId}`).remove();
+            }
+
+            console.log('[MultiplayerAdapter] Player kicked successfully');
+        } catch (error) {
+            console.error('[MultiplayerAdapter] Failed to kick player:', error);
+        }
+    }
+
+    /**
+     * Set the game start time for tracking total duration
+     */
+    setGameStartTime() {
+        this.gameStartTime = Date.now();
     }
 
     // ==================== GAME LIFECYCLE HOOKS ====================

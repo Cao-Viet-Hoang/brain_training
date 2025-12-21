@@ -27,6 +27,7 @@ class ExpressionPuzzleMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.multiplayerState.isMultiplayerMode = true;
         this.multiplayerState.role = 'host';
+        this.isMultiplayerMode = true; // Set base class flag
 
         await this.init(null, roomId);
 
@@ -48,6 +49,7 @@ class ExpressionPuzzleMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.multiplayerState.isMultiplayerMode = true;
         this.multiplayerState.role = 'player';
+        this.isMultiplayerMode = true; // Set base class flag
 
         await this.init(null, roomId);
 
@@ -248,6 +250,9 @@ class ExpressionPuzzleMultiplayerAdapter extends MultiplayerGameAdapter {
     startMultiplayerGame(gameData) {
         console.log('[ExpressionPuzzleAdapter] Starting multiplayer game with shared data');
 
+        // Set game start time for tracking
+        this.setGameStartTime();
+
         // Set game state from shared data
         this.game.puzzleCount = gameData.config.puzzleCount;
         this.game.timePerPuzzle = gameData.config.timePerPuzzle;
@@ -328,11 +333,22 @@ class ExpressionPuzzleMultiplayerAdapter extends MultiplayerGameAdapter {
         const finalScore = this.getCurrentScore();
         await this.syncScore(finalScore.score);
 
+        const accuracy = finalScore.totalPuzzles > 0
+            ? Math.round((finalScore.score / finalScore.totalPuzzles) * 100)
+            : 0;
+
+        // Calculate total time spent
+        const totalTime = this.game.startTime ? Date.now() - this.game.startTime : null;
+
         await this.endMultiplayerGame({
             score: finalScore.score,
-            currentPuzzle: finalScore.currentPuzzle,
-            totalPuzzles: finalScore.totalPuzzles,
-            accuracy: Math.round((finalScore.score / finalScore.totalPuzzles) * 100)
+            time: totalTime,
+            accuracy: accuracy,
+            details: {
+                correct: finalScore.score,
+                accuracy: accuracy,
+                totalPuzzles: finalScore.totalPuzzles
+            }
         });
 
         console.log('[ExpressionPuzzleAdapter] Final scores synced');

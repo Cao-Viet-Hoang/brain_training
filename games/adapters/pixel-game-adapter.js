@@ -27,6 +27,7 @@ class PixelGameMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.multiplayerState.isMultiplayerMode = true;
         this.multiplayerState.role = 'host';
+        this.isMultiplayerMode = true; // Set base class flag
 
         // Initialize core without container (we're in game page)
         await this.init(null, roomId);
@@ -53,6 +54,7 @@ class PixelGameMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.multiplayerState.isMultiplayerMode = true;
         this.multiplayerState.role = 'player';
+        this.isMultiplayerMode = true; // Set base class flag
 
         // Initialize core without container
         await this.init(null, roomId);
@@ -279,6 +281,9 @@ class PixelGameMultiplayerAdapter extends MultiplayerGameAdapter {
     startMultiplayerGame(gameData) {
         console.log('[PixelGameAdapter] Starting multiplayer game with shared data');
 
+        // Set game start time for tracking
+        this.setGameStartTime();
+
         // Set config from shared data
         this.game.config = gameData.config;
 
@@ -372,13 +377,20 @@ class PixelGameMultiplayerAdapter extends MultiplayerGameAdapter {
         const finalScore = this.getCurrentScore();
         await this.syncScore(finalScore.score);
 
+        // Calculate accuracy
+        const total = finalScore.correct + finalScore.wrong;
+        const accuracy = total > 0 ? Math.round((finalScore.correct / total) * 100) : 0;
+
         // End multiplayer game
         await this.endMultiplayerGame({
             score: finalScore.score,
-            correct: finalScore.correct,
-            wrong: finalScore.wrong,
-            completedTargets: finalScore.completedTargets,
-            totalTargets: finalScore.totalTargets
+            accuracy: accuracy,
+            details: {
+                correct: finalScore.correct,
+                accuracy: accuracy,
+                completedTargets: finalScore.completedTargets,
+                totalTargets: finalScore.totalTargets
+            }
         });
 
         console.log('[PixelGameAdapter] Final scores synced');

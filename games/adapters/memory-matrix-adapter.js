@@ -31,6 +31,7 @@ class MemoryMatrixMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.multiplayerState.isMultiplayerMode = true;
         this.multiplayerState.role = 'host';
+        this.isMultiplayerMode = true; // Set base class flag
 
         await this.init(null, roomId);
 
@@ -52,6 +53,7 @@ class MemoryMatrixMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.multiplayerState.isMultiplayerMode = true;
         this.multiplayerState.role = 'player';
+        this.isMultiplayerMode = true; // Set base class flag
 
         await this.init(null, roomId);
 
@@ -258,6 +260,9 @@ class MemoryMatrixMultiplayerAdapter extends MultiplayerGameAdapter {
     startMultiplayerGame(gameData) {
         console.log('[MemoryMatrixAdapter] Starting multiplayer game with shared data');
 
+        // Set game start time for tracking
+        this.setGameStartTime();
+
         // Set config
         this.engine.config.mode = gameData.config.mode;
         this.engine.config.mistakePolicy = gameData.config.mistakePolicy;
@@ -355,9 +360,10 @@ class MemoryMatrixMultiplayerAdapter extends MultiplayerGameAdapter {
 
         await this.endMultiplayerGame({
             score: finalScore.score,
-            level: finalScore.level,
-            streak: finalScore.streak,
-            bestStreak: finalScore.bestStreak
+            details: {
+                level: finalScore.level,
+                streak: finalScore.bestStreak || finalScore.streak
+            }
         });
 
         console.log('[MemoryMatrixAdapter] Final scores synced');

@@ -251,20 +251,45 @@ class MultiplayerCore {
         // Stop heartbeat
         this.stopHeartbeat();
 
-        // If host leaves, delete the entire room and kick all players
+        // If host leaves, try to transfer host to another player
         if (this.isHost) {
-            console.log('👑 Host is leaving - closing room for all players');
-            
-            // Set room status to closed to notify other players
-            await this.roomRef.child('meta/status').set('closed');
-            await this.roomRef.child('meta/closedReason').set('Host left the room');
-            
-            // Give a moment for other clients to receive the status change
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // Delete the entire room
-            console.log('🗑️ Deleting room:', this.roomId);
-            await this.roomRef.remove();
+            console.log('👑 Host is leaving - attempting to transfer host');
+
+            // Get all players
+            const playersSnapshot = await this.roomRef.child('players').once('value');
+            const players = playersSnapshot.val() || {};
+
+            // Find another player to be the new host
+            const otherPlayers = Object.keys(players).filter(id => id !== this.playerId);
+
+            if (otherPlayers.length > 0) {
+                // Transfer host to the first available player
+                const newHostId = otherPlayers[0];
+                console.log('👑 Transferring host to:', newHostId);
+
+                // Update host flags
+                await this.roomRef.child(`players/${this.playerId}/isHost`).set(false);
+                await this.roomRef.child(`players/${newHostId}/isHost`).set(true);
+                await this.roomRef.child('meta/hostId').set(newHostId);
+
+                // Remove current player
+                await this.roomRef.child(`players/${this.playerId}`).remove();
+
+                console.log('✅ Host transferred successfully');
+            } else {
+                // No other players, close the room
+                console.log('🗑️ No other players - closing room');
+
+                // Set room status to closed to notify other players
+                await this.roomRef.child('meta/status').set('closed');
+                await this.roomRef.child('meta/closedReason').set('Host left the room');
+
+                // Give a moment for other clients to receive the status change
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Delete the entire room
+                await this.roomRef.remove();
+            }
         } else {
             // Non-host just removes themselves
             await this.roomRef.child(`players/${this.playerId}`).remove();
@@ -393,6 +418,27 @@ class MultiplayerCore {
         // If host, mark room for cleanup on disconnect
         if (this.isHost) {
             this.roomRef.child('meta/hostDisconnected').onDisconnect().set(true);
+        }
+    }
+
+    /**
+     * Cancel disconnect handler to prevent player removal when navigating away
+     * Call this before intentionally leaving the page (e.g., "Back to Home")
+     */
+    cancelDisconnectHandler() {
+        if (!this.roomRef || !this.playerId) {
+            console.warn('⚠️ No room reference for canceling disconnect handler');
+            return;
+        }
+
+        console.log('🔌 Canceling disconnect handler');
+
+        // Cancel the onDisconnect for player removal
+        this.roomRef.child(`players/${this.playerId}`).onDisconnect().cancel();
+
+        // If host, also cancel the hostDisconnected flag
+        if (this.isHost) {
+            this.roomRef.child('meta/hostDisconnected').onDisconnect().cancel();
         }
     }
 

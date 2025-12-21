@@ -29,6 +29,7 @@ class DualNBackMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.multiplayerState.isMultiplayerMode = true;
         this.multiplayerState.role = 'host';
+        this.isMultiplayerMode = true; // Set base class flag
 
         await this.init(null, roomId);
 
@@ -50,6 +51,7 @@ class DualNBackMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.multiplayerState.isMultiplayerMode = true;
         this.multiplayerState.role = 'player';
+        this.isMultiplayerMode = true; // Set base class flag
 
         await this.init(null, roomId);
 
@@ -250,6 +252,9 @@ class DualNBackMultiplayerAdapter extends MultiplayerGameAdapter {
     startMultiplayerGame(gameData) {
         console.log('[DualNBackAdapter] Starting multiplayer game with shared data');
 
+        // Set game start time for tracking
+        this.setGameStartTime();
+
         // Set config
         this.game.config = gameData.config;
 
@@ -322,11 +327,20 @@ class DualNBackMultiplayerAdapter extends MultiplayerGameAdapter {
 
         const stats = this.game.analytics.calculateFinalStats();
 
+        // Calculate overall accuracy
+        const overallAccuracy = Math.round(
+            (stats.position.accuracy + stats.letter.accuracy) / 2
+        );
+
         await this.endMultiplayerGame({
             score: finalScore.score,
-            positionAccuracy: stats.position.accuracy,
-            letterAccuracy: stats.letter.accuracy,
-            dualMatchBonuses: stats.dualMatchBonuses
+            accuracy: overallAccuracy,
+            details: {
+                accuracy: overallAccuracy,
+                positionAccuracy: stats.position.accuracy,
+                letterAccuracy: stats.letter.accuracy,
+                dualMatchBonuses: stats.dualMatchBonuses
+            }
         });
 
         console.log('[DualNBackAdapter] Final scores synced');
