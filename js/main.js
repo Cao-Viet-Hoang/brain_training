@@ -114,96 +114,109 @@ function initializeGames() {
 // Initialize multiplayer UI
 function initializeMultiplayer() {
     const mpUI = new MultiplayerUI('multiplayerContainer');
+    const mpCore = new MultiplayerCore();
     
-    // Set up callbacks for testing/demo purposes
-    mpUI.onCreateRoom((playerName, gameConfig) => {
+    // Set up callbacks
+    mpUI.onCreateRoom(async (playerName, gameConfig) => {
         console.log('Create room requested:', playerName, gameConfig);
         
-        // Simulate room creation after 1 second
-        setTimeout(() => {
-            const mockRoomData = {
-                roomId: 'TEST',
-                maxPlayers: 4
-            };
+        try {
+            const roomCode = await mpCore.createRoom('generic', gameConfig, playerName);
             
-            const mockPlayers = {
-                'player1': {
-                    name: playerName,
-                    isHost: true,
-                    isReady: false
-                }
-            };
-            
-            mpUI.renderLobbyView(mockRoomData, mockPlayers, 'player1', true);
-        }, 1000);
-    });
-    
-    mpUI.onJoinRoom((roomCode, playerName) => {
-        console.log('Join room requested:', roomCode, playerName);
-        
-        // Simulate joining room after 1 second
-        setTimeout(() => {
-            const mockRoomData = {
+            // Get initial room data
+            const roomData = {
                 roomId: roomCode,
-                maxPlayers: 4
+                maxPlayers: gameConfig?.maxPlayers || MP_CONSTANTS.MAX_PLAYERS
             };
             
-            const mockPlayers = {
-                'host123': {
-                    name: 'Alice',
-                    isHost: true,
-                    isReady: false
-                },
-                'player2': {
+            const players = {
+                [mpCore.getPlayerId()]: {
                     name: playerName,
-                    isHost: false,
+                    isHost: true,
                     isReady: false
                 }
             };
             
-            mpUI.renderLobbyView(mockRoomData, mockPlayers, 'player2', false);
-        }, 1000);
-    });
-    
-    mpUI.onToggleReady((isReady) => {
-        console.log('Ready state changed:', isReady);
-        
-        // Update UI to reflect ready state
-        const mockPlayers = {
-            'host123': {
-                name: 'Alice',
-                isHost: true,
-                isReady: false
-            },
-            'player2': {
-                name: mpUI.playerName,
-                isHost: false,
-                isReady: isReady
-            }
-        };
-        
-        mpUI.updatePlayers(mockPlayers);
-    });
-    
-    mpUI.onStartGame(() => {
-        console.log('Start game requested');
-        alert('Game starting! (Demo mode - Firebase not connected yet)');
-    });
-    
-    mpUI.onLeaveRoom(() => {
-        console.log('Leave room requested');
-        if (confirm('Are you sure you want to leave the room?')) {
-            mpUI.reset();
-            mpUI.renderMenuView();
+            mpUI.renderLobbyView(roomData, players, mpCore.getPlayerId(), true);
+            
+            // Listen for player changes
+            mpCore.onPlayersChange((updatedPlayers) => {
+                mpUI.updatePlayers(updatedPlayers);
+            });
+            
+        } catch (error) {
+            console.error('Error creating room:', error);
+            mpUI.showError(error.message || 'Failed to create room');
         }
     });
     
-    // Make mpUI available globally for testing in console
-    window.mpUI = mpUI;
+    mpUI.onJoinRoom(async (roomCode, playerName) => {
+        console.log('Join room requested:', roomCode, playerName);
+        
+        try {
+            const roomData = await mpCore.joinRoom(roomCode, playerName);
+            
+            const lobbyData = {
+                roomId: roomCode,
+                maxPlayers: roomData.meta.maxPlayers
+            };
+            
+            mpUI.renderLobbyView(lobbyData, roomData.players, mpCore.getPlayerId(), false);
+            
+            // Listen for player changes
+            mpCore.onPlayersChange((updatedPlayers) => {
+                mpUI.updatePlayers(updatedPlayers);
+            });
+            
+        } catch (error) {
+            console.error('Error joining room:', error);
+            mpUI.showError(error.message || 'Failed to join room');
+        }
+    });
     
-    console.log('✅ Multiplayer UI initialized (Demo mode)');
-    console.log('💡 You can test it by clicking the Multiplayer button');
-    console.log('🔧 Access UI controls via window.mpUI in console');
+    mpUI.onToggleReady(async (isReady) => {
+        console.log('Ready state changed:', isReady);
+        
+        try {
+            await mpCore.setPlayerReady(isReady);
+        } catch (error) {
+            console.error('Error setting ready state:', error);
+        }
+    });
+    
+    mpUI.onStartGame(async () => {
+        console.log('Start game requested');
+        
+        try {
+            await mpCore.setRoomStatus(MP_CONSTANTS.ROOM_STATUS.PLAYING);
+            alert('Game starting! (Phase 2 - Room management complete. Game integration in later phases)');
+        } catch (error) {
+            console.error('Error starting game:', error);
+            alert('Failed to start game: ' + error.message);
+        }
+    });
+    
+    mpUI.onLeaveRoom(async () => {
+        console.log('Leave room requested');
+        
+        if (confirm('Are you sure you want to leave the room?')) {
+            try {
+                await mpCore.leaveRoom();
+                mpUI.reset();
+                mpUI.renderMenuView();
+            } catch (error) {
+                console.error('Error leaving room:', error);
+            }
+        }
+    });
+    
+    // Make instances available globally for testing in console
+    window.mpUI = mpUI;
+    window.mpCore = mpCore;
+    
+    console.log('✅ Multiplayer system initialized (Phase 2 - Firebase connected)');
+    console.log('💡 Click the Multiplayer button to test');
+    console.log('🔧 Access controls via window.mpUI and window.mpCore in console');
 }
 
 // Create individual game card
