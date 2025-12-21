@@ -256,6 +256,21 @@
         </main>
     </div>
 
+    <!-- Multiplayer Scripts (IN ORDER) -->
+    <link rel="stylesheet" href="../css/multiplayer.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="../shared/firebase-config.js"></script>
+    <script src="../shared/constants.js"></script>
+    <script src="../shared/room-validator.js"></script>
+    <script src="../shared/room-cleanup.js"></script>
+    <script src="../shared/multiplayer-core.js"></script>
+    <script src="../shared/multiplayer-ui.js"></script>
+    <script src="../shared/multiplayer-adapter.js"></script>
+    <script src="adapters/pixel-game-adapter.js"></script>
+
+    <!-- Game Script (LAST) -->
     <script src="pixel-game.js"></script>
 </body>
 </html>

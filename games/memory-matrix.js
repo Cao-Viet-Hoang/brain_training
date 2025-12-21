@@ -1130,6 +1130,47 @@ class GameCoordinator {
 // ============================================================================
 // INITIALIZE GAME
 // ============================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    const game = new GameCoordinator();
+let gameCoordinator;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    gameCoordinator = new GameCoordinator();
+
+    // Check if multiplayer mode
+    const roomId = sessionStorage.getItem('multiplayerRoomId');
+    const role = sessionStorage.getItem('multiplayerRole');
+
+    if (roomId && typeof MemoryMatrixMultiplayerAdapter !== 'undefined') {
+        console.log('[MemoryMatrix] Checking multiplayer room validity:', { roomId, role });
+
+        // Validate room exists and is still active
+        try {
+            const roomRef = database.ref(`rooms/${roomId}`);
+            const snapshot = await roomRef.once('value');
+            const roomData = snapshot.val();
+
+            // Check if room exists and is in valid state
+            if (!roomData || roomData.meta.status === 'closed' || roomData.meta.status === 'finished') {
+                console.log('[MemoryMatrix] Room no longer valid, clearing multiplayer state');
+                sessionStorage.removeItem('multiplayerRoomId');
+                sessionStorage.removeItem('multiplayerRole');
+                return; // Exit and let game run in single player mode
+            }
+
+            console.log('[MemoryMatrix] Room valid, initializing multiplayer mode');
+            const adapter = new MemoryMatrixMultiplayerAdapter(gameCoordinator);
+
+            if (role === 'host') {
+                adapter.initAsHost(roomId);
+            } else if (role === 'player') {
+                adapter.initAsPlayer(roomId);
+            }
+
+            // Expose adapter globally for debugging
+            window.memoryMatrixAdapter = adapter;
+        } catch (error) {
+            console.error('[MemoryMatrix] Error checking room validity:', error);
+            sessionStorage.removeItem('multiplayerRoomId');
+            sessionStorage.removeItem('multiplayerRole');
+        }
+    }
 });

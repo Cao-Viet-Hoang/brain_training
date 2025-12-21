@@ -244,8 +244,15 @@ class MultiplayerGameAdapter {
         // Listen for status changes
         this.core.onStatusChange((status) => {
             if (status === MP_CONSTANTS.ROOM_STATUS.PLAYING && !this.core.isRoomHost()) {
-                // Non-host player: game started, load game data
-                this.handleGameStartedAsPlayer();
+                // Only navigate if we're in lobby (index.html), not already in game page
+                // Game page adapters handle game start differently (via waitForGameDataAndStart)
+                const currentPath = window.location.pathname;
+                const isInGamePage = currentPath.includes('/games/') && !currentPath.endsWith('index.html');
+
+                if (!isInGamePage) {
+                    // Non-host player in lobby: navigate to game page
+                    this.handleGameStartedAsPlayer();
+                }
             }
         });
     }
@@ -264,11 +271,50 @@ class MultiplayerGameAdapter {
 
     /**
      * Handle game started (for non-host players)
+     * Navigate to the correct game page based on room's game type
      */
     async handleGameStartedAsPlayer() {
         console.log('🎮 Game started by host');
-        // Wait a bit for game data to be available
-        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Get room data to find the game type
+        const snapshot = await this.core.roomRef.once('value');
+        const roomData = snapshot.val();
+
+        if (!roomData || !roomData.meta) {
+            console.error('Cannot get room data');
+            return;
+        }
+
+        const gameType = roomData.meta.gameType;
+        const gameFiles = {
+            'math-game': 'math-game.html',
+            'pixel-game': 'pixel-game.html',
+            'expression-puzzle': 'expression-puzzle.html',
+            'dual-n-back': 'dual-n-back.html',
+            'memory-matrix': 'memory-matrix.html',
+            'word-recall': 'word-recall.html'
+        };
+
+        const gameFile = gameFiles[gameType];
+
+        if (!gameFile) {
+            console.error('Unknown game type:', gameType);
+            return;
+        }
+
+        // Determine the correct path based on current location
+        const currentPath = window.location.pathname;
+        const isInGamesFolder = currentPath.includes('/games/');
+        const gameUrl = isInGamesFolder ? gameFile : `games/${gameFile}`;
+
+        // Store room info in sessionStorage
+        sessionStorage.setItem('multiplayerRoomId', this.core.roomId);
+        sessionStorage.setItem('multiplayerRole', 'player');
+
+        console.log('🎮 Navigating player to:', gameUrl);
+
+        // Navigate to game
+        window.location.href = gameUrl;
     }
 
     // ==================== SYNC METHODS ====================

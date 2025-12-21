@@ -207,13 +207,23 @@ function initializeMultiplayer() {
             mpCore.onStatusChange((status) => {
                 if (status === MP_CONSTANTS.ROOM_STATUS.PLAYING && !mpCore.isRoomHost()) {
                     console.log('🎮 Game starting, navigating to game...');
-                    
+
                     // Store room info for player
                     sessionStorage.setItem('multiplayerRoomId', roomCode);
                     sessionStorage.setItem('multiplayerRole', 'player');
-                    
-                    // Navigate to game (default to math-game for now)
-                    window.location.href = 'games/math-game.html';
+
+                    // Get game URL based on gameType from room data
+                    const gameType = roomData.meta.gameType;
+                    const gameUrls = {
+                        'math-game': 'games/math-game.html',
+                        'pixel-game': 'games/pixel-game.html',
+                        'expression-puzzle': 'games/expression-puzzle.html',
+                        'dual-n-back': 'games/dual-n-back.html',
+                        'memory-matrix': 'games/memory-matrix.html',
+                        'word-recall': 'games/word-recall.html'
+                    };
+                    const gameUrl = gameUrls[gameType] || 'games/math-game.html';
+                    window.location.href = gameUrl;
                 }
             });
             
