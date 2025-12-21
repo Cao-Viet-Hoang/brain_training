@@ -127,15 +127,16 @@ function initializeMultiplayer() {
     const mpCore = new MultiplayerCore();
     
     // Set up callbacks
-    mpUI.onCreateRoom(async (playerName, gameConfig) => {
-        console.log('Create room requested:', playerName, gameConfig);
+    mpUI.onCreateRoom(async (playerName, gameType, gameConfig) => {
+        console.log('Create room requested:', playerName, 'Game:', gameType, gameConfig);
         
         try {
-            const roomCode = await mpCore.createRoom('generic', gameConfig, playerName);
+            const roomCode = await mpCore.createRoom(gameType, gameConfig, playerName);
             
             // Get initial room data
             const roomData = {
                 roomId: roomCode,
+                gameType: gameType,
                 maxPlayers: gameConfig?.maxPlayers || MP_CONSTANTS.MAX_PLAYERS
             };
             
@@ -154,6 +155,29 @@ function initializeMultiplayer() {
                 mpUI.updatePlayers(updatedPlayers);
             });
             
+            // Listen for status changes (for players to auto-navigate)
+            mpCore.onStatusChange((status) => {
+                if (status === MP_CONSTANTS.ROOM_STATUS.PLAYING && !mpCore.isRoomHost()) {
+                    console.log('🎮 Game starting, navigating to game...');
+                    
+                    // Store room info for player
+                    sessionStorage.setItem('multiplayerRoomId', roomCode);
+                    sessionStorage.setItem('multiplayerRole', 'player');
+                    
+                    // Get game URL based on gameType
+                    const gameUrls = {
+                        'math-game': 'games/math-game.html',
+                        'pixel-game': 'games/pixel-game.html',
+                        'expression-puzzle': 'games/expression-puzzle.html',
+                        'dual-n-back': 'games/dual-n-back.html',
+                        'memory-matrix': 'games/memory-matrix.html',
+                        'word-recall': 'games/word-recall.html'
+                    };
+                    const gameUrl = gameUrls[gameType] || 'games/math-game.html';
+                    window.location.href = gameUrl;
+                }
+            });
+            
         } catch (error) {
             console.error('Error creating room:', error);
             mpUI.showError(error.message || 'Failed to create room');
@@ -168,6 +192,7 @@ function initializeMultiplayer() {
             
             const lobbyData = {
                 roomId: roomCode,
+                gameType: roomData.meta.gameType,
                 maxPlayers: roomData.meta.maxPlayers
             };
             
@@ -176,6 +201,20 @@ function initializeMultiplayer() {
             // Listen for player changes
             mpCore.onPlayersChange((updatedPlayers) => {
                 mpUI.updatePlayers(updatedPlayers);
+            });
+            
+            // Listen for status changes (for players to auto-navigate)
+            mpCore.onStatusChange((status) => {
+                if (status === MP_CONSTANTS.ROOM_STATUS.PLAYING && !mpCore.isRoomHost()) {
+                    console.log('🎮 Game starting, navigating to game...');
+                    
+                    // Store room info for player
+                    sessionStorage.setItem('multiplayerRoomId', roomCode);
+                    sessionStorage.setItem('multiplayerRole', 'player');
+                    
+                    // Navigate to game (default to math-game for now)
+                    window.location.href = 'games/math-game.html';
+                }
             });
             
             // Listen for room closed event

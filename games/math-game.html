@@ -10,6 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/math-game.css">
+    <link rel="stylesheet" href="../css/multiplayer.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
 <body>
     <div class="container">
@@ -282,6 +288,17 @@
         </main>
     </div>
 
+    <!-- Multiplayer Scripts (IN ORDER) -->
+    <script src="../shared/firebase-config.js"></script>
+    <script src="../shared/constants.js"></script>
+    <script src="../shared/room-validator.js"></script>
+    <script src="../shared/room-cleanup.js"></script>
+    <script src="../shared/multiplayer-core.js"></script>
+    <script src="../shared/multiplayer-ui.js"></script>
+    <script src="../shared/multiplayer-adapter.js"></script>
+    <script src="adapters/math-game-adapter.js"></script>
+    
+    <!-- Game Script -->
     <script src="math-game.js"></script>
 </body>
 </html>

@@ -99,9 +99,36 @@ class MultiplayerCore {
 
         // Create room
         this.roomRef = database.ref(`rooms/${roomCode}`);
+        
+        // Determine game URL based on game type
+        let gameUrl = '';
+        switch(gameType || 'generic') {
+            case 'math-game':
+                gameUrl = 'games/math-game.html';
+                break;
+            case 'pixel-game':
+                gameUrl = 'games/pixel-game.html';
+                break;
+            case 'expression-puzzle':
+                gameUrl = 'games/expression-puzzle.html';
+                break;
+            case 'dual-n-back':
+                gameUrl = 'games/dual-n-back.html';
+                break;
+            case 'memory-matrix':
+                gameUrl = 'games/memory-matrix.html';
+                break;
+            case 'word-recall':
+                gameUrl = 'games/word-recall.html';
+                break;
+            default:
+                gameUrl = gameType ? `games/${gameType}.html` : '';
+        }
+        
         await this.roomRef.set({
             meta: {
                 gameType: gameType || 'generic',
+                gameUrl: gameUrl,  // NEW - URL for navigation
                 hostId: this.playerId,
                 status: MP_CONSTANTS.ROOM_STATUS.WAITING,
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
@@ -434,6 +461,26 @@ class MultiplayerCore {
 
     onRoomClosed(callback) {
         this.callbacks.onRoomClosed = callback;
+    }
+
+    /**
+     * Subscribe to game data updates
+     * Returns unsubscribe function
+     */
+    onGameDataUpdate(callback) {
+        if (!this.roomRef) {
+            throw new Error('Not in a room');
+        }
+
+        const listener = this.roomRef.child('gameData').on('value', (snapshot) => {
+            const data = snapshot.val();
+            callback(data);
+        });
+
+        // Return unsubscribe function
+        return () => {
+            this.roomRef.child('gameData').off('value', listener);
+        };
     }
 
     // ==================== ENHANCED ROOM MANAGEMENT ====================

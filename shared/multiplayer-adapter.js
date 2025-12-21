@@ -16,15 +16,53 @@ class MultiplayerGameAdapter {
 
     /**
      * Initialize multiplayer for a game
+     * @param {string} containerId - Container ID for multiplayer UI (null if in game page)
+     * @param {string} roomId - Room ID to reconnect to (optional)
      */
-    async init(containerId) {
+    async init(containerId = null, roomId = null) {
         try {
+            console.log('[MultiplayerAdapter] Initializing...');
+            
+            // Initialize core
             await this.core.initAuth();
-            this.ui = new MultiplayerUI(containerId);
-            this.setupUICallbacks();
-            console.log('✅ Multiplayer adapter initialized for', this.gameType);
+            
+            // Initialize UI only if container provided (not in game page)
+            if (containerId) {
+                this.ui = new MultiplayerUI(containerId);
+                this.setupUICallbacks();
+            } else {
+                console.log('[MultiplayerAdapter] No container provided, skipping UI initialization');
+            }
+            
+            // If roomId provided, reconnect to that room
+            if (roomId) {
+                this.roomId = roomId;  // NEW - Store roomId in adapter
+                this.core.roomId = roomId;
+                this.core.roomRef = database.ref(`rooms/${roomId}`);
+                
+                // Fetch room data to determine if this player is host
+                const snapshot = await this.core.roomRef.once('value');
+                const roomData = snapshot.val();
+                if (roomData && roomData.meta.hostId === this.core.playerId) {
+                    this.core.isHost = true;
+                    console.log('[MultiplayerAdapter] Reconnected as HOST');
+                } else {
+                    this.core.isHost = false;
+                    console.log('[MultiplayerAdapter] Reconnected as PLAYER');
+                }
+                
+                // Setup disconnect handler and heartbeat after reconnect
+                this.core.setupDisconnectHandler();
+                this.core.startHeartbeat();
+                
+                this.core.setupRoomListeners();
+                this.setupGameListeners();
+                console.log('[MultiplayerAdapter] Reconnected to room:', roomId);
+            }
+            
+            console.log('[MultiplayerAdapter] Initialization complete');
         } catch (error) {
-            console.error('❌ Failed to initialize multiplayer adapter:', error);
+            console.error('[MultiplayerAdapter] Initialization failed:', error);
             throw error;
         }
     }
@@ -175,9 +213,16 @@ class MultiplayerGameAdapter {
      * Setup game-specific listeners
      */
     setupGameListeners() {
+        console.log('[MultiplayerAdapter] Setting up game listeners...');
+        
         // Listen for player changes
         this.core.onPlayersChange((players) => {
-            this.ui.updatePlayers(players);
+            console.log('[MultiplayerAdapter] Players changed:', Object.keys(players || {}).length, 'players');
+            
+            // Only update UI if it exists (not in game page)
+            if (this.ui) {
+                this.ui.updatePlayers(players);
+            }
             this.onPlayersUpdate(players);
         });
 

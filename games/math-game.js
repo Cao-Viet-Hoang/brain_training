@@ -779,6 +779,39 @@ class MathGame {
 }
 
 // Initialize game when DOM is loaded
+let gameInstance = null; // Global reference for multiplayer adapter
+
 document.addEventListener('DOMContentLoaded', () => {
-    new MathGame();
+    gameInstance = new MathGame();
+    window.mathGame = gameInstance; // Expose globally for debugging and multiplayer
+    
+    // Check if this is multiplayer mode
+    const roomId = sessionStorage.getItem('multiplayerRoomId');
+    const role = sessionStorage.getItem('multiplayerRole');
+    
+    if (roomId && typeof MathGameMultiplayerAdapter !== 'undefined') {
+        console.log('[MathGame] Multiplayer mode detected - Role:', role, 'Room:', roomId);
+        
+        // Initialize multiplayer adapter
+        const adapter = new MathGameMultiplayerAdapter(gameInstance);
+        
+        if (role === 'host') {
+            // Initialize as host (will intercept game start)
+            adapter.initAsHost(roomId).catch(err => {
+                console.error('[MathGame] Failed to initialize multiplayer as host:', err);
+                alert('Failed to initialize multiplayer: ' + err.message);
+            });
+        } else if (role === 'player') {
+            // Initialize as player (will wait for questions and auto-start)
+            adapter.initAsPlayer(roomId).catch(err => {
+                console.error('[MathGame] Failed to initialize multiplayer as player:', err);
+                alert('Failed to initialize multiplayer: ' + err.message);
+            });
+        }
+        
+        // Expose adapter globally
+        window.mathGameAdapter = adapter;
+    } else {
+        console.log('[MathGame] Single player mode');
+    }
 });

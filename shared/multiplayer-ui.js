@@ -144,6 +144,18 @@ class MultiplayerUI {
         this.modalBody.innerHTML = `
             <div class="mp-form">
                 <div class="mp-form-group">
+                    <label for="mpGameSelect">Select Game</label>
+                    <select id="mpGameSelect" class="mp-game-select">
+                        <option value="math-game">🔢 Quick Math</option>
+                        <option value="pixel-game">🎮 Pixel Number</option>
+                        <option value="expression-puzzle">🧮 Expression Puzzle</option>
+                        <option value="dual-n-back">🔄 Dual N-Back</option>
+                        <option value="memory-matrix">🔲 Memory Matrix</option>
+                        <option value="word-recall">💭 Word Recall</option>
+                    </select>
+                </div>
+
+                <div class="mp-form-group">
                     <label for="mpPlayerName">Your Name</label>
                     <input type="text" id="mpPlayerName" placeholder="Enter your name"
                            maxlength="20" value="${this.playerName}">
@@ -172,8 +184,9 @@ class MultiplayerUI {
 
         createBtn.addEventListener('click', () => {
             this.playerName = nameInput.value.trim();
+            const gameType = document.getElementById('mpGameSelect').value;
             this.showLoading('Creating room...');
-            this.callbacks.onCreateRoom?.(this.playerName, gameConfig);
+            this.callbacks.onCreateRoom?.(this.playerName, gameType, gameConfig);
         });
     }
 
@@ -238,7 +251,18 @@ class MultiplayerUI {
         this.currentPlayerId = currentPlayerId;
         this.isHost = isHost;
 
-        this.modalTitle.textContent = '🎮 Game Lobby';
+        // Get game name from gameType
+        const gameNames = {
+            'math-game': '🔢 Quick Math',
+            'pixel-game': '🎮 Pixel Number',
+            'expression-puzzle': '🧮 Expression Puzzle',
+            'dual-n-back': '🔄 Dual N-Back',
+            'memory-matrix': '🔲 Memory Matrix',
+            'word-recall': '💭 Word Recall'
+        };
+        const gameName = gameNames[roomData.gameType] || '🎮 Game';
+        
+        this.modalTitle.textContent = `${gameName} - Lobby`;
 
         const playerCount = Object.keys(players).length;
         const maxPlayers = roomData.maxPlayers || 4;
@@ -297,14 +321,36 @@ class MultiplayerUI {
         });
 
         if (isHost) {
-            document.getElementById('mpStartBtn')?.addEventListener('click', () => {
+            document.getElementById('mpStartBtn')?.addEventListener('click', async () => {
+                // Store room info in sessionStorage for game page
+                sessionStorage.setItem('multiplayerRoomId', roomData.roomId);
+                sessionStorage.setItem('multiplayerRole', 'host');
+                
+                // Get game URL from room data or use mapping
+                const gameUrls = {
+                    'math-game': 'games/math-game.html',
+                    'pixel-game': 'games/pixel-game.html',
+                    'expression-puzzle': 'games/expression-puzzle.html',
+                    'dual-n-back': 'games/dual-n-back.html',
+                    'memory-matrix': 'games/memory-matrix.html',
+                    'word-recall': 'games/word-recall.html'
+                };
+                const gameUrl = gameUrls[roomData.gameType] || 'games/math-game.html';
+                
+                // Update room status to indicate host is entering game
                 this.callbacks.onStartGame?.();
+                
+                // Navigate to game
+                window.location.href = gameUrl;
             });
         } else {
             document.getElementById('mpReadyBtn')?.addEventListener('click', () => {
                 this.isReady = !this.isReady;
                 this.callbacks.onToggleReady?.(this.isReady);
             });
+            
+            // Listen for game start (for non-host players)
+            // This will be handled by multiplayer-core status change listener
         }
 
         document.getElementById('mpLeaveBtn').addEventListener('click', () => {
