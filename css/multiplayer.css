@@ -1,0 +1,702 @@
+/* ========================================
+   MULTIPLAYER FLOATING ACTION BUTTON
+   ======================================== */
+.multiplayer-fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--primary-color), #3a7a8a);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.multiplayer-fab:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(74, 144, 164, 0.4);
+}
+
+.multiplayer-fab .fab-icon {
+    font-size: 1.3rem;
+}
+
+.multiplayer-fab.in-room {
+    background: linear-gradient(135deg, var(--success-color), #70b088);
+}
+
+.multiplayer-fab.in-room::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+/* ========================================
+   MULTIPLAYER MODAL
+   ======================================== */
+.multiplayer-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.multiplayer-modal.active {
+    display: flex;
+}
+
+.multiplayer-modal-content {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 450px;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Modal Header */
+.mp-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, var(--primary-color), #3a7a8a);
+    color: white;
+}
+
+.mp-modal-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.mp-modal-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.mp-modal-actions button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.mp-modal-actions button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Modal Body */
+.mp-modal-body {
+    padding: 1.25rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* ========================================
+   MENU VIEW
+   ======================================== */
+.mp-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mp-menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--secondary-color);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.mp-menu-btn:hover {
+    border-color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.mp-menu-btn .icon {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--radius-md);
+}
+
+.mp-menu-btn .text h4 {
+    margin: 0 0 4px 0;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.mp-menu-btn .text p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* ========================================
+   CREATE/JOIN ROOM FORMS
+   ======================================== */
+.mp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mp-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.mp-form-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.mp-form-group input {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.mp-form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.mp-form-group input.room-code-input {
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.mp-config-preview {
+    background: var(--secondary-color);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.mp-config-preview h5 {
+    margin: 0 0 0.75rem 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mp-config-preview .config-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.mp-config-preview .config-item {
+    background: var(--card-bg);
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.mp-form-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.mp-form-actions button {
+    flex: 1;
+    padding: 0.85rem;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.mp-btn-primary {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.mp-btn-primary:hover {
+    background: #3a7a8a;
+}
+
+.mp-btn-primary:disabled {
+    background: var(--border-color);
+    cursor: not-allowed;
+}
+
+.mp-btn-secondary {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+}
+
+.mp-btn-secondary:hover {
+    border-color: var(--text-secondary);
+}
+
+/* ========================================
+   LOBBY VIEW
+   ======================================== */
+.mp-lobby {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Room Info */
+.mp-room-info {
+    background: linear-gradient(135deg, var(--primary-color), #3a7a8a);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mp-room-code {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mp-room-code .label {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mp-room-code .code {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+}
+
+.mp-copy-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+
+.mp-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Players List */
+.mp-players {
+    background: var(--secondary-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.mp-players-header {
+    padding: 0.75rem 1rem;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mp-players-header h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.mp-players-count {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.mp-players-list {
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.mp-player-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--card-bg);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.mp-player-item.is-you {
+    border: 2px solid var(--primary-color);
+}
+
+.mp-player-item.is-ready {
+    background: rgba(144, 213, 168, 0.15);
+}
+
+.mp-player-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.mp-player-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.mp-player-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.mp-player-name .host-badge {
+    margin-left: 6px;
+    font-size: 0.75rem;
+}
+
+.mp-player-name .you-badge {
+    margin-left: 6px;
+    font-size: 0.7rem;
+    background: var(--primary-color);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.mp-player-status {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+}
+
+.mp-player-status.ready {
+    background: var(--success-color);
+    color: white;
+}
+
+.mp-player-status.waiting {
+    background: var(--border-color);
+    color: var(--text-secondary);
+}
+
+/* Lobby Actions */
+.mp-lobby-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mp-ready-btn {
+    padding: 1rem;
+    font-size: 1.1rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-family: inherit;
+}
+
+.mp-ready-btn.not-ready {
+    background: var(--success-color);
+    color: white;
+}
+
+.mp-ready-btn.is-ready {
+    background: var(--warning-color);
+    color: var(--text-primary);
+}
+
+.mp-start-btn {
+    padding: 1rem;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, var(--accent-color), #c62828);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.mp-start-btn:disabled {
+    background: var(--border-color);
+    cursor: not-allowed;
+}
+
+.mp-start-btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(230, 57, 70, 0.4);
+}
+
+.mp-leave-btn {
+    padding: 0.75rem;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.mp-leave-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+/* ========================================
+   MINIMIZED POPUP
+   ======================================== */
+.multiplayer-popup {
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--card-bg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    overflow: hidden;
+    animation: slideInRight 0.3s ease;
+    border: 2px solid var(--primary-color);
+}
+
+.multiplayer-popup.active {
+    display: block;
+}
+
+.mp-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, var(--primary-color), #3a7a8a);
+    color: white;
+    cursor: pointer;
+}
+
+.mp-popup-header:hover {
+    background: linear-gradient(135deg, #3a7a8a, #2a6a7a);
+}
+
+.mp-popup-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.mp-popup-room {
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.mp-popup-players {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.mp-popup-expand {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ========================================
+   LOADING STATE
+   ======================================== */
+.mp-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 1rem;
+}
+
+.mp-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.mp-loading p {
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.mp-player-item {
+    animation: fadeInUp 0.3s ease;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+    .multiplayer-fab {
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 16px;
+    }
+
+    .multiplayer-fab .fab-text {
+        display: none;
+    }
+
+    .multiplayer-fab .fab-icon {
+        font-size: 1.5rem;
+    }
+
+    .multiplayer-modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .mp-room-code .code {
+        font-size: 1.4rem;
+    }
+
+    .multiplayer-popup {
+        bottom: 20px;
+        right: 20px;
+        left: 20px;
+    }
+}

@@ -98,6 +98,7 @@ const games = [
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
     initializeGames();
+    initializeMultiplayer();
 });
 
 // Create game cards
@@ -108,6 +109,101 @@ function initializeGames() {
         const gameCard = createGameCard(game);
         gamesGrid.appendChild(gameCard);
     });
+}
+
+// Initialize multiplayer UI
+function initializeMultiplayer() {
+    const mpUI = new MultiplayerUI('multiplayerContainer');
+    
+    // Set up callbacks for testing/demo purposes
+    mpUI.onCreateRoom((playerName, gameConfig) => {
+        console.log('Create room requested:', playerName, gameConfig);
+        
+        // Simulate room creation after 1 second
+        setTimeout(() => {
+            const mockRoomData = {
+                roomId: 'TEST',
+                maxPlayers: 4
+            };
+            
+            const mockPlayers = {
+                'player1': {
+                    name: playerName,
+                    isHost: true,
+                    isReady: false
+                }
+            };
+            
+            mpUI.renderLobbyView(mockRoomData, mockPlayers, 'player1', true);
+        }, 1000);
+    });
+    
+    mpUI.onJoinRoom((roomCode, playerName) => {
+        console.log('Join room requested:', roomCode, playerName);
+        
+        // Simulate joining room after 1 second
+        setTimeout(() => {
+            const mockRoomData = {
+                roomId: roomCode,
+                maxPlayers: 4
+            };
+            
+            const mockPlayers = {
+                'host123': {
+                    name: 'Alice',
+                    isHost: true,
+                    isReady: false
+                },
+                'player2': {
+                    name: playerName,
+                    isHost: false,
+                    isReady: false
+                }
+            };
+            
+            mpUI.renderLobbyView(mockRoomData, mockPlayers, 'player2', false);
+        }, 1000);
+    });
+    
+    mpUI.onToggleReady((isReady) => {
+        console.log('Ready state changed:', isReady);
+        
+        // Update UI to reflect ready state
+        const mockPlayers = {
+            'host123': {
+                name: 'Alice',
+                isHost: true,
+                isReady: false
+            },
+            'player2': {
+                name: mpUI.playerName,
+                isHost: false,
+                isReady: isReady
+            }
+        };
+        
+        mpUI.updatePlayers(mockPlayers);
+    });
+    
+    mpUI.onStartGame(() => {
+        console.log('Start game requested');
+        alert('Game starting! (Demo mode - Firebase not connected yet)');
+    });
+    
+    mpUI.onLeaveRoom(() => {
+        console.log('Leave room requested');
+        if (confirm('Are you sure you want to leave the room?')) {
+            mpUI.reset();
+            mpUI.renderMenuView();
+        }
+    });
+    
+    // Make mpUI available globally for testing in console
+    window.mpUI = mpUI;
+    
+    console.log('✅ Multiplayer UI initialized (Demo mode)');
+    console.log('💡 You can test it by clicking the Multiplayer button');
+    console.log('🔧 Access UI controls via window.mpUI in console');
 }
 
 // Create individual game card
