@@ -256,7 +256,6 @@ async function initializeMultiplayer() {
         
         try {
             await mpCore.setRoomStatus(MP_CONSTANTS.ROOM_STATUS.PLAYING);
-            alert('Game starting! (Phase 2 - Room management complete. Game integration in later phases)');
         } catch (error) {
             console.error('Error starting game:', error);
             alert('Failed to start game: ' + error.message);
@@ -281,9 +280,8 @@ async function initializeMultiplayer() {
     window.mpUI = mpUI;
     window.mpCore = mpCore;
     
-    console.log('✅ Multiplayer system initialized (Phase 2 - Firebase connected)');
-    console.log('💡 Click the Multiplayer button to test');
-    console.log('🔧 Access controls via window.mpUI and window.mpCore in console');
+    console.log('✅ Multiplayer system initialized');
+    console.log('💡 Click the Multiplayer button to start');
 }
 
 // Create individual game card
