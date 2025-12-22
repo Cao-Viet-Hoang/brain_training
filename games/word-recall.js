@@ -514,9 +514,10 @@ class GameEngine {
      * Calculate memorize time for round
      */
     calculateMemorizeTime(roundIndex) {
+        // Giảm chậm hơn: chỉ 60ms mỗi round thay vì 120ms
         return Math.max(
             this.config.memorizeMsMin,
-            this.config.memorizeMsBase - roundIndex * 120
+            this.config.memorizeMsBase - roundIndex * 60
         );
     }
 
@@ -1154,8 +1155,8 @@ class WordRecallApp {
             sessionRounds: 10,
             startK: 5,
             maxK: 12,
-            memorizeMsBase: 3500,
-            memorizeMsMin: 1200,
+            memorizeMsBase: 5000,  // Tăng từ 3500ms lên 5000ms (5 giây)
+            memorizeMsMin: 2500,   // Tăng từ 1200ms lên 2500ms (2.5 giây)
             testTimeLimitMs: 9000,
             decoyCountRatio: 1.0,
             allowMistakes: 0,

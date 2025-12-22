@@ -87,14 +87,29 @@ class LevelManager {
     }
 
     /**
-     * Calculate show duration based on level
+     * Calculate show duration based on level and number of targets
+     * Now proportional to the number of cells to give enough time to view
      */
     getShowDuration(level) {
-        const reduction = (level - 1) * 40;
-        return Math.max(
+        const gridSize = this.getGridSize(level);
+        const targetsCount = this.getTargetsCount(level, gridSize);
+        
+        // Base time per target cell: 200ms per cell
+        // This ensures more time for more complex patterns
+        const timePerTarget = 200;
+        const calculatedTime = 400 + (targetsCount * timePerTarget);
+        
+        // Still apply level-based reduction but more gradually
+        const levelReduction = (level - 1) * 15;
+        const adjustedTime = calculatedTime - levelReduction;
+        
+        // Ensure minimum time scales with number of targets
+        const minTime = Math.max(
             this.config.showDurationMsMin,
-            this.config.showDurationMsBase - reduction
+            350 + (targetsCount * 100)
         );
+        
+        return Math.max(minTime, adjustedTime);
     }
 
     /**

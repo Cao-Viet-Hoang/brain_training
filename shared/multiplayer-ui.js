@@ -158,7 +158,7 @@ class MultiplayerUI {
                 <div class="mp-form-group">
                     <label for="mpPlayerName">Your Name</label>
                     <input type="text" id="mpPlayerName" placeholder="Enter your name"
-                           maxlength="20" value="${this.playerName}">
+                           maxlength="50" value="${this.playerName}">
                 </div>
 
                 <div class="mp-form-actions">
@@ -205,7 +205,7 @@ class MultiplayerUI {
                 <div class="mp-form-group">
                     <label for="mpPlayerNameJoin">Your Name</label>
                     <input type="text" id="mpPlayerNameJoin" placeholder="Enter your name"
-                           maxlength="20" value="${this.playerName}">
+                           maxlength="50" value="${this.playerName}">
                 </div>
 
                 <div class="mp-form-actions">
@@ -370,7 +370,14 @@ class MultiplayerUI {
     }
 
     renderPlayersList(players, currentPlayerId) {
-        return Object.entries(players).map(([id, player]) => {
+        // Sort players by joinedAt timestamp to maintain join order
+        const sortedPlayers = Object.entries(players).sort((a, b) => {
+            const timeA = a[1].joinedAt || 0;
+            const timeB = b[1].joinedAt || 0;
+            return timeA - timeB;
+        });
+
+        return sortedPlayers.map(([id, player]) => {
             const isYou = id === currentPlayerId;
             const isReady = player.isReady;
             const isHost = player.isHost;
@@ -463,18 +470,45 @@ class MultiplayerUI {
     // ==================== UPDATE METHODS ====================
 
     updatePlayers(players) {
+        // Check if players actually changed to prevent unnecessary updates
+        const oldPlayerKeys = Object.keys(this.players).sort().join(',');
+        const newPlayerKeys = Object.keys(players).sort().join(',');
+        const playersChanged = oldPlayerKeys !== newPlayerKeys;
+
+        // Check if any player status changed
+        let statusChanged = false;
+        if (!playersChanged) {
+            for (const [id, player] of Object.entries(players)) {
+                const oldPlayer = this.players[id];
+                if (!oldPlayer || oldPlayer.isReady !== player.isReady || oldPlayer.name !== player.name) {
+                    statusChanged = true;
+                    break;
+                }
+            }
+        }
+
         this.players = players;
+
         if (this.currentView === 'lobby') {
-            const listEl = document.getElementById('mpPlayersList');
-            if (listEl) {
-                listEl.innerHTML = this.renderPlayersList(players, this.currentPlayerId);
+            const playerCount = Object.keys(players).length;
+            const maxPlayers = this.roomData?.maxPlayers || 4;
+
+            // Only re-render player list if players changed or status changed
+            if (playersChanged || statusChanged) {
+                const listEl = document.getElementById('mpPlayersList');
+                if (listEl) {
+                    // Use a more efficient update method if only status changed
+                    if (!playersChanged && statusChanged) {
+                        this.updatePlayerStatuses(players);
+                    } else {
+                        listEl.innerHTML = this.renderPlayersList(players, this.currentPlayerId);
+                    }
+                }
             }
 
             // Update player count
-            const playerCount = Object.keys(players).length;
-            const maxPlayers = this.roomData?.maxPlayers || 4;
             const countEl = document.querySelector('.mp-players-count');
-            if (countEl) {
+            if (countEl && countEl.textContent !== `${playerCount}/${maxPlayers}`) {
                 countEl.textContent = `${playerCount}/${maxPlayers}`;
             }
 
@@ -482,11 +516,14 @@ class MultiplayerUI {
             if (!this.isHost) {
                 const currentPlayer = players[this.currentPlayerId];
                 if (currentPlayer) {
-                    this.isReady = currentPlayer.isReady || false;
-                    const readyBtn = document.getElementById('mpReadyBtn');
-                    if (readyBtn) {
-                        readyBtn.className = `mp-ready-btn ${this.isReady ? 'is-ready' : 'not-ready'}`;
-                        readyBtn.textContent = this.isReady ? '⏳ Cancel Ready' : '✅ Ready';
+                    const newReadyState = currentPlayer.isReady || false;
+                    if (this.isReady !== newReadyState) {
+                        this.isReady = newReadyState;
+                        const readyBtn = document.getElementById('mpReadyBtn');
+                        if (readyBtn) {
+                            readyBtn.className = `mp-ready-btn ${this.isReady ? 'is-ready' : 'not-ready'}`;
+                            readyBtn.textContent = this.isReady ? '⏳ Cancel Ready' : '✅ Ready';
+                        }
                     }
                 }
             }
@@ -496,7 +533,7 @@ class MultiplayerUI {
                 const allReady = Object.values(players).every(p => p.isReady || p.isHost);
                 const canStart = allReady && playerCount >= 2;
                 const startBtn = document.getElementById('mpStartBtn');
-                if (startBtn) {
+                if (startBtn && startBtn.disabled === canStart) {
                     startBtn.disabled = !canStart;
                 }
             }
@@ -504,6 +541,37 @@ class MultiplayerUI {
             // Update popup
             this.updatePopupInfo(this.roomData.roomId, playerCount, maxPlayers);
         }
+    }
+
+    /**
+     * Update only player statuses without re-rendering entire list
+     */
+    updatePlayerStatuses(players) {
+        Object.entries(players).forEach(([id, player]) => {
+            const playerItem = document.querySelector(`[data-player-id="${id}"]`);
+            if (playerItem) {
+                const isReady = player.isReady;
+                const isHost = player.isHost;
+                const statusEl = playerItem.querySelector('.mp-player-status');
+                
+                // Update classes
+                if (isReady) {
+                    playerItem.classList.add('is-ready');
+                } else {
+                    playerItem.classList.remove('is-ready');
+                }
+
+                // Update status text
+                if (statusEl) {
+                    const newStatus = isHost ? 'Host' : (isReady ? 'Ready' : 'Waiting');
+                    const newClass = isReady || isHost ? 'ready' : 'waiting';
+                    if (statusEl.textContent !== newStatus) {
+                        statusEl.textContent = newStatus;
+                        statusEl.className = `mp-player-status ${newClass}`;
+                    }
+                }
+            }
+        });
     }
 
     reset() {
