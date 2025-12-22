@@ -161,12 +161,6 @@ class PixelNumberGame {
     }
 
     setupEventListeners() {
-        // Game mode change
-        document.getElementById('gameMode').addEventListener('change', (e) => {
-            const buzzerGroup = document.getElementById('answerTimeLimitGroup');
-            buzzerGroup.style.display = e.target.value === 'buzzer' ? 'block' : 'none';
-        });
-
         // Start game
         document.getElementById('startGameBtn').addEventListener('click', () => this.startGame());
 
@@ -217,11 +211,11 @@ class PixelNumberGame {
 
         // Read configuration
         this.config = {
-            gameMode: document.getElementById('gameMode').value,
+            gameMode: 'single',
             cardCount: parseInt(document.getElementById('cardCount').value),
             targetCount: parseInt(document.getElementById('targetCount').value),
             roundTimeLimit: parseInt(document.getElementById('roundTimeLimit').value),
-            answerTimeLimit: parseInt(document.getElementById('answerTimeLimit').value),
+            answerTimeLimit: 10,
             penaltyMode: document.getElementById('penaltyMode').value
         };
 

@@ -33,7 +33,6 @@
                     <div class="help-section">
                         <h3>⚙️ Setup</h3>
                         <ul>
-                            <li><strong>Game Mode:</strong> Choose Single Player or Multi-Player Buzzer</li>
                             <li><strong>Cards:</strong> Set total number of cards (10-20, includes both pieces and decoys)</li>
                             <li><strong>Targets:</strong> Set how many numbers to reconstruct (1-5)</li>
                             <li><strong>Round Time Limit:</strong> Total time to complete all targets (60-600 seconds)</li>
@@ -116,14 +115,6 @@
                     <h2>Game Configuration</h2>
                     
                     <div class="config-group">
-                        <label for="gameMode">Game Mode:</label>
-                        <select id="gameMode" class="config-select">
-                            <option value="single">Single Player</option>
-                            <option value="buzzer">Multi-Player Buzzer</option>
-                        </select>
-                    </div>
-
-                    <div class="config-group">
                         <label for="cardCount">Number of Cards:</label>
                         <input type="number" id="cardCount" value="15" min="10" max="20" inputmode="numeric" pattern="[0-9]*">
                     </div>
@@ -137,12 +128,6 @@
                         <label for="roundTimeLimit">Round Time Limit (seconds):</label>
                         <input type="number" id="roundTimeLimit" value="300" min="60" max="600" inputmode="numeric" pattern="[0-9]*">
                         <small>Total time to complete all targets</small>
-                    </div>
-
-                    <div class="config-group" id="answerTimeLimitGroup" style="display: none;">
-                        <label for="answerTimeLimit">Answer Time Limit (seconds):</label>
-                        <input type="number" id="answerTimeLimit" value="10" min="5" max="30" inputmode="numeric" pattern="[0-9]*">
-                        <small>Time limit for buzzer mode answers</small>
                     </div>
 
                     <div class="config-group">
