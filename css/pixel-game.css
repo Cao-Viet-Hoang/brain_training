@@ -571,24 +571,6 @@
     transform: translateY(0);
 }
 
-.back-btn {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    background: var(--secondary-color);
-    color: var(--text-primary);
-    text-decoration: none;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    transition: var(--transition);
-    border: 2px solid var(--border-color);
-}
-
-.back-btn:hover {
-    background: #e0e0e0;
-    border-color: var(--primary-color);
-    transform: translateX(-3px);
-}
-
 /* ===== Responsive Design ===== */
 @media (max-width: 768px) {
     .game-header {
