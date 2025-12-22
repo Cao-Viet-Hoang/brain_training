@@ -41,7 +41,7 @@ class MultiplayerGameAdapter {
                 this.roomId = roomId;  // NEW - Store roomId in adapter
                 this.core.roomId = roomId;
                 this.core.roomRef = database.ref(`rooms/${roomId}`);
-                
+
                 // Fetch room data to determine if this player is host
                 const snapshot = await this.core.roomRef.once('value');
                 const roomData = snapshot.val();
@@ -52,17 +52,49 @@ class MultiplayerGameAdapter {
                     this.core.isHost = false;
                     console.log('[MultiplayerAdapter] Reconnected as PLAYER');
                 }
-                
+
+                // Restore player name from Firebase or sessionStorage
+                let playerExists = roomData && roomData.players && roomData.players[this.core.playerId];
+
+                if (playerExists) {
+                    this.core.playerName = roomData.players[this.core.playerId].name;
+
+                    // Check if name is missing or empty - update it from sessionStorage
+                    if (!this.core.playerName) {
+                        this.core.playerName = sessionStorage.getItem('multiplayerPlayerName') || 'Unknown';
+                        if (this.core.playerName !== 'Unknown') {
+                            try {
+                                await this.core.roomRef.child(`players/${this.core.playerId}/name`).set(this.core.playerName);
+                            } catch (error) {
+                                console.error('[MultiplayerAdapter] Failed to update player name:', error);
+                            }
+                        }
+                    }
+                } else {
+                    // Player doesn't exist in Firebase - recreate player node from sessionStorage
+                    this.core.playerName = sessionStorage.getItem('multiplayerPlayerName') || 'Unknown';
+                    if (this.core.playerName !== 'Unknown') {
+                        try {
+                            await this.core.roomRef.child(`players/${this.core.playerId}`).set({
+                                name: this.core.playerName,
+                                isHost: this.core.isHost,
+                                isReady: this.core.isHost,
+                                score: 0,
+                                status: MP_CONSTANTS.PLAYER_STATUS.ACTIVE,
+                                joinedAt: firebase.database.ServerValue.TIMESTAMP
+                            });
+                        } catch (error) {
+                            console.error('[MultiplayerAdapter] Failed to recreate player in Firebase:', error);
+                        }
+                    }
+                }
+
                 // Setup disconnect handler and heartbeat after reconnect
                 this.core.setupDisconnectHandler();
                 this.core.startHeartbeat();
-                
                 this.core.setupRoomListeners();
                 this.setupGameListeners();
-                console.log('[MultiplayerAdapter] Reconnected to room:', roomId);
             }
-            
-            console.log('[MultiplayerAdapter] Initialization complete');
         } catch (error) {
             console.error('[MultiplayerAdapter] Initialization failed:', error);
             throw error;
@@ -276,14 +308,11 @@ class MultiplayerGameAdapter {
      * Navigate to the correct game page based on room's game type
      */
     async handleGameStartedAsPlayer() {
-        console.log('🎮 Game started by host');
-
-        // Get room data to find the game type
         const snapshot = await this.core.roomRef.once('value');
         const roomData = snapshot.val();
 
         if (!roomData || !roomData.meta) {
-            console.error('Cannot get room data');
+            console.error('[MultiplayerAdapter] Cannot get room data');
             return;
         }
 
@@ -298,9 +327,8 @@ class MultiplayerGameAdapter {
         };
 
         const gameFile = gameFiles[gameType];
-
         if (!gameFile) {
-            console.error('Unknown game type:', gameType);
+            console.error('[MultiplayerAdapter] Unknown game type:', gameType);
             return;
         }
 
@@ -309,11 +337,13 @@ class MultiplayerGameAdapter {
         const isInGamesFolder = currentPath.includes('/games/');
         const gameUrl = isInGamesFolder ? gameFile : `games/${gameFile}`;
 
-        // Store room info in sessionStorage
+        // Store room info and player name in sessionStorage
         sessionStorage.setItem('multiplayerRoomId', this.core.roomId);
         sessionStorage.setItem('multiplayerRole', 'player');
+        sessionStorage.setItem('multiplayerPlayerName', this.core.playerName);
 
-        console.log('🎮 Navigating player to:', gameUrl);
+        // Cancel disconnect handler to prevent player removal when navigating
+        this.core.cancelDisconnectHandler();
 
         // Navigate to game
         window.location.href = gameUrl;
@@ -398,6 +428,7 @@ class MultiplayerGameAdapter {
             this.resultModal = new MultiplayerResultModal();
             this.resultModal.init({
                 playerId: this.core.getPlayerId(),
+                playerName: this.core.getPlayerName(), // Add player name
                 roomRef: this.core.roomRef,
                 gameType: this.gameType,
                 isHost: this.core.isRoomHost()

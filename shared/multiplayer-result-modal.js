@@ -9,6 +9,7 @@ class MultiplayerResultModal {
         this.results = {};
         this.players = {};
         this.currentPlayerId = null;
+        this.currentPlayerName = null; // Add player name storage
         this.roomRef = null;
         this.unsubscribeResults = null;
         this.unsubscribePlayers = null;
@@ -25,6 +26,7 @@ class MultiplayerResultModal {
      */
     init(options = {}) {
         this.currentPlayerId = options.playerId;
+        this.currentPlayerName = options.playerName; // Store player name
         this.roomRef = options.roomRef;
         this.gameType = options.gameType;
         this.isHost = options.isHost || false;
@@ -143,23 +145,30 @@ class MultiplayerResultModal {
             return;
         }
 
+        // Use stored player name, fallback to reading from Firebase if not available
+        let playerName = this.currentPlayerName || 'Unknown';
+        if (!this.currentPlayerName) {
+            try {
+                const playerSnapshot = await this.roomRef.child(`players/${this.currentPlayerId}/name`).once('value');
+                playerName = playerSnapshot.val() || 'Unknown';
+            } catch (error) {
+                console.warn('[ResultModal] Could not fetch player name:', error);
+            }
+        }
+
         const resultData = {
             score: result.score || 0,
-            time: result.time || null, // Time in milliseconds (null if game doesn't track time)
+            time: result.time || null,
             details: result.details || {},
+            playerName: playerName,
             finishedAt: firebase.database.ServerValue.TIMESTAMP
         };
 
         try {
-            // Save result to Firebase
             await this.roomRef.child(`results/${this.currentPlayerId}`).set(resultData);
-
-            // Mark player as finished
             await this.roomRef.child(`players/${this.currentPlayerId}/status`).set(MP_CONSTANTS.PLAYER_STATUS.FINISHED);
             await this.roomRef.child(`players/${this.currentPlayerId}/finished`).set(true);
             await this.roomRef.child(`players/${this.currentPlayerId}/finishedAt`).set(firebase.database.ServerValue.TIMESTAMP);
-
-            console.log('[ResultModal] Result submitted:', resultData);
         } catch (error) {
             console.error('[ResultModal] Failed to submit result:', error);
         }
@@ -176,8 +185,14 @@ class MultiplayerResultModal {
         const playerResults = [];
         const waitingPlayers = [];
 
-        Object.keys(this.players).forEach(playerId => {
-            const player = this.players[playerId];
+        // First, get all player IDs from both players and results to avoid missing anyone
+        const allPlayerIds = new Set([
+            ...Object.keys(this.players),
+            ...Object.keys(this.results)
+        ]);
+
+        allPlayerIds.forEach(playerId => {
+            const player = this.players[playerId] || {};
             const result = this.results[playerId];
 
             // Check if player has finished (either has result OR finished flag is true)
@@ -186,7 +201,7 @@ class MultiplayerResultModal {
             if (hasFinished) {
                 playerResults.push({
                     playerId,
-                    name: player.name,
+                    name: player.name || result?.playerName || `Player ${playerId.substring(0, 6)}`,
                     isHost: player.isHost,
                     score: result?.score || player.score || 0,
                     time: result?.time || null,
@@ -197,7 +212,7 @@ class MultiplayerResultModal {
             } else if (player.status !== MP_CONSTANTS.PLAYER_STATUS.DISCONNECTED && !player.exited) {
                 waitingPlayers.push({
                     playerId,
-                    name: player.name,
+                    name: player.name || `Player ${playerId.substring(0, 6)}`,
                     isHost: player.isHost
                 });
             }

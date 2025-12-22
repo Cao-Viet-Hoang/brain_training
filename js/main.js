@@ -206,13 +206,15 @@ async function initializeMultiplayer() {
             // Listen for status changes (for players to auto-navigate)
             mpCore.onStatusChange((status) => {
                 if (status === MP_CONSTANTS.ROOM_STATUS.PLAYING && !mpCore.isRoomHost()) {
-                    console.log('🎮 Game starting, navigating to game...');
-
-                    // Store room info for player
+                    // Store room info and player name for game page
                     sessionStorage.setItem('multiplayerRoomId', roomCode);
                     sessionStorage.setItem('multiplayerRole', 'player');
+                    sessionStorage.setItem('multiplayerPlayerName', mpCore.getPlayerName());
 
-                    // Get game URL based on gameType from room data
+                    // Cancel disconnect handler to prevent player removal when navigating
+                    mpCore.cancelDisconnectHandler();
+
+                    // Navigate to game
                     const gameType = roomData.meta.gameType;
                     const gameUrls = {
                         'math-game': 'games/math-game.html',
@@ -222,8 +224,7 @@ async function initializeMultiplayer() {
                         'memory-matrix': 'games/memory-matrix.html',
                         'word-recall': 'games/word-recall.html'
                     };
-                    const gameUrl = gameUrls[gameType] || 'games/math-game.html';
-                    window.location.href = gameUrl;
+                    window.location.href = gameUrls[gameType] || 'games/math-game.html';
                 }
             });
             
@@ -252,10 +253,11 @@ async function initializeMultiplayer() {
     });
     
     mpUI.onStartGame(async () => {
-        console.log('Start game requested');
-        
         try {
             await mpCore.setRoomStatus(MP_CONSTANTS.ROOM_STATUS.PLAYING);
+
+            // Cancel disconnect handler to prevent player removal when navigating to game page
+            mpCore.cancelDisconnectHandler();
         } catch (error) {
             console.error('Error starting game:', error);
             alert('Failed to start game: ' + error.message);

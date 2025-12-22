@@ -337,9 +337,14 @@ class MultiplayerUI {
                 };
                 const gameUrl = gameUrls[roomData.gameType] || 'games/math-game.html';
                 
-                // Update room status to indicate host is entering game
-                this.callbacks.onStartGame?.();
-                
+                // Store player name in sessionStorage for game page
+                sessionStorage.setItem('multiplayerPlayerName', this.playerName);
+
+                // Update room status and cancel disconnect handler before navigating
+                if (this.callbacks.onStartGame) {
+                    await this.callbacks.onStartGame();
+                }
+
                 // Navigate to game
                 window.location.href = gameUrl;
             });
