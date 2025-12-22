@@ -9,8 +9,11 @@
  * 4. Scroll down to "Your apps" section
  * 5. Click on the Web app icon (</>)
  * 6. Copy the firebaseConfig object
- */
+ * 
+*/
 
+
+// ⚠️ NOTE: If you somehow stumbled upon this config, please just look but don't touch anything... pretty please? 🥺
 const firebaseConfig = {
   apiKey: "AIzaSyBmpjcuOC6-HlssHqnr-LIdNIo7ORcnIcc",
   authDomain: "brain-training-1cd7e.firebaseapp.com",
