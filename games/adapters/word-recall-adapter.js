@@ -141,8 +141,18 @@ class WordRecallMultiplayerAdapter extends MultiplayerGameAdapter {
             font-family: inherit;
         `;
         overlay.innerHTML = `
+            <style>
+                @keyframes hourglassRotate {
+                    0%, 100% { transform: rotate(0deg); }
+                    50% { transform: rotate(180deg); }
+                }
+                .hourglass-icon {
+                    display: inline-block;
+                    animation: hourglassRotate 2s ease-in-out infinite;
+                }
+            </style>
             <div style="text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+                <div class="hourglass-icon" style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
                 <h2 style="margin: 0 0 0.5rem 0;">${message}</h2>
                 <p style="margin: 0; opacity: 0.7;">Please wait...</p>
             </div>
