@@ -156,13 +156,23 @@ class MultiplayerResultModal {
             }
         }
 
+        // Filter out undefined values from details (Firebase doesn't accept undefined)
+        const details = { ...(result.details || {}) };
+        Object.keys(details).forEach(key => {
+            if (details[key] === undefined) {
+                delete details[key];
+            }
+        });
+
         const resultData = {
             score: result.score || 0,
-            time: result.time || null,
-            details: result.details || {},
+            time: result.time !== undefined && result.time !== null ? result.time : null,
+            details: details,
             playerName: playerName,
             finishedAt: firebase.database.ServerValue.TIMESTAMP
         };
+
+        console.log('[ResultModal] Submitting result to Firebase:', resultData);
 
         try {
             await this.roomRef.child(`results/${this.currentPlayerId}`).set(resultData);
@@ -199,12 +209,13 @@ class MultiplayerResultModal {
             const hasFinished = result || player.finished === true || player.status === MP_CONSTANTS.PLAYER_STATUS.FINISHED;
 
             if (hasFinished) {
+                console.log('[ResultModal] Result from Firebase for', playerId, ':', result);
                 playerResults.push({
                     playerId,
                     name: player.name || result?.playerName || `Player ${playerId.substring(0, 6)}`,
                     isHost: player.isHost,
                     score: result?.score || player.score || 0,
-                    time: result?.time || null,
+                    time: result?.time !== undefined && result?.time !== null ? result.time : null,
                     details: result?.details || {},
                     finishedAt: result?.finishedAt || player.finishedAt,
                     exited: player.exited || false
@@ -347,6 +358,8 @@ class MultiplayerResultModal {
     formatResultDetails(player) {
         const details = player.details || {};
         let timeStr = '';
+
+        console.log('[ResultModal] formatResultDetails - player.time:', player.time, 'type:', typeof player.time);
 
         // Format time if available
         if (player.time !== null && player.time !== undefined) {

@@ -251,6 +251,20 @@ class PixelGameMultiplayerAdapter extends MultiplayerGameAdapter {
         // Generate round using game's logic
         const round = this.game.generateRound(config);
 
+        // Create a map from cardId to display index (1-based for user-friendly display)
+        // After shuffle, cards[index].id may not equal index
+        const cardIdToDisplayIndex = {};
+        round.cards.forEach((card, index) => {
+            cardIdToDisplayIndex[card.id] = index + 1; // 1-based index (Card 1, Card 2, etc.)
+        });
+
+        // Convert solutions from cardId to display card numbers
+        const solutionsWithCardNumbers = {};
+        Object.keys(round.solutions).forEach(targetDigit => {
+            const cardIds = round.solutions[targetDigit];
+            solutionsWithCardNumbers[targetDigit] = cardIds.map(cardId => cardIdToDisplayIndex[cardId]);
+        });
+
         // Serialize round data
         const serializedRound = {
             cards: round.cards.map(card => ({
@@ -258,7 +272,7 @@ class PixelGameMultiplayerAdapter extends MultiplayerGameAdapter {
                 mask: card.mask
             })),
             targets: round.targets,
-            solutions: round.solutions
+            solutions: solutionsWithCardNumbers // Display-friendly: target digit -> [Card 1, Card 5, etc.]
         };
 
         const gameData = {
@@ -381,9 +395,19 @@ class PixelGameMultiplayerAdapter extends MultiplayerGameAdapter {
         const total = finalScore.correct + finalScore.wrong;
         const accuracy = total > 0 ? Math.round((finalScore.correct / total) * 100) : 0;
 
+        // Calculate time used (in milliseconds)
+        const timeUsed = this.gameStartTime ? Date.now() - this.gameStartTime : null;
+
+        console.log('[PixelGameAdapter] Time calculation:', {
+            gameStartTime: this.gameStartTime,
+            now: Date.now(),
+            timeUsed: timeUsed
+        });
+
         // End multiplayer game
         await this.endMultiplayerGame({
             score: finalScore.score,
+            time: timeUsed,
             accuracy: accuracy,
             details: {
                 correct: finalScore.correct,

@@ -390,17 +390,24 @@ class MultiplayerGameAdapter {
             // Calculate total time if game tracks it
             const totalTime = this.gameStartTime ? Date.now() - this.gameStartTime : null;
 
-            // Prepare result data
+            // Prepare result data - filter out undefined values (Firebase doesn't accept undefined)
+            const details = { ...results.details };
+            if (results.accuracy !== undefined) details.accuracy = results.accuracy;
+            if (results.correct !== undefined) details.correct = results.correct;
+            if (results.wrong !== undefined) details.wrong = results.wrong;
+            if (results.streak !== undefined) details.streak = results.streak;
+
+            // Remove any undefined values from details
+            Object.keys(details).forEach(key => {
+                if (details[key] === undefined) {
+                    delete details[key];
+                }
+            });
+
             const resultData = {
                 score: results.score || 0,
                 time: results.time !== undefined ? results.time : totalTime,
-                details: {
-                    accuracy: results.accuracy,
-                    correct: results.correct,
-                    wrong: results.wrong,
-                    streak: results.streak,
-                    ...results.details
-                }
+                details: details
             };
 
             // Initialize and show result modal
