@@ -638,6 +638,7 @@ class UIController {
         this.gameEngine = gameEngine;
         this.elements = {};
         this.timers = [];
+        this.testStartTime = 0; // Track test phase start time
         this.initElements();
         this.attachEventListeners();
     }
@@ -882,6 +883,7 @@ class UIController {
         this.elements.submitTestBtn.disabled = true;
 
         // Start timer
+        this.testStartTime = Date.now(); // Record start time
         let timeRemaining = this.gameEngine.config.testTimeLimitMs;
         this.startCountdownTimer(
             this.elements.testTimer,
@@ -928,9 +930,9 @@ class UIController {
     handleSubmitTest() {
         this.clearTimers();
         
-        // Calculate time remaining from timer display
-        const timerText = this.elements.testTimer.textContent;
-        const timeRemaining = parseFloat(timerText) * 1000;
+        // Calculate time remaining accurately from actual timestamps
+        const elapsed = Date.now() - this.testStartTime;
+        const timeRemaining = Math.max(0, this.gameEngine.config.testTimeLimitMs - elapsed);
 
         const result = this.gameEngine.submitTest(timeRemaining);
         this.gameEngine.setState('RESULT');
