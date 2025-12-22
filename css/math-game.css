@@ -518,7 +518,6 @@
 
 .timer-ring-progress.danger {
     stroke: var(--accent-color);
-    animation: pulse 0.5s ease-in-out infinite;
 }
 
 .timer-ring-progress.reset {

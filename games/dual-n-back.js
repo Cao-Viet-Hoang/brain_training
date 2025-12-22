@@ -1066,7 +1066,10 @@ class UIController {
 // ============================================================================
 // MAIN GAME INITIALIZATION
 // ============================================================================
-document.addEventListener('DOMContentLoaded', () => {
+let gameEngine;
+let uiController;
+
+document.addEventListener('DOMContentLoaded', async () => {
     // Create initial config (will be overwritten when game starts)
     const initialConfig = {
         N: 2,
@@ -1083,8 +1086,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize modules
     const analytics = new Analytics();
-    const gameEngine = new GameEngine(initialConfig, analytics);
-    const uiController = new UIController(gameEngine);
-    
+    gameEngine = new GameEngine(initialConfig, analytics);
+    uiController = new UIController(gameEngine);
+
     console.log('Dual N-Back game initialized successfully!');
+
+    // Check if multiplayer mode
+    const roomId = sessionStorage.getItem('multiplayerRoomId');
+    const role = sessionStorage.getItem('multiplayerRole');
+
+    if (roomId && typeof DualNBackMultiplayerAdapter !== 'undefined') {
+        console.log('[DualNBack] Checking multiplayer room validity:', { roomId, role });
+
+        // Validate room exists and is still active
+        try {
+            const roomRef = database.ref(`rooms/${roomId}`);
+            const snapshot = await roomRef.once('value');
+            const roomData = snapshot.val();
+
+            // Check if room exists and is in valid state
+            if (!roomData || roomData.meta.status === 'closed' || roomData.meta.status === 'finished') {
+                console.log('[DualNBack] Room no longer valid, clearing multiplayer state');
+                sessionStorage.removeItem('multiplayerRoomId');
+                sessionStorage.removeItem('multiplayerRole');
+                return; // Exit and let game run in single player mode
+            }
+
+            console.log('[DualNBack] Room valid, initializing multiplayer mode');
+            const adapter = new DualNBackMultiplayerAdapter(gameEngine, uiController);
+
+            if (role === 'host') {
+                adapter.initAsHost(roomId);
+            } else if (role === 'player') {
+                adapter.initAsPlayer(roomId);
+            }
+
+            // Expose adapter globally for debugging
+            window.dualNBackAdapter = adapter;
+        } catch (error) {
+            console.error('[DualNBack] Error checking room validity:', error);
+            sessionStorage.removeItem('multiplayerRoomId');
+            sessionStorage.removeItem('multiplayerRole');
+        }
+    }
 });

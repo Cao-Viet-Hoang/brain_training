@@ -91,18 +91,12 @@ class MathGame {
     }
     
     toggleOperation(btn) {
-        const operation = btn.dataset.operation;
+        // Deselect all other operations - only allow one operation at a time
+        document.querySelectorAll('.operation-btn').forEach(b => {
+            if (b !== btn) b.classList.remove('active');
+        });
         
-        // If clicking mixed, deselect all others
-        if (operation === 'mixed') {
-            document.querySelectorAll('.operation-btn').forEach(b => {
-                if (b !== btn) b.classList.remove('active');
-            });
-        } else {
-            // If clicking other operation, deselect mixed
-            document.querySelector('.operation-btn[data-operation="mixed"]').classList.remove('active');
-        }
-        
+        // Toggle the clicked button
         btn.classList.toggle('active');
     }
     
@@ -779,6 +773,60 @@ class MathGame {
 }
 
 // Initialize game when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new MathGame();
+let gameInstance = null; // Global reference for multiplayer adapter
+
+document.addEventListener('DOMContentLoaded', async () => {
+    gameInstance = new MathGame();
+    window.mathGame = gameInstance; // Expose globally for debugging and multiplayer
+
+    // Check if this is multiplayer mode
+    const roomId = sessionStorage.getItem('multiplayerRoomId');
+    const role = sessionStorage.getItem('multiplayerRole');
+
+    if (roomId && typeof MathGameMultiplayerAdapter !== 'undefined') {
+        console.log('[MathGame] Checking multiplayer room validity:', { roomId, role });
+
+        // Validate room exists and is still active
+        try {
+            const roomRef = database.ref(`rooms/${roomId}`);
+            const snapshot = await roomRef.once('value');
+            const roomData = snapshot.val();
+
+            // Check if room exists and is in valid state
+            if (!roomData || roomData.meta.status === 'closed' || roomData.meta.status === 'finished') {
+                console.log('[MathGame] Room no longer valid, clearing multiplayer state');
+                sessionStorage.removeItem('multiplayerRoomId');
+                sessionStorage.removeItem('multiplayerRole');
+                console.log('[MathGame] Single player mode');
+                return; // Exit and let game run in single player mode
+            }
+
+            console.log('[MathGame] Room valid, initializing multiplayer mode');
+            const adapter = new MathGameMultiplayerAdapter(gameInstance);
+
+            if (role === 'host') {
+                // Initialize as host (will intercept game start)
+                adapter.initAsHost(roomId).catch(err => {
+                    console.error('[MathGame] Failed to initialize multiplayer as host:', err);
+                    alert('Failed to initialize multiplayer: ' + err.message);
+                });
+            } else if (role === 'player') {
+                // Initialize as player (will wait for questions and auto-start)
+                adapter.initAsPlayer(roomId).catch(err => {
+                    console.error('[MathGame] Failed to initialize multiplayer as player:', err);
+                    alert('Failed to initialize multiplayer: ' + err.message);
+                });
+            }
+
+            // Expose adapter globally
+            window.mathGameAdapter = adapter;
+        } catch (error) {
+            console.error('[MathGame] Error checking room validity:', error);
+            sessionStorage.removeItem('multiplayerRoomId');
+            sessionStorage.removeItem('multiplayerRole');
+            console.log('[MathGame] Single player mode');
+        }
+    } else {
+        console.log('[MathGame] Single player mode');
+    }
 });

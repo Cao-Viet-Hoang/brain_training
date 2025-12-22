@@ -928,6 +928,7 @@ class ExpressionPuzzleGame {
                 input.className = 'inline-input';
                 input.dataset.index = i;
                 input.placeholder = '_';
+                input.autocomplete = 'off';
                 input.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
                         this.checkAnswer();
@@ -1269,6 +1270,45 @@ class ExpressionPuzzleGame {
 
 let game;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     game = new ExpressionPuzzleGame();
+
+    // Check if multiplayer mode
+    const roomId = sessionStorage.getItem('multiplayerRoomId');
+    const role = sessionStorage.getItem('multiplayerRole');
+
+    if (roomId && typeof ExpressionPuzzleMultiplayerAdapter !== 'undefined') {
+        console.log('[ExpressionPuzzle] Checking multiplayer room validity:', { roomId, role });
+
+        // Validate room exists and is still active
+        try {
+            const roomRef = database.ref(`rooms/${roomId}`);
+            const snapshot = await roomRef.once('value');
+            const roomData = snapshot.val();
+
+            // Check if room exists and is in valid state
+            if (!roomData || roomData.meta.status === 'closed' || roomData.meta.status === 'finished') {
+                console.log('[ExpressionPuzzle] Room no longer valid, clearing multiplayer state');
+                sessionStorage.removeItem('multiplayerRoomId');
+                sessionStorage.removeItem('multiplayerRole');
+                return; // Exit and let game run in single player mode
+            }
+
+            console.log('[ExpressionPuzzle] Room valid, initializing multiplayer mode');
+            const adapter = new ExpressionPuzzleMultiplayerAdapter(game);
+
+            if (role === 'host') {
+                adapter.initAsHost(roomId);
+            } else if (role === 'player') {
+                adapter.initAsPlayer(roomId);
+            }
+
+            // Expose adapter globally for debugging
+            window.expressionPuzzleAdapter = adapter;
+        } catch (error) {
+            console.error('[ExpressionPuzzle] Error checking room validity:', error);
+            sessionStorage.removeItem('multiplayerRoomId');
+            sessionStorage.removeItem('multiplayerRole');
+        }
+    }
 });

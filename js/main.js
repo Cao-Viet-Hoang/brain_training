@@ -98,6 +98,8 @@ const games = [
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
     initializeGames();
+    initializeMultiplayer();
+    initializeRoomCleanup();
 });
 
 // Create game cards
@@ -108,6 +110,180 @@ function initializeGames() {
         const gameCard = createGameCard(game);
         gamesGrid.appendChild(gameCard);
     });
+}
+
+// Initialize room cleanup
+function initializeRoomCleanup() {
+    if (typeof roomCleanup !== 'undefined') {
+        // Start automatic cleanup (runs every 5 minutes)
+        roomCleanup.startAutoCleanup();
+        console.log('✅ Room cleanup service started');
+    }
+}
+
+// Initialize multiplayer UI
+async function initializeMultiplayer() {
+    const mpUI = new MultiplayerUI('multiplayerContainer');
+    const mpCore = new MultiplayerCore();
+
+    // Set up callbacks
+    mpUI.onCreateRoom(async (playerName, gameType, gameConfig) => {
+        console.log('Create room requested:', playerName, 'Game:', gameType, gameConfig);
+        
+        try {
+            const roomCode = await mpCore.createRoom(gameType, gameConfig, playerName);
+            
+            // Get initial room data
+            const roomData = {
+                roomId: roomCode,
+                gameType: gameType,
+                maxPlayers: gameConfig?.maxPlayers || MP_CONSTANTS.MAX_PLAYERS
+            };
+            
+            const players = {
+                [mpCore.getPlayerId()]: {
+                    name: playerName,
+                    isHost: true,
+                    isReady: false
+                }
+            };
+            
+            mpUI.renderLobbyView(roomData, players, mpCore.getPlayerId(), true);
+            
+            // Listen for player changes
+            mpCore.onPlayersChange((updatedPlayers) => {
+                mpUI.updatePlayers(updatedPlayers);
+            });
+            
+            // Listen for status changes (for players to auto-navigate)
+            mpCore.onStatusChange((status) => {
+                if (status === MP_CONSTANTS.ROOM_STATUS.PLAYING && !mpCore.isRoomHost()) {
+                    console.log('🎮 Game starting, navigating to game...');
+                    
+                    // Store room info for player
+                    sessionStorage.setItem('multiplayerRoomId', roomCode);
+                    sessionStorage.setItem('multiplayerRole', 'player');
+                    
+                    // Get game URL based on gameType
+                    const gameUrls = {
+                        'math-game': 'games/math-game.html',
+                        'pixel-game': 'games/pixel-game.html',
+                        'expression-puzzle': 'games/expression-puzzle.html',
+                        'dual-n-back': 'games/dual-n-back.html',
+                        'memory-matrix': 'games/memory-matrix.html',
+                        'word-recall': 'games/word-recall.html'
+                    };
+                    const gameUrl = gameUrls[gameType] || 'games/math-game.html';
+                    window.location.href = gameUrl;
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error creating room:', error);
+            mpUI.showError(error.message || 'Failed to create room');
+        }
+    });
+    
+    mpUI.onJoinRoom(async (roomCode, playerName) => {
+        console.log('Join room requested:', roomCode, playerName);
+        
+        try {
+            const roomData = await mpCore.joinRoom(roomCode, playerName);
+            
+            const lobbyData = {
+                roomId: roomCode,
+                gameType: roomData.meta.gameType,
+                maxPlayers: roomData.meta.maxPlayers
+            };
+            
+            mpUI.renderLobbyView(lobbyData, roomData.players, mpCore.getPlayerId(), false);
+            
+            // Listen for player changes
+            mpCore.onPlayersChange((updatedPlayers) => {
+                mpUI.updatePlayers(updatedPlayers);
+            });
+            
+            // Listen for status changes (for players to auto-navigate)
+            mpCore.onStatusChange((status) => {
+                if (status === MP_CONSTANTS.ROOM_STATUS.PLAYING && !mpCore.isRoomHost()) {
+                    // Store room info and player name for game page
+                    sessionStorage.setItem('multiplayerRoomId', roomCode);
+                    sessionStorage.setItem('multiplayerRole', 'player');
+                    sessionStorage.setItem('multiplayerPlayerName', mpCore.getPlayerName());
+
+                    // Cancel disconnect handler to prevent player removal when navigating
+                    mpCore.cancelDisconnectHandler();
+
+                    // Navigate to game
+                    const gameType = roomData.meta.gameType;
+                    const gameUrls = {
+                        'math-game': 'games/math-game.html',
+                        'pixel-game': 'games/pixel-game.html',
+                        'expression-puzzle': 'games/expression-puzzle.html',
+                        'dual-n-back': 'games/dual-n-back.html',
+                        'memory-matrix': 'games/memory-matrix.html',
+                        'word-recall': 'games/word-recall.html'
+                    };
+                    window.location.href = gameUrls[gameType] || 'games/math-game.html';
+                }
+            });
+            
+            // Listen for room closed event
+            mpCore.onRoomClosed(() => {
+                console.log('⚠️ Room closed by host');
+                mpUI.reset();
+                alert('The host has left and closed the room. You have been disconnected.');
+                mpUI.renderMenuView();
+            });
+            
+        } catch (error) {
+            console.error('Error joining room:', error);
+            mpUI.showError(error.message || 'Failed to join room');
+        }
+    });
+    
+    mpUI.onToggleReady(async (isReady) => {
+        console.log('Ready state changed:', isReady);
+        
+        try {
+            await mpCore.setPlayerReady(isReady);
+        } catch (error) {
+            console.error('Error setting ready state:', error);
+        }
+    });
+    
+    mpUI.onStartGame(async () => {
+        try {
+            await mpCore.setRoomStatus(MP_CONSTANTS.ROOM_STATUS.PLAYING);
+
+            // Cancel disconnect handler to prevent player removal when navigating to game page
+            mpCore.cancelDisconnectHandler();
+        } catch (error) {
+            console.error('Error starting game:', error);
+            alert('Failed to start game: ' + error.message);
+        }
+    });
+    
+    mpUI.onLeaveRoom(async () => {
+        console.log('Leave room requested');
+        
+        if (confirm('Are you sure you want to leave the room?')) {
+            try {
+                await mpCore.leaveRoom();
+                mpUI.reset();
+                mpUI.renderMenuView();
+            } catch (error) {
+                console.error('Error leaving room:', error);
+            }
+        }
+    });
+    
+    // Make instances available globally for testing in console
+    window.mpUI = mpUI;
+    window.mpCore = mpCore;
+    
+    console.log('✅ Multiplayer system initialized');
+    console.log('💡 Click the Multiplayer button to start');
 }
 
 // Create individual game card
