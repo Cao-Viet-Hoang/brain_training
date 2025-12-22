@@ -91,13 +91,31 @@ class MathGame {
     }
     
     toggleOperation(btn) {
-        // Deselect all other operations - only allow one operation at a time
-        document.querySelectorAll('.operation-btn').forEach(b => {
-            if (b !== btn) b.classList.remove('active');
-        });
+        const operation = btn.dataset.operation;
+        const isMixed = operation === 'mixed';
+        const isCurrentlyActive = btn.classList.contains('active');
         
-        // Toggle the clicked button
-        btn.classList.toggle('active');
+        if (isMixed) {
+            // If clicking on mixed, deselect all other operations
+            if (!isCurrentlyActive) {
+                document.querySelectorAll('.operation-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                btn.classList.add('active');
+            } else {
+                // If mixed is already active, just deselect it
+                btn.classList.remove('active');
+            }
+        } else {
+            // If clicking on a regular operation and mixed is selected, deselect mixed
+            const mixedBtn = document.querySelector('.operation-btn[data-operation="mixed"]');
+            if (mixedBtn && mixedBtn.classList.contains('active')) {
+                mixedBtn.classList.remove('active');
+            }
+            
+            // Toggle the clicked button
+            btn.classList.toggle('active');
+        }
     }
     
     validateConfig() {
@@ -233,41 +251,33 @@ class MathGame {
                     }
                 }
             } else {
-                // Single operation mode
-                let operation = operations[Math.floor(Math.random() * operations.length)];
-                
-                // For division, generate numbers that divide evenly
-                if (operation === '/') {
-                    // Start with the final result
-                    let result = this.getRandomNumber(Math.max(1, minNumber), Math.min(maxNumber, 20));
-                    numbers.push(result);
-                    
-                    // For each subsequent number, multiply to build the dividend
-                    for (let j = 1; j < operandCount; j++) {
-                        const divisor = this.getRandomNumber(2, 10);
-                        numbers[0] = numbers[0] * divisor;
-                        numbers.push(divisor);
-                    }
-                    
-                    // Make sure the first number doesn't exceed maxNumber
-                    if (numbers[0] > maxNumber) {
-                        // Scale down all numbers proportionally
-                        const scaleFactor = maxNumber / numbers[0];
-                        numbers[0] = maxNumber;
-                        for (let j = 1; j < numbers.length; j++) {
-                            numbers[j] = Math.max(2, Math.floor(numbers[j] * scaleFactor));
-                        }
-                    }
-                } else {
-                    // For other operations, generate numbers normally
-                    for (let j = 0; j < operandCount; j++) {
-                        numbers.push(this.getRandomNumber(minNumber, maxNumber));
-                    }
+                // Multiple operations mode - each operation can be different (randomly selected)
+                // First, randomly select operations for each position
+                for (let j = 1; j < operandCount; j++) {
+                    const op = operations[Math.floor(Math.random() * operations.length)];
+                    ops.push(op);
                 }
                 
-                // Fill ops array with the same operation
-                for (let j = 1; j < operandCount; j++) {
-                    ops.push(operation);
+                // Then generate numbers based on operations
+                // Keep numbers smaller when mixing operations to avoid very large results
+                const adjustedMax = operations.length > 1 ? Math.min(maxNumber, 50) : maxNumber;
+                
+                for (let j = 0; j < operandCount; j++) {
+                    if (j > 0 && ops[j - 1] === '/') {
+                        // For division, ensure divisibility
+                        // Generate a divisor first
+                        const divisor = this.getRandomNumber(2, Math.min(10, Math.floor(adjustedMax / 2)));
+                        numbers.push(divisor);
+                        
+                        // Make the previous number (dividend) divisible by this divisor
+                        // Find a reasonable multiplier
+                        const maxMultiplier = Math.floor(adjustedMax / divisor);
+                        const multiplier = this.getRandomNumber(2, Math.min(maxMultiplier, 20));
+                        numbers[j - 1] = divisor * multiplier;
+                    } else {
+                        // For other operations, generate normally
+                        numbers.push(this.getRandomNumber(minNumber, adjustedMax));
+                    }
                 }
             }
             
