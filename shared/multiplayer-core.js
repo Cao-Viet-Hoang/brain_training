@@ -248,6 +248,9 @@ class MultiplayerCore {
 
         console.log('👋 Leaving room:', this.roomId);
 
+        const roomRef = this.roomRef;
+        const roomId = this.roomId;
+
         // Stop heartbeat
         this.stopHeartbeat();
 
@@ -256,7 +259,7 @@ class MultiplayerCore {
             console.log('👑 Host is leaving - attempting to transfer host');
 
             // Get all players
-            const playersSnapshot = await this.roomRef.child('players').once('value');
+            const playersSnapshot = await roomRef.child('players').once('value');
             const players = playersSnapshot.val() || {};
 
             // Find another player to be the new host
@@ -268,12 +271,12 @@ class MultiplayerCore {
                 console.log('👑 Transferring host to:', newHostId);
 
                 // Update host flags
-                await this.roomRef.child(`players/${this.playerId}/isHost`).set(false);
-                await this.roomRef.child(`players/${newHostId}/isHost`).set(true);
-                await this.roomRef.child('meta/hostId').set(newHostId);
+                await roomRef.child(`players/${this.playerId}/isHost`).set(false);
+                await roomRef.child(`players/${newHostId}/isHost`).set(true);
+                await roomRef.child('meta/hostId').set(newHostId);
 
                 // Remove current player
-                await this.roomRef.child(`players/${this.playerId}`).remove();
+                await roomRef.child(`players/${this.playerId}`).remove();
 
                 console.log('✅ Host transferred successfully');
             } else {
@@ -281,18 +284,28 @@ class MultiplayerCore {
                 console.log('🗑️ No other players - closing room');
 
                 // Set room status to closed to notify other players
-                await this.roomRef.child('meta/status').set('closed');
-                await this.roomRef.child('meta/closedReason').set('Host left the room');
+                await roomRef.child('meta/status').set('closed');
+                await roomRef.child('meta/closedReason').set('Host left the room');
 
                 // Give a moment for other clients to receive the status change
                 await new Promise(resolve => setTimeout(resolve, 500));
 
                 // Delete the entire room
-                await this.roomRef.remove();
+                await roomRef.remove();
             }
         } else {
-            // Non-host just removes themselves
-            await this.roomRef.child(`players/${this.playerId}`).remove();
+            // Non-host removes themselves
+            await roomRef.child(`players/${this.playerId}`).remove();
+
+            // Check if room is now empty after removal
+            const remainingSnapshot = await roomRef.child('players').once('value');
+            const remainingPlayers = remainingSnapshot.val();
+            const remainingCount = remainingPlayers ? Object.keys(remainingPlayers).length : 0;
+
+            if (remainingCount === 0) {
+                console.log('🗑️ Room is now empty after player left - deleting room:', roomId);
+                await roomRef.remove();
+            }
         }
 
         this.cleanup();
@@ -439,6 +452,56 @@ class MultiplayerCore {
         // If host, also cancel the hostDisconnected flag
         if (this.isHost) {
             this.roomRef.child('meta/hostDisconnected').onDisconnect().cancel();
+        }
+    }
+
+    /**
+     * Exit room with proper cleanup - marks player as exited and deletes room when all players have exited
+     * Use this when player intentionally exits (e.g., from result modal)
+     * This preserves results for other players still viewing the result modal
+     */
+    async exitRoomWithCleanup() {
+        if (!this.roomRef || !this.playerId) {
+            console.warn('⚠️ No room reference for exit cleanup');
+            this.cleanup();
+            return;
+        }
+
+        const roomId = this.roomId;
+        const playerId = this.playerId;
+        const roomRef = this.roomRef;
+
+        console.log('🚪 Exiting room with cleanup:', roomId);
+
+        try {
+            // Mark player as exited instead of removing (to preserve ranking for others)
+            await roomRef.child(`players/${playerId}/exited`).set(true);
+            await roomRef.child(`players/${playerId}/exitedAt`).set(firebase.database.ServerValue.TIMESTAMP);
+            console.log('✅ Player marked as exited');
+
+            // Check if all players have exited
+            const playersSnapshot = await roomRef.child('players').once('value');
+            const players = playersSnapshot.val();
+
+            if (players) {
+                const allExited = Object.values(players).every(player => player.exited === true);
+                const playerCount = Object.keys(players).length;
+                const exitedCount = Object.values(players).filter(p => p.exited === true).length;
+
+                console.log(`📊 Players: ${exitedCount}/${playerCount} exited`);
+
+                // If all players have exited, delete the room
+                if (allExited) {
+                    console.log('🗑️ All players exited, deleting room:', roomId);
+                    await roomRef.remove();
+                    console.log('✅ Room deleted successfully');
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error during exit cleanup:', error);
+        } finally {
+            // Always cleanup local state
+            this.cleanup();
         }
     }
 

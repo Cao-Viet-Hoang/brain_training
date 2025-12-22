@@ -191,9 +191,10 @@ class MultiplayerResultModal {
                     score: result?.score || player.score || 0,
                     time: result?.time || null,
                     details: result?.details || {},
-                    finishedAt: result?.finishedAt || player.finishedAt
+                    finishedAt: result?.finishedAt || player.finishedAt,
+                    exited: player.exited || false
                 });
-            } else if (player.status !== MP_CONSTANTS.PLAYER_STATUS.DISCONNECTED) {
+            } else if (player.status !== MP_CONSTANTS.PLAYER_STATUS.DISCONNECTED && !player.exited) {
                 waitingPlayers.push({
                     playerId,
                     name: player.name,
@@ -229,15 +230,17 @@ class MultiplayerResultModal {
             const isCurrentPlayer = player.playerId === this.currentPlayerId;
             const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
             const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+            const hasExited = player.exited === true;
 
             html += `
-                <div class="mp-result-item ${isCurrentPlayer ? 'is-you' : ''} ${rankClass}">
+                <div class="mp-result-item ${isCurrentPlayer ? 'is-you' : ''} ${rankClass} ${hasExited ? 'exited' : ''}">
                     <div class="mp-result-rank">${rankIcon}</div>
                     <div class="mp-result-player-info">
                         <div class="mp-result-player-name">
                             ${this.escapeHtml(player.name)}
                             ${player.isHost ? '<span class="host-badge">👑</span>' : ''}
                             ${isCurrentPlayer ? '<span class="you-badge">YOU</span>' : ''}
+                            ${hasExited ? '<span class="left-badge">Left</span>' : ''}
                         </div>
                         <div class="mp-result-player-details">
                             ${this.formatResultDetails(player)}

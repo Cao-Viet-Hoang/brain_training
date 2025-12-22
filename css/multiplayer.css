@@ -914,6 +914,23 @@
     font-weight: 600;
 }
 
+.mp-result-player-name .left-badge {
+    font-size: 0.65rem;
+    background: var(--text-secondary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.mp-result-item.exited {
+    opacity: 0.6;
+}
+
+.mp-result-item.exited .mp-result-player-name {
+    color: var(--text-secondary);
+}
+
 .mp-result-player-details {
     margin-top: 4px;
     font-size: 0.8rem;

@@ -426,13 +426,14 @@ class MultiplayerGameAdapter {
                 this.resultModal = null;
             }
 
-            // Cancel disconnect handler BEFORE cleanup to prevent Firebase from removing player
-            // This keeps the results visible for other players
+            // Cancel disconnect handler BEFORE cleanup to prevent Firebase from removing player twice
             this.core.cancelDisconnectHandler();
 
-            // Stop heartbeat and cleanup listeners without removing player from room
+            // Stop heartbeat
             this.core.stopHeartbeat();
-            this.core.cleanup();
+
+            // Remove player from room and cleanup room if empty
+            await this.core.exitRoomWithCleanup();
 
             // Clear all multiplayer session storage
             sessionStorage.removeItem('multiplayerRoomId');

@@ -98,6 +98,15 @@ class RoomCleanup {
                     }
                 }
 
+                // Check if all players have exited
+                if (roomData.players && Object.keys(roomData.players).length > 0) {
+                    const allExited = Object.values(roomData.players).every(player => player.exited === true);
+                    if (allExited) {
+                        shouldDelete = true;
+                        reason = 'all_players_exited';
+                    }
+                }
+
                 if (shouldDelete) {
                     await roomsRef.child(roomId).remove();
                     cleanedCount++;
