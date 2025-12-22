@@ -91,18 +91,12 @@ class MathGame {
     }
     
     toggleOperation(btn) {
-        const operation = btn.dataset.operation;
+        // Deselect all other operations - only allow one operation at a time
+        document.querySelectorAll('.operation-btn').forEach(b => {
+            if (b !== btn) b.classList.remove('active');
+        });
         
-        // If clicking mixed, deselect all others
-        if (operation === 'mixed') {
-            document.querySelectorAll('.operation-btn').forEach(b => {
-                if (b !== btn) b.classList.remove('active');
-            });
-        } else {
-            // If clicking other operation, deselect mixed
-            document.querySelector('.operation-btn[data-operation="mixed"]').classList.remove('active');
-        }
-        
+        // Toggle the clicked button
         btn.classList.toggle('active');
     }
     

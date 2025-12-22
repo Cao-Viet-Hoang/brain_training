@@ -928,6 +928,7 @@ class ExpressionPuzzleGame {
                 input.className = 'inline-input';
                 input.dataset.index = i;
                 input.placeholder = '_';
+                input.autocomplete = 'off';
                 input.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
                         this.checkAnswer();

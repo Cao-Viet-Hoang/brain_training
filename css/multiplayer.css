@@ -1075,3 +1075,537 @@
         padding: 0.75rem;
     }
 }
+
+/* ========================================
+   RESPONSIVE DESIGN - MULTIPLAYER UI
+   ======================================== */
+
+/* Large Desktop (1440px and above) */
+@media (min-width: 1440px) {
+    .multiplayer-modal-content {
+        max-width: 550px;
+    }
+
+    .mp-modal-header {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .mp-modal-header h3 {
+        font-size: 1.3rem;
+    }
+
+    .mp-modal-body {
+        padding: 1.5rem;
+    }
+
+    .mp-menu-btn {
+        padding: 1.5rem;
+    }
+
+    .mp-menu-btn .icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2.3rem;
+    }
+
+    .mp-menu-btn .text h4 {
+        font-size: 1.2rem;
+    }
+
+    .mp-players-list {
+        max-height: 280px;
+    }
+
+    .mp-room-code .code {
+        font-size: 2rem;
+    }
+}
+
+/* Standard Desktop (1024px to 1439px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .multiplayer-modal-content {
+        max-width: 480px;
+    }
+
+    .mp-players-list {
+        max-height: 240px;
+    }
+}
+
+/* Tablet Landscape (768px to 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .multiplayer-fab {
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 16px;
+        font-size: 0.95rem;
+    }
+
+    .multiplayer-fab .fab-icon {
+        font-size: 1.2rem;
+    }
+
+    .multiplayer-modal-content {
+        max-width: 500px;
+        width: 85%;
+    }
+
+    .mp-modal-header {
+        padding: 0.9rem 1.1rem;
+    }
+
+    .mp-modal-header h3 {
+        font-size: 1.05rem;
+    }
+
+    .mp-modal-body {
+        padding: 1.1rem;
+    }
+
+    .mp-menu-btn {
+        padding: 1.1rem;
+    }
+
+    .mp-menu-btn .icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.9rem;
+    }
+
+    .mp-room-code .code {
+        font-size: 1.6rem;
+        letter-spacing: 3px;
+    }
+
+    .mp-players-list {
+        max-height: 220px;
+    }
+}
+
+/* Mobile Landscape (576px to 767px) */
+@media (min-width: 576px) and (max-width: 767px) {
+    .multiplayer-fab {
+        bottom: 16px;
+        right: 16px;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    .multiplayer-fab .fab-text {
+        display: none;
+    }
+
+    .multiplayer-fab .fab-icon {
+        font-size: 1.4rem;
+    }
+
+    .multiplayer-modal-content {
+        width: 92%;
+        max-width: none;
+        max-height: 88vh;
+    }
+
+    .mp-modal-header {
+        padding: 0.85rem 1rem;
+    }
+
+    .mp-modal-header h3 {
+        font-size: 1rem;
+    }
+
+    .mp-modal-actions button {
+        width: 30px;
+        height: 30px;
+        font-size: 1.1rem;
+    }
+
+    .mp-modal-body {
+        padding: 1rem;
+    }
+
+    .mp-menu-btn {
+        padding: 1rem;
+        gap: 0.85rem;
+    }
+
+    .mp-menu-btn .icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.7rem;
+    }
+
+    .mp-menu-btn .text h4 {
+        font-size: 1rem;
+    }
+
+    .mp-menu-btn .text p {
+        font-size: 0.8rem;
+    }
+
+    .mp-form-group input,
+    .mp-form-group select {
+        padding: 0.65rem 0.85rem;
+        font-size: 0.95rem;
+    }
+
+    .mp-form-group input.room-code-input {
+        font-size: 1.3rem;
+        letter-spacing: 6px;
+    }
+
+    .mp-room-code .code {
+        font-size: 1.5rem;
+        letter-spacing: 3px;
+    }
+
+    .mp-players-list {
+        max-height: 180px;
+    }
+
+    .mp-player-item {
+        padding: 0.65rem 0.85rem;
+    }
+
+    .mp-player-avatar {
+        width: 34px;
+        height: 34px;
+        font-size: 0.85rem;
+    }
+
+    .mp-player-name {
+        font-size: 0.9rem;
+    }
+
+    .mp-ready-btn,
+    .mp-start-btn {
+        padding: 0.85rem;
+        font-size: 1rem;
+    }
+
+    .mp-leave-btn {
+        padding: 0.75rem 0.85rem;
+        font-size: 0.9rem;
+    }
+
+    .multiplayer-popup {
+        bottom: 16px;
+        right: 16px;
+    }
+}
+
+/* Mobile Portrait (up to 575px) */
+@media (max-width: 575px) {
+    .multiplayer-fab {
+        bottom: 15px;
+        right: 15px;
+        padding: 10px 12px;
+        border-radius: 50%;
+        width: 56px;
+        height: 56px;
+        justify-content: center;
+    }
+
+    .multiplayer-fab .fab-text {
+        display: none;
+    }
+
+    .multiplayer-fab .fab-icon {
+        font-size: 1.5rem;
+    }
+
+    .multiplayer-fab.in-room::after {
+        width: 10px;
+        height: 10px;
+        top: -1px;
+        right: -1px;
+    }
+
+    .multiplayer-modal-content {
+        width: 95%;
+        max-width: none;
+        max-height: 92vh;
+        border-radius: var(--radius-md);
+    }
+
+    .mp-modal-header {
+        padding: 0.75rem 0.9rem;
+    }
+
+    .mp-modal-header h3 {
+        font-size: 0.95rem;
+    }
+
+    .mp-modal-actions {
+        gap: 6px;
+    }
+
+    .mp-modal-actions button {
+        width: 28px;
+        height: 28px;
+        font-size: 1rem;
+    }
+
+    .mp-modal-body {
+        padding: 0.9rem;
+    }
+
+    /* Menu View */
+    .mp-menu {
+        gap: 0.85rem;
+    }
+
+    .mp-menu-btn {
+        padding: 0.9rem;
+        gap: 0.75rem;
+    }
+
+    .mp-menu-btn .icon {
+        width: 42px;
+        height: 42px;
+        font-size: 1.5rem;
+    }
+
+    .mp-menu-btn .text h4 {
+        font-size: 0.95rem;
+    }
+
+    .mp-menu-btn .text p {
+        font-size: 0.75rem;
+    }
+
+    /* Form */
+    .mp-form {
+        gap: 0.85rem;
+    }
+
+    .mp-form-group {
+        gap: 0.4rem;
+    }
+
+    .mp-form-group label {
+        font-size: 0.85rem;
+    }
+
+    .mp-form-group input,
+    .mp-form-group select {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .mp-form-group input.room-code-input {
+        font-size: 1.2rem;
+        letter-spacing: 5px;
+    }
+
+    .mp-config-preview {
+        padding: 0.85rem;
+    }
+
+    .mp-config-preview h5 {
+        font-size: 0.8rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .mp-config-preview .config-item {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.8rem;
+    }
+
+    .mp-form-actions {
+        gap: 0.6rem;
+        flex-direction: column;
+    }
+
+    .mp-form-actions button {
+        padding: 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    /* Lobby View */
+    .mp-lobby {
+        gap: 1rem;
+    }
+
+    .mp-room-info {
+        padding: 0.85rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .mp-room-code .label {
+        font-size: 0.7rem;
+    }
+
+    .mp-room-code .code {
+        font-size: 1.4rem;
+        letter-spacing: 3px;
+    }
+
+    .mp-copy-btn {
+        padding: 0.45rem 0.85rem;
+        font-size: 0.85rem;
+        align-self: stretch;
+        justify-content: center;
+    }
+
+    .mp-players-header {
+        padding: 0.65rem 0.85rem;
+    }
+
+    .mp-players-header h4 {
+        font-size: 0.9rem;
+    }
+
+    .mp-players-count {
+        font-size: 0.8rem;
+    }
+
+    .mp-players-list {
+        max-height: 160px;
+        padding: 0.4rem;
+        gap: 0.4rem;
+    }
+
+    .mp-player-item {
+        padding: 0.6rem 0.75rem;
+        gap: 0.6rem;
+    }
+
+    .mp-player-item.is-you {
+        border-width: 1.5px;
+    }
+
+    .mp-player-info {
+        gap: 0.6rem;
+    }
+
+    .mp-player-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+
+    .mp-player-name {
+        font-size: 0.85rem;
+    }
+
+    .mp-player-name .host-badge {
+        font-size: 0.7rem;
+        margin-left: 4px;
+    }
+
+    .mp-player-name .you-badge {
+        font-size: 0.65rem;
+        padding: 2px 5px;
+        margin-left: 4px;
+    }
+
+    .mp-player-status {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    /* Lobby Actions */
+    .mp-lobby-actions {
+        gap: 0.6rem;
+    }
+
+    .mp-ready-btn,
+    .mp-start-btn {
+        padding: 0.8rem;
+        font-size: 0.95rem;
+    }
+
+    .mp-leave-btn {
+        padding: 0.7rem 0.85rem;
+        font-size: 0.85rem;
+        gap: 6px;
+    }
+
+    /* Minimized Popup */
+    .multiplayer-popup {
+        bottom: 15px;
+        right: 15px;
+        border-radius: var(--radius-sm);
+    }
+
+    .mp-popup-header {
+        padding: 0.6rem 0.8rem;
+    }
+
+    .mp-popup-info {
+        gap: 0.75rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .mp-popup-room {
+        font-size: 0.9rem;
+        letter-spacing: 1.5px;
+    }
+
+    .mp-popup-players {
+        font-size: 0.75rem;
+    }
+
+    .mp-popup-expand {
+        width: 26px;
+        height: 26px;
+    }
+
+    /* Loading */
+    .mp-loading {
+        padding: 1.5rem;
+    }
+
+    .mp-spinner {
+        width: 36px;
+        height: 36px;
+        border-width: 2.5px;
+    }
+
+    .mp-loading p {
+        font-size: 0.9rem;
+    }
+}
+
+/* Extra Small Mobile (up to 360px) */
+@media (max-width: 360px) {
+    .multiplayer-fab {
+        width: 50px;
+        height: 50px;
+        bottom: 12px;
+        right: 12px;
+    }
+
+    .multiplayer-fab .fab-icon {
+        font-size: 1.3rem;
+    }
+
+    .mp-modal-header h3 {
+        font-size: 0.9rem;
+    }
+
+    .mp-modal-body {
+        padding: 0.75rem;
+    }
+
+    .mp-room-code .code {
+        font-size: 1.2rem;
+        letter-spacing: 2px;
+    }
+
+    .mp-players-list {
+        max-height: 140px;
+    }
+
+    .mp-menu-btn .text h4 {
+        font-size: 0.9rem;
+    }
+
+    .mp-form-actions button {
+        padding: 0.7rem;
+        font-size: 0.9rem;
+    }
+}
