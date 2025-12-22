@@ -158,7 +158,7 @@ class MultiplayerUI {
                 <div class="mp-form-group">
                     <label for="mpPlayerName">Your Name</label>
                     <input type="text" id="mpPlayerName" placeholder="Enter your name"
-                           maxlength="20" value="${this.playerName}">
+                           maxlength="50" value="${this.playerName}">
                 </div>
 
                 <div class="mp-form-actions">
@@ -205,7 +205,7 @@ class MultiplayerUI {
                 <div class="mp-form-group">
                     <label for="mpPlayerNameJoin">Your Name</label>
                     <input type="text" id="mpPlayerNameJoin" placeholder="Enter your name"
-                           maxlength="20" value="${this.playerName}">
+                           maxlength="50" value="${this.playerName}">
                 </div>
 
                 <div class="mp-form-actions">

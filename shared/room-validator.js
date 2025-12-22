@@ -40,8 +40,8 @@ class RoomValidator {
             return { valid: false, error: 'Name must be at least 2 characters' };
         }
 
-        if (trimmedName.length > 20) {
-            return { valid: false, error: 'Name must be 20 characters or less' };
+        if (trimmedName.length > 50) {
+            return { valid: false, error: 'Name must be 50 characters or less' };
         }
 
         // Check for inappropriate characters
