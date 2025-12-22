@@ -22,7 +22,7 @@ const MP_CONSTANTS = {
     },
 
     // Limits
-    MAX_PLAYERS: 4,
+    MAX_PLAYERS: 10,
     MIN_PLAYERS_TO_START: 2,
     ROOM_CODE_LENGTH: 4,
     ROOM_EXPIRY_HOURS: 2,

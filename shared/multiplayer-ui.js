@@ -307,7 +307,7 @@ class MultiplayerUI {
                             ${this.isReady ? '⏳ Cancel Ready' : '✅ Ready'}
                         </button>
                     `}
-                    <button class="mp-leave-btn" id="mpLeaveBtn">Leave Room</button>
+                    <button class="mp-leave-btn" id="mpLeaveBtn">🚪 Leave Room</button>
                 </div>
             </div>
         `;
@@ -476,6 +476,19 @@ class MultiplayerUI {
             const countEl = document.querySelector('.mp-players-count');
             if (countEl) {
                 countEl.textContent = `${playerCount}/${maxPlayers}`;
+            }
+
+            // Update ready button state for non-host players
+            if (!this.isHost) {
+                const currentPlayer = players[this.currentPlayerId];
+                if (currentPlayer) {
+                    this.isReady = currentPlayer.isReady || false;
+                    const readyBtn = document.getElementById('mpReadyBtn');
+                    if (readyBtn) {
+                        readyBtn.className = `mp-ready-btn ${this.isReady ? 'is-ready' : 'not-ready'}`;
+                        readyBtn.textContent = this.isReady ? '⏳ Cancel Ready' : '✅ Ready';
+                    }
+                }
             }
 
             // Update start button state
