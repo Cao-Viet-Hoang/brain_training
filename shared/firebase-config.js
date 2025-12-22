@@ -12,7 +12,6 @@
  * 
 */
 
-
 // ⚠️ NOTE: If you somehow stumbled upon this config, please just look but don't touch anything... pretty please? 🥺
 const firebaseConfig = {
   apiKey: "AIzaSyBmpjcuOC6-HlssHqnr-LIdNIo7ORcnIcc",
