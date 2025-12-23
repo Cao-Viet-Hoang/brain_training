@@ -235,7 +235,6 @@ class PixelGameMultiplayerAdapter extends MultiplayerGameAdapter {
             cardCount: this.game.config.cardCount,
             targetCount: this.game.config.targetCount,
             roundTimeLimit: this.game.config.roundTimeLimit,
-            answerTimeLimit: this.game.config.answerTimeLimit,
             penaltyMode: this.game.config.penaltyMode
         };
     }
@@ -248,11 +247,10 @@ class PixelGameMultiplayerAdapter extends MultiplayerGameAdapter {
 
         // Read configuration from UI
         const config = {
-            gameMode: document.getElementById('gameMode').value,
+            gameMode: 'single', // Pixel game doesn't have gameMode selector
             cardCount: parseInt(document.getElementById('cardCount').value),
             targetCount: parseInt(document.getElementById('targetCount').value),
             roundTimeLimit: parseInt(document.getElementById('roundTimeLimit').value),
-            answerTimeLimit: parseInt(document.getElementById('answerTimeLimit').value),
             penaltyMode: document.getElementById('penaltyMode').value
         };
 

@@ -108,7 +108,6 @@ class PixelNumberGame {
             cardCount: 15,
             targetCount: 3,
             roundTimeLimit: 300,
-            answerTimeLimit: 10,
             penaltyMode: 'score'
         };
 
@@ -215,7 +214,6 @@ class PixelNumberGame {
             cardCount: parseInt(document.getElementById('cardCount').value),
             targetCount: parseInt(document.getElementById('targetCount').value),
             roundTimeLimit: parseInt(document.getElementById('roundTimeLimit').value),
-            answerTimeLimit: 10,
             penaltyMode: document.getElementById('penaltyMode').value
         };
 
