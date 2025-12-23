@@ -1043,6 +1043,13 @@ class MazeGameConfig {
         const reduction = (round - 1) * 5;
         baseTime = baseTime - reduction;
 
+        // Fog mode time bonus: light fog gets 25% more time due to limited visibility
+        if (this.mode === 'fog_light') {
+            baseTime = Math.floor(baseTime * 1.25);
+        } else if (this.mode === 'fog_heavy') {
+            baseTime = Math.floor(baseTime * 1.5);
+        }
+
         return Math.max(this.minTime, Math.min(baseTime, this.maxTime));
     }
 
