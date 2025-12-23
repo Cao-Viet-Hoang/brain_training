@@ -251,6 +251,72 @@
     color: var(--text-secondary);
 }
 
+/* ===== Maze Size Input ===== */
+.maze-size-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.size-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: var(--secondary-color);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+}
+
+.size-input {
+    width: 70px;
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    text-align: center;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+
+.size-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.2);
+}
+
+.size-input::-webkit-outer-spin-button,
+.size-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.size-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.size-label {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.size-display {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 30px;
+}
+
+.size-hint {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
 .start-btn {
     width: 100%;
     background: var(--primary-color);
@@ -380,11 +446,32 @@
 .maze-grid.size-7 { grid-template-columns: repeat(7, 1fr); }
 .maze-grid.size-9 { grid-template-columns: repeat(9, 1fr); }
 .maze-grid.size-11 { grid-template-columns: repeat(11, 1fr); }
+.maze-grid.size-12 { grid-template-columns: repeat(12, 1fr); }
 .maze-grid.size-13 { grid-template-columns: repeat(13, 1fr); }
+.maze-grid.size-14 { grid-template-columns: repeat(14, 1fr); }
 .maze-grid.size-15 { grid-template-columns: repeat(15, 1fr); }
+.maze-grid.size-16 { grid-template-columns: repeat(16, 1fr); }
 .maze-grid.size-17 { grid-template-columns: repeat(17, 1fr); }
+.maze-grid.size-18 { grid-template-columns: repeat(18, 1fr); }
 .maze-grid.size-19 { grid-template-columns: repeat(19, 1fr); }
+.maze-grid.size-20 { grid-template-columns: repeat(20, 1fr); }
 .maze-grid.size-21 { grid-template-columns: repeat(21, 1fr); }
+.maze-grid.size-22 { grid-template-columns: repeat(22, 1fr); }
+.maze-grid.size-23 { grid-template-columns: repeat(23, 1fr); }
+.maze-grid.size-24 { grid-template-columns: repeat(24, 1fr); }
+.maze-grid.size-25 { grid-template-columns: repeat(25, 1fr); }
+.maze-grid.size-26 { grid-template-columns: repeat(26, 1fr); }
+.maze-grid.size-27 { grid-template-columns: repeat(27, 1fr); }
+.maze-grid.size-28 { grid-template-columns: repeat(28, 1fr); }
+.maze-grid.size-29 { grid-template-columns: repeat(29, 1fr); }
+.maze-grid.size-30 { grid-template-columns: repeat(30, 1fr); }
+.maze-grid.size-31 { grid-template-columns: repeat(31, 1fr); }
+.maze-grid.size-32 { grid-template-columns: repeat(32, 1fr); }
+.maze-grid.size-33 { grid-template-columns: repeat(33, 1fr); }
+.maze-grid.size-34 { grid-template-columns: repeat(34, 1fr); }
+.maze-grid.size-35 { grid-template-columns: repeat(35, 1fr); }
+.maze-grid.size-36 { grid-template-columns: repeat(36, 1fr); }
+.maze-grid.size-37 { grid-template-columns: repeat(37, 1fr); }
 
 /* ===== Maze Cells ===== */
 .maze-cell {
@@ -405,11 +492,32 @@
 .maze-grid.size-7 .maze-cell { width: 45px; height: 45px; }
 .maze-grid.size-9 .maze-cell { width: 40px; height: 40px; }
 .maze-grid.size-11 .maze-cell { width: 35px; height: 35px; }
+.maze-grid.size-12 .maze-cell { width: 32px; height: 32px; }
 .maze-grid.size-13 .maze-cell { width: 30px; height: 30px; }
+.maze-grid.size-14 .maze-cell { width: 29px; height: 29px; }
 .maze-grid.size-15 .maze-cell { width: 28px; height: 28px; }
+.maze-grid.size-16 .maze-cell { width: 27px; height: 27px; }
 .maze-grid.size-17 .maze-cell { width: 26px; height: 26px; }
+.maze-grid.size-18 .maze-cell { width: 25px; height: 25px; }
 .maze-grid.size-19 .maze-cell { width: 24px; height: 24px; }
+.maze-grid.size-20 .maze-cell { width: 23px; height: 23px; }
 .maze-grid.size-21 .maze-cell { width: 22px; height: 22px; }
+.maze-grid.size-22 .maze-cell { width: 21px; height: 21px; }
+.maze-grid.size-23 .maze-cell { width: 20px; height: 20px; }
+.maze-grid.size-24 .maze-cell { width: 19px; height: 19px; }
+.maze-grid.size-25 .maze-cell { width: 18px; height: 18px; }
+.maze-grid.size-26 .maze-cell { width: 17px; height: 17px; }
+.maze-grid.size-27 .maze-cell { width: 16px; height: 16px; }
+.maze-grid.size-28 .maze-cell { width: 16px; height: 16px; }
+.maze-grid.size-29 .maze-cell { width: 15px; height: 15px; }
+.maze-grid.size-30 .maze-cell { width: 15px; height: 15px; }
+.maze-grid.size-31 .maze-cell { width: 14px; height: 14px; }
+.maze-grid.size-32 .maze-cell { width: 14px; height: 14px; }
+.maze-grid.size-33 .maze-cell { width: 13px; height: 13px; }
+.maze-grid.size-34 .maze-cell { width: 13px; height: 13px; }
+.maze-grid.size-35 .maze-cell { width: 12px; height: 12px; }
+.maze-grid.size-36 .maze-cell { width: 12px; height: 12px; }
+.maze-grid.size-37 .maze-cell { width: 11px; height: 11px; }
 
 /* Wall cell */
 .maze-cell.wall {

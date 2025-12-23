@@ -5,8 +5,8 @@
 
 // ============================================================================
 // MODULE 1: ADVANCED MAZE GENERATOR
-// Uses Growing Tree algorithm with random bias for more junctions
-// Includes braiding, quality scoring, and multiple exits
+// Uses Hybrid algorithm: Growing Tree + Recursive Division + Noise Generation
+// Creates challenging mazes with many dead-ends, fake paths, and confusing junctions
 // ============================================================================
 class MazeGenerator {
     constructor() {
@@ -17,17 +17,25 @@ class MazeGenerator {
             { dx: 2, dy: 0, wallDx: 1, wallDy: 0 }    // Right
         ];
 
-        // Quality thresholds for maze selection
+        this.simpleDirections = [
+            { dx: 0, dy: -1 }, // Up
+            { dx: 0, dy: 1 },  // Down
+            { dx: -1, dy: 0 }, // Left
+            { dx: 1, dy: 0 }   // Right
+        ];
+
+        // Quality thresholds for maze selection - stricter for harder mazes
         this.qualityThresholds = {
-            minJunctionRatio: 0.15,      // At least 15% of path cells should be junctions
-            maxCorridorRatio: 0.5,       // No more than 50% should be corridors
-            maxStraightLength: 5,        // Max average straight segment length
-            minWrongBranchLength: 3      // Wrong branches should be at least 3 cells
+            minJunctionRatio: 0.20,      // At least 20% of path cells should be junctions
+            maxCorridorRatio: 0.35,      // No more than 35% should be corridors
+            maxStraightLength: 3,        // Max average straight segment length
+            minWrongBranchLength: 4,     // Wrong branches should be at least 4 cells
+            minDeadEndRatio: 0.15        // At least 15% dead ends to confuse
         };
     }
 
     /**
-     * Generate best maze from multiple candidates
+     * Generate best maze from multiple candidates with advanced algorithms
      * @param {number} width - Maze width (should be odd)
      * @param {number} height - Maze height (should be odd)
      * @param {Object} options - Generation options
@@ -35,8 +43,10 @@ class MazeGenerator {
      */
     generate(width, height, options = {}) {
         const {
-            candidates = 50,           // Number of mazes to generate
-            braidAmount = 0.15         // Percentage of dead-ends to remove (0-1)
+            candidates = 80,           // More candidates for better selection
+            braidAmount = 0.20,        // Higher braiding for more loops/confusion
+            algorithm = 'hybrid',      // 'hybrid', 'recursive_division', 'growing_tree', 'eller'
+            noiseLevel = 0.3           // Amount of noise/fake paths to add
         } = options;
 
         // Ensure odd dimensions for proper maze structure
@@ -53,11 +63,29 @@ class MazeGenerator {
         for (let i = 0; i < candidates; i++) {
             const grid = this.initializeGrid(totalWidth, totalHeight);
 
-            // Use Growing Tree algorithm with random bias
-            this.growingTreeCarve(grid, totalWidth, totalHeight);
+            // Use different algorithms based on configuration
+            switch (algorithm) {
+                case 'recursive_division':
+                    this.recursiveDivisionCarve(grid, totalWidth, totalHeight);
+                    break;
+                case 'eller':
+                    this.ellerAlgorithmCarve(grid, totalWidth, totalHeight);
+                    break;
+                case 'hybrid':
+                    this.hybridCarve(grid, totalWidth, totalHeight);
+                    break;
+                default:
+                    this.growingTreeCarve(grid, totalWidth, totalHeight);
+            }
 
             // Add controlled braiding (remove some dead-ends to create loops)
             this.addBraiding(grid, totalWidth, totalHeight, braidAmount);
+
+            // Add noise and fake paths to increase difficulty
+            this.addNoisePaths(grid, totalWidth, totalHeight, noiseLevel);
+
+            // Add extra dead-end extensions to confuse players
+            this.extendDeadEnds(grid, totalWidth, totalHeight);
 
             // Score this maze
             const score = this.scoreMaze(grid, totalWidth, totalHeight);
@@ -110,10 +138,22 @@ class MazeGenerator {
     }
 
     /**
-     * Growing Tree algorithm with random bias for more junctions
-     * Unlike DFS-backtracker, this creates more varied maze structures
+     * Hybrid algorithm combining multiple techniques for maximum difficulty
+     * Uses Growing Tree with aggressive random bias + Recursive Division features
      */
-    growingTreeCarve(grid, totalWidth, totalHeight) {
+    hybridCarve(grid, totalWidth, totalHeight) {
+        // First pass: Growing Tree with very high random bias for many junctions
+        this.growingTreeCarve(grid, totalWidth, totalHeight, 0.85);
+
+        // Second pass: Add recursive division walls to create more complexity
+        this.addRecursiveWalls(grid, totalWidth, totalHeight);
+    }
+
+    /**
+     * Growing Tree algorithm with configurable random bias
+     * Higher randomBias = more junctions and complex structures
+     */
+    growingTreeCarve(grid, totalWidth, totalHeight, randomBias = 0.7) {
         const cells = [];
         const startX = 2;
         const startY = 2;
@@ -122,12 +162,13 @@ class MazeGenerator {
         cells.push({ x: startX, y: startY });
 
         while (cells.length > 0) {
-            // Random bias: 70% random selection, 30% newest (like DFS)
-            // This creates more junctions than pure DFS
+            // Configurable random bias for cell selection
             let index;
-            if (Math.random() < 0.7) {
+            if (Math.random() < randomBias) {
+                // Random selection creates more branches
                 index = Math.floor(Math.random() * cells.length);
             } else {
+                // Newest selection creates longer corridors
                 index = cells.length - 1;
             }
 
@@ -150,6 +191,314 @@ class MazeGenerator {
                 cells.splice(index, 1);
             }
         }
+    }
+
+    /**
+     * Recursive Division algorithm - creates maze with long walls
+     * Good for creating confusing large open areas with strategic walls
+     */
+    recursiveDivisionCarve(grid, totalWidth, totalHeight) {
+        // First, create all paths
+        for (let y = 2; y < totalHeight - 2; y++) {
+            for (let x = 2; x < totalWidth - 2; x++) {
+                grid[y][x] = 'path';
+            }
+        }
+
+        // Then divide recursively
+        this.divide(grid, 2, 2, totalWidth - 4, totalHeight - 4);
+    }
+
+    /**
+     * Recursive division helper - divides a chamber with a wall
+     */
+    divide(grid, x, y, width, height) {
+        if (width < 4 || height < 4) return;
+
+        // Choose orientation based on aspect ratio with some randomness
+        const horizontal = width < height ? true : (width > height ? false : Math.random() < 0.5);
+
+        if (horizontal) {
+            // Build horizontal wall
+            const wallY = y + 2 + Math.floor(Math.random() * Math.floor((height - 3) / 2)) * 2;
+            const passageX = x + Math.floor(Math.random() * Math.floor(width / 2)) * 2;
+
+            for (let wx = x; wx < x + width; wx++) {
+                if (wx !== passageX && wx !== passageX + 1) {
+                    grid[wallY][wx] = 'wall';
+                }
+            }
+
+            // Recurse on both sides
+            this.divide(grid, x, y, width, wallY - y);
+            this.divide(grid, x, wallY + 1, width, height - (wallY - y) - 1);
+        } else {
+            // Build vertical wall
+            const wallX = x + 2 + Math.floor(Math.random() * Math.floor((width - 3) / 2)) * 2;
+            const passageY = y + Math.floor(Math.random() * Math.floor(height / 2)) * 2;
+
+            for (let wy = y; wy < y + height; wy++) {
+                if (wy !== passageY && wy !== passageY + 1) {
+                    grid[wy][wallX] = 'wall';
+                }
+            }
+
+            // Recurse on both sides
+            this.divide(grid, x, y, wallX - x, height);
+            this.divide(grid, wallX + 1, y, width - (wallX - x) - 1, height);
+        }
+    }
+
+    /**
+     * Add recursive division-style walls to existing maze for extra complexity
+     */
+    addRecursiveWalls(grid, totalWidth, totalHeight) {
+        const iterations = Math.floor((totalWidth + totalHeight) / 8);
+
+        for (let i = 0; i < iterations; i++) {
+            // Find a 3x3 or larger open area and add a wall segment
+            const x = 2 + Math.floor(Math.random() * (totalWidth - 6));
+            const y = 2 + Math.floor(Math.random() * (totalHeight - 6));
+
+            // Check if area is mostly paths
+            let pathCount = 0;
+            for (let dy = 0; dy < 3; dy++) {
+                for (let dx = 0; dx < 3; dx++) {
+                    if (grid[y + dy] && grid[y + dy][x + dx] === 'path') {
+                        pathCount++;
+                    }
+                }
+            }
+
+            // If area is mostly paths, add a wall with passage
+            if (pathCount >= 7) {
+                const horizontal = Math.random() < 0.5;
+                if (horizontal && y + 1 < totalHeight - 2) {
+                    // Add horizontal wall with one passage
+                    const passageOffset = Math.floor(Math.random() * 3);
+                    for (let dx = 0; dx < 3; dx++) {
+                        if (dx !== passageOffset && grid[y + 1][x + dx] === 'path') {
+                            // Only add wall if it doesn't block the only path
+                            const neighbors = this.countPathNeighbors(grid, x + dx, y + 1);
+                            if (neighbors > 2) {
+                                grid[y + 1][x + dx] = 'wall';
+                            }
+                        }
+                    }
+                } else if (x + 1 < totalWidth - 2) {
+                    // Add vertical wall with one passage
+                    const passageOffset = Math.floor(Math.random() * 3);
+                    for (let dy = 0; dy < 3; dy++) {
+                        if (dy !== passageOffset && grid[y + dy][x + 1] === 'path') {
+                            const neighbors = this.countPathNeighbors(grid, x + 1, y + dy);
+                            if (neighbors > 2) {
+                                grid[y + dy][x + 1] = 'wall';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Eller's Algorithm - creates mazes row by row
+     * Known for creating challenging, unbiased mazes
+     */
+    ellerAlgorithmCarve(grid, totalWidth, totalHeight) {
+        const mazeWidth = Math.floor((totalWidth - 3) / 2) + 1;
+        const mazeHeight = Math.floor((totalHeight - 3) / 2) + 1;
+
+        // Initialize sets for first row
+        let sets = [];
+        let nextSetId = 0;
+        for (let x = 0; x < mazeWidth; x++) {
+            sets[x] = nextSetId++;
+        }
+
+        for (let row = 0; row < mazeHeight; row++) {
+            const y = 2 + row * 2;
+
+            // Create cells for this row
+            for (let x = 0; x < mazeWidth; x++) {
+                const cellX = 2 + x * 2;
+                grid[y][cellX] = 'path';
+            }
+
+            // Randomly merge adjacent cells in the same row
+            for (let x = 0; x < mazeWidth - 1; x++) {
+                const cellX = 2 + x * 2;
+                if (sets[x] !== sets[x + 1] && (row === mazeHeight - 1 || Math.random() < 0.5)) {
+                    // Merge by removing wall
+                    grid[y][cellX + 1] = 'path';
+                    const oldSet = sets[x + 1];
+                    const newSet = sets[x];
+                    for (let i = 0; i < mazeWidth; i++) {
+                        if (sets[i] === oldSet) sets[i] = newSet;
+                    }
+                }
+            }
+
+            // Create vertical connections to next row (except for last row)
+            if (row < mazeHeight - 1) {
+                const nextY = y + 2;
+                const setConnections = {};
+
+                // Group cells by set
+                for (let x = 0; x < mazeWidth; x++) {
+                    if (!setConnections[sets[x]]) {
+                        setConnections[sets[x]] = [];
+                    }
+                    setConnections[sets[x]].push(x);
+                }
+
+                // Each set must have at least one vertical connection
+                const newSets = [];
+                for (let x = 0; x < mazeWidth; x++) {
+                    newSets[x] = nextSetId++;
+                }
+
+                for (const setId in setConnections) {
+                    const cells = setConnections[setId];
+                    this.shuffleArray(cells);
+
+                    // Ensure at least one connection per set
+                    const connectionCount = 1 + Math.floor(Math.random() * cells.length);
+                    for (let i = 0; i < connectionCount; i++) {
+                        const x = cells[i];
+                        const cellX = 2 + x * 2;
+                        grid[y + 1][cellX] = 'path'; // Remove wall
+                        grid[nextY][cellX] = 'path'; // Next row cell
+                        newSets[x] = parseInt(setId);
+                    }
+                }
+
+                sets = newSets;
+            }
+        }
+    }
+
+    /**
+     * Add noise paths - create fake paths that lead nowhere
+     * This makes the maze much harder to solve visually
+     */
+    addNoisePaths(grid, totalWidth, totalHeight, noiseLevel) {
+        const totalCells = (totalWidth - 4) * (totalHeight - 4);
+        const noiseCount = Math.floor(totalCells * noiseLevel * 0.1);
+
+        for (let i = 0; i < noiseCount; i++) {
+            // Find a wall cell adjacent to a path
+            const x = 2 + Math.floor(Math.random() * (totalWidth - 4));
+            const y = 2 + Math.floor(Math.random() * (totalHeight - 4));
+
+            if (grid[y][x] === 'wall') {
+                // Check if adjacent to exactly one path (to create dead-end)
+                const pathNeighbors = [];
+                for (const dir of this.simpleDirections) {
+                    const nx = x + dir.dx;
+                    const ny = y + dir.dy;
+                    if (grid[ny] && grid[ny][nx] === 'path') {
+                        pathNeighbors.push({ x: nx, y: ny });
+                    }
+                }
+
+                if (pathNeighbors.length === 1) {
+                    // Create a small dead-end branch
+                    grid[y][x] = 'path';
+
+                    // Extend the dead-end randomly
+                    let currentX = x;
+                    let currentY = y;
+                    const branchLength = 1 + Math.floor(Math.random() * 3);
+
+                    for (let j = 0; j < branchLength; j++) {
+                        const availableDirs = [];
+                        for (const dir of this.simpleDirections) {
+                            const nx = currentX + dir.dx;
+                            const ny = currentY + dir.dy;
+                            if (nx > 1 && nx < totalWidth - 2 &&
+                                ny > 1 && ny < totalHeight - 2 &&
+                                grid[ny][nx] === 'wall') {
+                                // Check this won't create a loop
+                                const wallNeighbors = this.countPathNeighbors(grid, nx, ny);
+                                if (wallNeighbors <= 1) {
+                                    availableDirs.push({ x: nx, y: ny });
+                                }
+                            }
+                        }
+
+                        if (availableDirs.length > 0) {
+                            const next = availableDirs[Math.floor(Math.random() * availableDirs.length)];
+                            grid[next.y][next.x] = 'path';
+                            currentX = next.x;
+                            currentY = next.y;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Extend existing dead-ends to make them longer and more confusing
+     */
+    extendDeadEnds(grid, totalWidth, totalHeight) {
+        const deadEnds = this.findDeadEnds(grid, totalWidth, totalHeight);
+        this.shuffleArray(deadEnds);
+
+        // Extend about 30% of dead ends
+        const toExtend = Math.floor(deadEnds.length * 0.3);
+
+        for (let i = 0; i < toExtend; i++) {
+            const deadEnd = deadEnds[i];
+            let currentX = deadEnd.x;
+            let currentY = deadEnd.y;
+
+            // Find the direction away from the path
+            const pathDir = this.findPathDirection(grid, currentX, currentY);
+            if (!pathDir) continue;
+
+            // Try to extend in the opposite direction
+            const extendDir = { dx: -pathDir.dx, dy: -pathDir.dy };
+            const extensionLength = 2 + Math.floor(Math.random() * 4);
+
+            for (let j = 0; j < extensionLength; j++) {
+                const nx = currentX + extendDir.dx;
+                const ny = currentY + extendDir.dy;
+
+                if (nx > 1 && nx < totalWidth - 2 &&
+                    ny > 1 && ny < totalHeight - 2 &&
+                    grid[ny][nx] === 'wall') {
+                    // Check this won't connect to another path
+                    const neighbors = this.countPathNeighbors(grid, nx, ny);
+                    if (neighbors === 1) {
+                        grid[ny][nx] = 'path';
+                        currentX = nx;
+                        currentY = ny;
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Find the direction where the path neighbor is
+     */
+    findPathDirection(grid, x, y) {
+        for (const dir of this.simpleDirections) {
+            const nx = x + dir.dx;
+            const ny = y + dir.dy;
+            if (grid[ny] && grid[ny][nx] === 'path') {
+                return dir;
+            }
+        }
+        return null;
     }
 
     /**
@@ -607,6 +956,7 @@ class MazeGenerator {
 
 // ============================================================================
 // MODULE 2: GAME CONFIGURATION
+// Enhanced with custom maze size and difficulty-based noise levels
 // ============================================================================
 class MazeGameConfig {
     constructor(options = {}) {
@@ -614,50 +964,103 @@ class MazeGameConfig {
         this.mode = options.mode || 'classic'; // 'classic', 'fog_light', 'fog_heavy'
 
         // Difficulty settings
-        this.difficulty = options.difficulty || 'easy'; // 'easy', 'medium', 'hard'
+        this.difficulty = options.difficulty || 'medium'; // 'easy', 'medium', 'hard'
 
         // Number of rounds
         this.totalRounds = options.totalRounds || 5;
 
-        // Base maze sizes for each difficulty
-        this.baseMazeSize = {
-            easy: 7,
-            medium: 11,
-            hard: 15
-        };
+        // Custom maze size (user-defined, minimum 10)
+        this.customMazeSize = Math.max(10, options.customMazeSize || 15);
 
-        // Time limits (in seconds) for each difficulty
-        this.baseTime = {
-            easy: 60,
-            medium: 90,
-            hard: 120
-        };
+        // Time limits (in seconds) based on maze size
+        // Larger mazes need more time
+        this.baseTimePerCell = 0.8; // seconds per cell approximately
+        this.minTime = 30;
+        this.maxTime = 300;
 
         // Scoring
         this.baseScore = 100;
         this.timeBonus = 2; // Points per second remaining
         this.stepPenalty = 0; // No penalty for extra steps
         this.errorPenalty = 5; // Points lost per wall hit
+
+        // Difficulty-based noise and complexity settings
+        this.difficultySettings = {
+            easy: {
+                noiseLevel: 0.15,      // Less fake paths
+                braidAmount: 0.15,     // Fewer loops
+                candidates: 50,        // Less candidates = slightly less optimal mazes
+                algorithm: 'growing_tree',
+                sizeIncrease: 2        // Size increase per 2 rounds
+            },
+            medium: {
+                noiseLevel: 0.30,      // Moderate fake paths
+                braidAmount: 0.25,     // More loops to confuse
+                candidates: 80,        // More candidates for better maze selection
+                algorithm: 'hybrid',
+                sizeIncrease: 3        // Size increase per 2 rounds
+            },
+            hard: {
+                noiseLevel: 0.45,      // Maximum fake paths
+                braidAmount: 0.35,     // Many loops and alternative routes
+                candidates: 100,       // Maximum candidates for most challenging mazes
+                algorithm: 'hybrid',
+                sizeIncrease: 4        // Size increase per 2 rounds
+            }
+        };
     }
 
     /**
      * Get maze size for a specific round
+     * Uses custom size as base, increases based on difficulty
      */
     getMazeSize(round) {
-        const baseSize = this.baseMazeSize[this.difficulty];
-        const increase = Math.floor((round - 1) / 2) * 2; // Increase every 2 rounds
-        const maxSize = 21;
-        return Math.min(baseSize + increase, maxSize);
+        const settings = this.difficultySettings[this.difficulty];
+        const increase = Math.floor((round - 1) / 2) * settings.sizeIncrease;
+        const maxSize = 35; // Maximum supported size
+        return Math.min(this.customMazeSize + increase, maxSize);
     }
 
     /**
      * Get time limit for a specific round
+     * Calculated based on maze size
      */
     getTimeLimit(round) {
-        const baseTime = this.baseTime[this.difficulty];
-        const reduction = (round - 1) * 5; // Reduce 5 seconds per round
-        const minTime = 20;
-        return Math.max(baseTime - reduction, minTime);
+        const mazeSize = this.getMazeSize(round);
+        const totalCells = mazeSize * mazeSize;
+
+        // Base time calculation: more cells = more time
+        // But harder difficulties get slightly less time
+        const difficultyMultiplier = {
+            easy: 1.2,
+            medium: 1.0,
+            hard: 0.85
+        };
+
+        let baseTime = Math.floor(totalCells * this.baseTimePerCell * difficultyMultiplier[this.difficulty]);
+
+        // Round reduction (less time each round)
+        const reduction = (round - 1) * 5;
+        baseTime = baseTime - reduction;
+
+        return Math.max(this.minTime, Math.min(baseTime, this.maxTime));
+    }
+
+    /**
+     * Get maze generation options based on difficulty
+     */
+    getMazeOptions(round) {
+        const settings = this.difficultySettings[this.difficulty];
+
+        // Increase noise slightly each round
+        const roundNoiseBonus = (round - 1) * 0.02;
+
+        return {
+            candidates: settings.candidates,
+            braidAmount: Math.min(0.45, settings.braidAmount + (round - 1) * 0.02),
+            algorithm: settings.algorithm,
+            noiseLevel: Math.min(0.5, settings.noiseLevel + roundNoiseBonus)
+        };
     }
 }
 
@@ -1205,6 +1608,33 @@ class MazeGame {
             this.config.totalRounds = parseInt(value);
         });
 
+        // Maze size input
+        const mazeSizeInput = document.getElementById('mazeSizeInput');
+        const mazeSizeDisplay = document.getElementById('mazeSizeDisplay');
+
+        if (mazeSizeInput && mazeSizeDisplay) {
+            // Sync display with input value
+            mazeSizeInput.addEventListener('input', () => {
+                let value = parseInt(mazeSizeInput.value) || 10;
+                // Clamp value between 10 and 35
+                value = Math.max(10, Math.min(35, value));
+                mazeSizeDisplay.textContent = value;
+                this.config.customMazeSize = value;
+            });
+
+            // Validate on blur
+            mazeSizeInput.addEventListener('blur', () => {
+                let value = parseInt(mazeSizeInput.value) || 10;
+                value = Math.max(10, Math.min(35, value));
+                mazeSizeInput.value = value;
+                mazeSizeDisplay.textContent = value;
+                this.config.customMazeSize = value;
+            });
+
+            // Initialize with default value
+            this.config.customMazeSize = parseInt(mazeSizeInput.value) || 15;
+        }
+
         // Start button
         document.getElementById('startGameBtn').addEventListener('click', () => {
             this.startGame();
@@ -1287,13 +1717,9 @@ class MazeGame {
         // Generate maze for current round with advanced options
         const mazeSize = this.config.getMazeSize(this.state.currentRound);
 
-        // Configure maze generation based on difficulty
-        // Braiding creates loops = multiple paths to the SAME exit
-        // Higher braid = more alternative routes
-        const mazeOptions = {
-            candidates: this.config.difficulty === 'easy' ? 30 : 50,
-            braidAmount: this.config.difficulty === 'easy' ? 0.15 : 0.25 // More braiding = more paths
-        };
+        // Get maze generation options based on difficulty and round
+        // Higher difficulty = more noise, more loops, more challenging algorithms
+        const mazeOptions = this.config.getMazeOptions(this.state.currentRound);
 
         this.currentMaze = this.mazeGenerator.generate(mazeSize, mazeSize, mazeOptions);
 

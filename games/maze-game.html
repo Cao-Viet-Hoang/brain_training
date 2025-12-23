@@ -112,11 +112,23 @@
                     </div>
 
                     <div class="config-item">
+                        <label class="config-label">Maze Size</label>
+                        <div class="maze-size-input">
+                            <div class="size-input-wrapper">
+                                <input type="number" id="mazeSizeInput" class="size-input" min="10" max="35" value="15" placeholder="10-35">
+                                <span class="size-label">x</span>
+                                <span class="size-display" id="mazeSizeDisplay">15</span>
+                            </div>
+                            <div class="size-hint">Min: 10 | Max: 35 (increases each round)</div>
+                        </div>
+                    </div>
+
+                    <div class="config-item">
                         <label class="config-label">Starting Difficulty</label>
                         <div class="option-buttons" id="difficultyButtons">
-                            <button class="option-btn active" data-value="easy">Easy<br><small>7x7 maze</small></button>
-                            <button class="option-btn" data-value="medium">Medium<br><small>11x11 maze</small></button>
-                            <button class="option-btn" data-value="hard">Hard<br><small>15x15 maze</small></button>
+                            <button class="option-btn" data-value="easy">Easy<br><small>Less noise</small></button>
+                            <button class="option-btn active" data-value="medium">Medium<br><small>Balanced</small></button>
+                            <button class="option-btn" data-value="hard">Hard<br><small>Maximum confusion</small></button>
                         </div>
                     </div>
 
