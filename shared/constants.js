@@ -30,7 +30,18 @@ const MP_CONSTANTS = {
     // Timeouts (ms)
     SYNC_DELAY: 1000,
     COUNTDOWN_DURATION: 3000,
-    SCORE_SYNC_THROTTLE: 500
+    SCORE_SYNC_THROTTLE: 500,
+
+    // Game type to file mapping (add new games here)
+    GAME_FILES: {
+        'math-game': 'math-game.html',
+        'pixel-game': 'pixel-game.html',
+        'expression-puzzle': 'expression-puzzle.html',
+        'dual-n-back': 'dual-n-back.html',
+        'memory-matrix': 'memory-matrix.html',
+        'word-recall': 'word-recall.html',
+        'maze-game': 'maze-game.html'
+    }
 };
 
 // Room code characters (avoid confusing chars like 0/O, 1/I)

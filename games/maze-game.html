@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Runner - Brain Training</title>
+
+    <!-- Google Analytics -->
+    <script src="../js/analytics.js"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗺️</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/maze-game.css">
+    <link rel="stylesheet" href="../css/multiplayer.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="game-header">
+            <a href="../index.html" class="back-btn">← Back</a>
+            <h1>🗺️ Maze Runner</h1>
+            <button class="help-btn" id="helpBtn">❓ How to Play</button>
+        </header>
+
+        <!-- How to Play Modal -->
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeHelpModal">&times;</span>
+                <h2>📖 How to Play</h2>
+                <div class="help-content">
+                    <div class="help-section">
+                        <h3>🎯 Objective</h3>
+                        <p>Navigate from the Start (outside the maze) through the entrance, solve the maze, and reach the Exit within the time limit.</p>
+                        <p>Train your spatial thinking, pathfinding, and problem-solving skills!</p>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>⚙️ Game Modes</h3>
+                        <ul>
+                            <li><strong>Classic:</strong> Full maze visibility - see all paths and walls clearly</li>
+                            <li><strong>Light Fog:</strong> See only 3 cells around you. Previously visited areas remain dimly visible, testing your spatial memory!</li>
+                            <li><strong>Heavy Fog:</strong> See only 1 cell around you with no memory - ultimate navigation challenge requiring pure pathfinding skills!</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>🛤️ Maze Features</h3>
+                        <ul>
+                            <li>Each maze has <strong>one optimal path</strong> calculated from entrance to exit</li>
+                            <li><strong>Multiple alternative routes</strong> with dead-ends, loops, and junctions</li>
+                            <li><strong>Fake paths</strong> and confusing branches designed to challenge you</li>
+                            <li>Path efficiency is tracked - taking the shortest route maximizes your score!</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>🎮 Controls</h3>
+                        <ul>
+                            <li><strong>Mouse/Touch:</strong> Click or tap on adjacent cells (highlighted) to move</li>
+                            <li><strong>Keyboard:</strong> Use arrow keys (↑ ↓ ← →) or WASD keys</li>
+                            <li>Move one cell at a time: up, down, left, or right</li>
+                            <li>Diagonal movement is not allowed</li>
+                            <li>Trying to move into a wall counts as an error</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>📈 Difficulty Progression</h3>
+                        <ul>
+                            <li><strong>Maze Size:</strong> Fixed (you choose 10-35) - stays constant across all rounds</li>
+                            <li><strong>Complexity:</strong> Increases each round with more dead-ends, confusing junctions, and fake paths</li>
+                            <li><strong>Time Limit:</strong> Decreases by 5 seconds each round</li>
+                            <li><strong>Starting Difficulty:</strong> Choose Easy, Medium, or Hard for different base complexity levels</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>🏆 Scoring System</h3>
+                        <ul>
+                            <li><strong>Base Score:</strong> 100 points for completing each round</li>
+                            <li><strong>Path Efficiency Bonus:</strong> Up to +150 points (optimal steps ÷ actual steps × 150)</li>
+                            <li><strong>Time Bonus:</strong> +3 points per second remaining</li>
+                            <li><strong>Time Efficiency Bonus:</strong> Up to +50 points based on % of time saved</li>
+                            <li><strong>Error Penalty:</strong> -10 points per wall collision</li>
+                        </ul>
+                        <p><small>Perfect round example: 100 (base) + 150 (perfect path) + time bonuses - 0 errors = 300+ points!</small></p>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>💡 Pro Tips</h3>
+                        <ul>
+                            <li><strong>Scout first:</strong> In Classic mode, study the maze before moving</li>
+                            <li><strong>Follow walls:</strong> The right-hand or left-hand rule can help find the exit</li>
+                            <li><strong>Mark mentally:</strong> In fog modes, remember which paths you've tried</li>
+                            <li><strong>Balance speed & accuracy:</strong> Both time and path efficiency matter for max score</li>
+                            <li><strong>Avoid backtracking:</strong> Each extra step reduces your efficiency bonus</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Screen -->
+        <div id="configScreen" class="screen active">
+            <div class="config-card">
+                <h2>Game Configuration</h2>
+
+                <div class="config-section">
+                    <div class="config-item">
+                        <label class="config-label" for="roundsInput">Number of Rounds</label>
+                        <input type="number" id="roundsInput" min="1" max="20" value="5" placeholder="1-20" inputmode="numeric" pattern="[0-9]*">
+                    </div>
+
+                    <div class="config-item">
+                        <label class="config-label">Maze Size</label>
+                        <div class="maze-size-input">
+                            <div class="size-input-wrapper">
+                                <input type="number" id="mazeSizeInput" class="size-input" min="10" max="35" value="15" placeholder="10-35">
+                                <span class="size-label">x</span>
+                                <span class="size-display" id="mazeSizeDisplay">15</span>
+                            </div>
+                            <div class="size-hint">Min: 10 | Max: 35 (fixed for all rounds)</div>
+                        </div>
+                    </div>
+
+                    <div class="config-item">
+                        <label class="config-label">Game Mode</label>
+                        <div class="option-buttons" id="gameModeButtons">
+                            <button class="option-btn active" data-value="classic">Classic<br><small>Full visibility</small></button>
+                            <button class="option-btn" data-value="fog_light">Light Fog<br><small>Limited view + memory</small></button>
+                            <button class="option-btn" data-value="fog_heavy">Heavy Fog<br><small>Minimal view, no memory</small></button>
+                        </div>
+                    </div>
+
+                    <div class="config-item">
+                        <label class="config-label">Starting Difficulty</label>
+                        <div class="option-buttons" id="difficultyButtons">
+                            <button class="option-btn" data-value="easy">Easy<br><small>Less noise</small></button>
+                            <button class="option-btn active" data-value="medium">Medium<br><small>Balanced</small></button>
+                            <button class="option-btn" data-value="hard">Hard<br><small>Maximum confusion</small></button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="start-btn" id="startGameBtn">🚀 Start Game</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <!-- Stats Panel -->
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <div class="stat-label">Round</div>
+                    <div class="stat-value" id="roundDisplay">1/5</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="scoreDisplay">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Steps</div>
+                    <div class="stat-value" id="stepsDisplay">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Errors</div>
+                    <div class="stat-value" id="errorsDisplay">0</div>
+                </div>
+            </div>
+
+            <!-- Timer Bar -->
+            <div class="timer-container">
+                <div class="timer-bar">
+                    <div class="timer-fill" id="timerFill"></div>
+                </div>
+                <div class="timer-text" id="timerText">60s</div>
+            </div>
+
+            <!-- Maze Container -->
+            <div class="maze-container">
+                <div id="mazeGrid" class="maze-grid">
+                    <!-- Maze cells will be generated dynamically -->
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="maze-legend">
+                <div class="legend-item">
+                    <div class="legend-icon start"></div>
+                    <span>Start</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon exit"></div>
+                    <span>Exit</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon player"></div>
+                    <span>You</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="resultScreen" class="screen">
+            <div class="result-card">
+                <div id="resultIcon" class="result-icon">🏆</div>
+                <h2 id="resultTitle">Game Complete!</h2>
+
+                <div class="result-stats">
+                    <div class="result-stat">
+                        <div class="result-stat-label">Rounds Completed</div>
+                        <div class="result-stat-value" id="finalRounds">0/5</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Final Score</div>
+                        <div class="result-stat-value" id="finalScore">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Total Steps</div>
+                        <div class="result-stat-value" id="totalSteps">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Total Errors</div>
+                        <div class="result-stat-value" id="totalErrors">0</div>
+                    </div>
+                </div>
+
+                <div class="result-actions">
+                    <button class="result-btn" id="playAgainBtn">🎮 Play Again</button>
+                    <button class="result-btn secondary" id="backToMenuBtn">📋 Main Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Multiplayer Scripts (IN ORDER) -->
+    <script src="../shared/firebase-config.js"></script>
+    <script src="../shared/constants.js"></script>
+    <script src="../shared/room-validator.js"></script>
+    <script src="../shared/room-cleanup.js"></script>
+    <script src="../shared/multiplayer-core.js"></script>
+    <script src="../shared/multiplayer-ui.js"></script>
+    <script src="../shared/multiplayer-adapter.js"></script>
+    <script src="../shared/multiplayer-result-modal.js"></script>
+    <script src="adapters/maze-game-adapter.js"></script>
+
+    <!-- Game Script -->
+    <script src="maze-game.js"></script>
+</body>
+</html>

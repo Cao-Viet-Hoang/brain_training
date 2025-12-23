@@ -1,0 +1,1956 @@
+/* Maze Game Specific Styles */
+
+/* ===== Game Header ===== */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.game-header h1 {
+    flex: 1;
+    text-align: center;
+    font-size: 2rem;
+    margin: 0;
+}
+
+.back-btn {
+    background: var(--secondary-color);
+    color: var(--text-primary);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.back-btn:hover {
+    background: var(--border-color);
+}
+
+.help-btn {
+    background: var(--secondary-color);
+    color: var(--text-primary);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.help-btn:hover {
+    background: var(--border-color);
+}
+
+/* ===== Modal ===== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.3s ease;
+    margin: 1rem;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.close-btn {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: var(--accent-color);
+}
+
+.modal-content h2 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    font-size: 1.8rem;
+}
+
+.help-content {
+    color: var(--text-primary);
+}
+
+.help-section {
+    margin-bottom: var(--spacing-md);
+}
+
+.help-section h3 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-xs);
+    font-size: 1.2rem;
+}
+
+.help-section ul {
+    list-style-position: inside;
+    padding-left: var(--spacing-sm);
+}
+
+.help-section li {
+    margin-bottom: 0.4rem;
+}
+
+/* ===== Screens ===== */
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* ===== Config Screen ===== */
+.config-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-md);
+}
+
+.config-card h2 {
+    text-align: center;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+    font-size: 1.8rem;
+}
+
+.config-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.config-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.config-label {
+    display: block;
+    margin-bottom: 0;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.config-item input[type="number"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.config-item input[type="number"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.option-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.option-btn {
+    background: var(--secondary-color);
+    border: 2px solid transparent;
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+}
+
+.option-btn small {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+}
+
+.option-btn:hover:not(.disabled) {
+    background: var(--border-color);
+    transform: translateY(-2px);
+}
+
+.option-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.option-btn.active small {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.option-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--border-color);
+}
+
+.option-btn.disabled small {
+    color: var(--text-secondary);
+}
+
+/* ===== Maze Size Input ===== */
+.maze-size-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.size-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: var(--secondary-color);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+}
+
+.size-input {
+    width: 70px;
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    text-align: center;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+
+.size-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.2);
+}
+
+.size-input::-webkit-outer-spin-button,
+.size-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.size-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.size-label {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.size-display {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 30px;
+}
+
+.size-hint {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.start-btn {
+    width: 100%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.start-btn:hover {
+    background: #3a7a8a;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ===== Game Screen ===== */
+.stats-panel {
+    background: var(--card-bg);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    justify-content: space-around;
+    gap: var(--spacing-sm);
+    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+    min-width: 80px;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* ===== Timer Bar ===== */
+.timer-container {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    padding: 0 var(--spacing-sm);
+}
+
+.timer-bar {
+    flex: 1;
+    height: 12px;
+    background: var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.timer-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+    border-radius: 6px;
+    transition: width 0.5s linear;
+    width: 100%;
+}
+
+.timer-fill.warning {
+    background: linear-gradient(90deg, var(--warning-color), #FF8C00);
+}
+
+.timer-fill.danger {
+    background: linear-gradient(90deg, var(--accent-color), #FF4444);
+    animation: timerPulse 0.5s ease infinite;
+}
+
+@keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.timer-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    min-width: 50px;
+    text-align: right;
+}
+
+.timer-text.warning {
+    color: #FF8C00;
+}
+
+.timer-text.danger {
+    color: var(--accent-color);
+}
+
+/* ===== Maze Container ===== */
+.maze-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+    overflow: auto;
+}
+
+.maze-grid {
+    display: grid;
+    gap: 2px;
+    background: var(--card-bg);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    border: 3px solid var(--primary-color);
+}
+
+/* Dynamic grid sizes */
+.maze-grid.size-7 { grid-template-columns: repeat(7, 1fr); }
+.maze-grid.size-9 { grid-template-columns: repeat(9, 1fr); }
+.maze-grid.size-11 { grid-template-columns: repeat(11, 1fr); }
+.maze-grid.size-12 { grid-template-columns: repeat(12, 1fr); }
+.maze-grid.size-13 { grid-template-columns: repeat(13, 1fr); }
+.maze-grid.size-14 { grid-template-columns: repeat(14, 1fr); }
+.maze-grid.size-15 { grid-template-columns: repeat(15, 1fr); }
+.maze-grid.size-16 { grid-template-columns: repeat(16, 1fr); }
+.maze-grid.size-17 { grid-template-columns: repeat(17, 1fr); }
+.maze-grid.size-18 { grid-template-columns: repeat(18, 1fr); }
+.maze-grid.size-19 { grid-template-columns: repeat(19, 1fr); }
+.maze-grid.size-20 { grid-template-columns: repeat(20, 1fr); }
+.maze-grid.size-21 { grid-template-columns: repeat(21, 1fr); }
+.maze-grid.size-22 { grid-template-columns: repeat(22, 1fr); }
+.maze-grid.size-23 { grid-template-columns: repeat(23, 1fr); }
+.maze-grid.size-24 { grid-template-columns: repeat(24, 1fr); }
+.maze-grid.size-25 { grid-template-columns: repeat(25, 1fr); }
+.maze-grid.size-26 { grid-template-columns: repeat(26, 1fr); }
+.maze-grid.size-27 { grid-template-columns: repeat(27, 1fr); }
+.maze-grid.size-28 { grid-template-columns: repeat(28, 1fr); }
+.maze-grid.size-29 { grid-template-columns: repeat(29, 1fr); }
+.maze-grid.size-30 { grid-template-columns: repeat(30, 1fr); }
+.maze-grid.size-31 { grid-template-columns: repeat(31, 1fr); }
+.maze-grid.size-32 { grid-template-columns: repeat(32, 1fr); }
+.maze-grid.size-33 { grid-template-columns: repeat(33, 1fr); }
+.maze-grid.size-34 { grid-template-columns: repeat(34, 1fr); }
+.maze-grid.size-35 { grid-template-columns: repeat(35, 1fr); }
+.maze-grid.size-36 { grid-template-columns: repeat(36, 1fr); }
+.maze-grid.size-37 { grid-template-columns: repeat(37, 1fr); }
+
+/* ===== Maze Cells ===== */
+.maze-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 600;
+    user-select: none;
+    min-width: 25px;
+    min-height: 25px;
+}
+
+/* Cell sizes based on maze size */
+.maze-grid.size-7 .maze-cell { width: 45px; height: 45px; }
+.maze-grid.size-9 .maze-cell { width: 40px; height: 40px; }
+.maze-grid.size-11 .maze-cell { width: 35px; height: 35px; }
+.maze-grid.size-12 .maze-cell { width: 32px; height: 32px; }
+.maze-grid.size-13 .maze-cell { width: 30px; height: 30px; }
+.maze-grid.size-14 .maze-cell { width: 29px; height: 29px; }
+.maze-grid.size-15 .maze-cell { width: 28px; height: 28px; }
+.maze-grid.size-16 .maze-cell { width: 27px; height: 27px; }
+.maze-grid.size-17 .maze-cell { width: 26px; height: 26px; }
+.maze-grid.size-18 .maze-cell { width: 25px; height: 25px; }
+.maze-grid.size-19 .maze-cell { width: 24px; height: 24px; }
+.maze-grid.size-20 .maze-cell { width: 23px; height: 23px; }
+.maze-grid.size-21 .maze-cell { width: 22px; height: 22px; }
+.maze-grid.size-22 .maze-cell { width: 21px; height: 21px; }
+.maze-grid.size-23 .maze-cell { width: 20px; height: 20px; }
+.maze-grid.size-24 .maze-cell { width: 19px; height: 19px; }
+.maze-grid.size-25 .maze-cell { width: 18px; height: 18px; }
+.maze-grid.size-26 .maze-cell { width: 17px; height: 17px; }
+.maze-grid.size-27 .maze-cell { width: 16px; height: 16px; }
+.maze-grid.size-28 .maze-cell { width: 16px; height: 16px; }
+.maze-grid.size-29 .maze-cell { width: 15px; height: 15px; }
+.maze-grid.size-30 .maze-cell { width: 15px; height: 15px; }
+.maze-grid.size-31 .maze-cell { width: 14px; height: 14px; }
+.maze-grid.size-32 .maze-cell { width: 14px; height: 14px; }
+.maze-grid.size-33 .maze-cell { width: 13px; height: 13px; }
+.maze-grid.size-34 .maze-cell { width: 13px; height: 13px; }
+.maze-grid.size-35 .maze-cell { width: 12px; height: 12px; }
+.maze-grid.size-36 .maze-cell { width: 12px; height: 12px; }
+.maze-grid.size-37 .maze-cell { width: 11px; height: 11px; }
+
+/* Wall cell */
+.maze-cell.wall {
+    background: var(--text-primary);
+    border: 1px solid #1a1c2e;
+}
+
+/* Path cell */
+.maze-cell.path {
+    background: var(--secondary-color);
+    border: 1px solid var(--border-color);
+}
+
+/* Clickable adjacent cells */
+.maze-cell.path.clickable {
+    cursor: pointer;
+    background: #E8F4F8;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 8px rgba(74, 144, 164, 0.3);
+}
+
+.maze-cell.path.clickable:hover {
+    background: #D0E8F0;
+    transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(74, 144, 164, 0.5);
+}
+
+/* Outside area (around the maze) */
+.maze-cell.outside {
+    background: transparent;
+    border: none;
+}
+
+/* Start zone - where player begins (outside) */
+.maze-cell.start-zone {
+    background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+    border: 2px dashed #4CAF50;
+    border-radius: 4px;
+    position: relative;
+}
+
+.maze-cell.start-zone::before {
+    content: 'START';
+    position: absolute;
+    font-size: 0.35em;
+    font-weight: 700;
+    color: #2E7D32;
+    white-space: nowrap;
+}
+
+/* Finish zone - where player needs to reach (outside) */
+.maze-cell.finish-zone {
+    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+    border: 2px dashed #FF9800;
+    border-radius: 4px;
+    position: relative;
+    animation: finishPulse 1.5s ease-in-out infinite;
+}
+
+.maze-cell.finish-zone::before {
+    content: 'GOAL';
+    position: absolute;
+    font-size: 0.35em;
+    font-weight: 700;
+    color: #E65100;
+    white-space: nowrap;
+}
+
+@keyframes finishPulse {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(255, 152, 0, 0.4);
+        border-color: #FF9800;
+    }
+    50% {
+        box-shadow: 0 0 16px rgba(255, 152, 0, 0.7);
+        border-color: #F57C00;
+    }
+}
+
+/* Entrance opening in wall */
+.maze-cell.entrance-opening {
+    background: linear-gradient(135deg, #A5D6A7, #81C784);
+    border: 2px solid #4CAF50;
+    position: relative;
+}
+
+.maze-cell.entrance-opening::after {
+    content: '▼';
+    position: absolute;
+    font-size: 0.5em;
+    color: #2E7D32;
+}
+
+.maze-cell.entrance-opening.opening-top::after { content: '▼'; }
+.maze-cell.entrance-opening.opening-bottom::after { content: '▲'; }
+.maze-cell.entrance-opening.opening-left::after { content: '▶'; }
+.maze-cell.entrance-opening.opening-right::after { content: '◀'; }
+
+/* Exit opening in wall */
+.maze-cell.exit-opening {
+    background: linear-gradient(135deg, #FFCC80, #FFB74D);
+    border: 2px solid #FF9800;
+    position: relative;
+    animation: exitOpeningGlow 1.5s ease-in-out infinite;
+}
+
+.maze-cell.exit-opening::after {
+    content: '▼';
+    position: absolute;
+    font-size: 0.5em;
+    color: #E65100;
+}
+
+.maze-cell.exit-opening.opening-top::after { content: '▲'; }
+.maze-cell.exit-opening.opening-bottom::after { content: '▼'; }
+.maze-cell.exit-opening.opening-left::after { content: '◀'; }
+.maze-cell.exit-opening.opening-right::after { content: '▶'; }
+
+@keyframes exitOpeningGlow {
+    0%, 100% { box-shadow: inset 0 0 8px rgba(255, 152, 0, 0.3); }
+    50% { box-shadow: inset 0 0 12px rgba(255, 152, 0, 0.6); }
+}
+
+/* Player cell - Runner character */
+.maze-cell.player {
+    background: radial-gradient(circle at 30% 30%, #5DADE2, #2E86AB);
+    border: 2px solid #1A5276;
+    border-radius: 50%;
+    z-index: 10;
+    position: relative;
+    box-shadow:
+        0 3px 6px rgba(30, 136, 229, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Player character - simple person icon using CSS */
+.maze-cell.player::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30%;
+    height: 30%;
+    background: #FFF;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.maze-cell.player::after {
+    content: '';
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 0.35em solid transparent;
+    border-right: 0.35em solid transparent;
+    border-top: 0.5em solid #FFF;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+}
+
+/* Direction indicators - arrow showing movement direction */
+.maze-cell.player.facing-up::after {
+    border-top: none;
+    border-bottom: 0.5em solid #FFF;
+    top: 50%;
+}
+
+.maze-cell.player.facing-down::after {
+    border-top: 0.5em solid #FFF;
+    border-bottom: none;
+    top: 50%;
+}
+
+.maze-cell.player.facing-left::after {
+    border-top: 0.35em solid transparent;
+    border-bottom: 0.35em solid transparent;
+    border-left: none;
+    border-right: 0.5em solid #FFF;
+    top: 55%;
+    left: 45%;
+}
+
+.maze-cell.player.facing-right::after {
+    border-top: 0.35em solid transparent;
+    border-bottom: 0.35em solid transparent;
+    border-right: none;
+    border-left: 0.5em solid #FFF;
+    top: 55%;
+    left: 55%;
+}
+
+/* Player movement animation */
+.maze-cell.player.player-moving {
+    animation: playerMove 0.18s ease-out;
+}
+
+@keyframes playerMove {
+    0% {
+        transform: scale(0.85);
+    }
+    40% {
+        transform: scale(1.12);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Movement trail effect */
+.maze-cell.player.player-moving::before {
+    animation: headBob 0.18s ease-out;
+}
+
+@keyframes headBob {
+    0%, 100% { top: 20%; }
+    50% { top: 15%; }
+}
+
+/* Player idle animation - subtle breathing */
+.maze-cell.player:not(.player-moving):not(.error) {
+    animation: playerIdle 2.5s ease-in-out infinite;
+}
+
+@keyframes playerIdle {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow:
+            0 3px 6px rgba(30, 136, 229, 0.4),
+            inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow:
+            0 4px 10px rgba(30, 136, 229, 0.5),
+            inset 0 2px 4px rgba(255, 255, 255, 0.4);
+    }
+}
+
+/* Visited cells */
+.maze-cell.visited {
+    background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+    border: 1px solid #90CAF9;
+}
+
+/* Optimal path highlighting */
+.maze-cell.optimal-path {
+    background: linear-gradient(135deg, #FFF9C4, #FFF59D) !important;
+    border: 2px solid #FBC02D !important;
+    box-shadow: 0 0 10px rgba(251, 192, 45, 0.5);
+    animation: optimalPathPulse 0.5s ease;
+    z-index: 10;
+    position: relative;
+}
+
+@keyframes optimalPathPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Optimal path overlay - positioned to not block maze view */
+.optimal-path-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 1rem;
+    gap: 0.5rem;
+    animation: fadeIn 0.3s ease;
+    pointer-events: none;
+}
+
+/* Allow interaction with overlay content */
+.optimal-path-overlay > * {
+    pointer-events: auto;
+}
+
+.optimal-path-message {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #000;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-lg);
+    font-size: 1.3rem;
+    font-weight: 700;
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+    animation: slideInRight 0.4s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Round Summary - displayed as a side panel */
+.round-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    background: rgba(255, 255, 255, 0.98);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #333;
+    min-width: 300px;
+    max-width: 340px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: slideInRight 0.4s ease 0.1s both;
+}
+
+.round-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.round-summary-row.score-row {
+    border-top: 1px solid #ddd;
+    padding-top: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.summary-item {
+    font-size: 0.8rem;
+    display: inline;
+    white-space: nowrap;
+}
+
+.summary-item strong {
+    color: #666;
+    font-weight: 600;
+    margin-right: 0.2rem;
+}
+
+.summary-item.score-item {
+    color: var(--primary-color);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* Timeout message styling */
+.timeout-message-text {
+    background: linear-gradient(135deg, #FF6B6B, #EE5A24) !important;
+}
+
+/* Score Breakdown Section */
+.score-breakdown {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-top: 0.5rem;
+    text-align: left;
+    border: 1px solid #e9ecef;
+}
+
+.score-breakdown-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.score-breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.score-breakdown-item span:first-child {
+    color: #666;
+}
+
+.score-value {
+    font-weight: 600;
+    min-width: 50px;
+    text-align: right;
+}
+
+.score-value.positive {
+    color: #28a745;
+}
+
+.score-value.negative {
+    color: #dc3545;
+}
+
+.score-breakdown-divider {
+    height: 1px;
+    background: #dee2e6;
+    margin: 0.5rem 0;
+}
+
+.score-breakdown-item.total {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #333;
+    padding-top: 0.5rem;
+}
+
+.score-breakdown-item.total .score-value {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+/* Efficiency Badge Styles */
+.efficiency-badge {
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.efficiency-badge strong {
+    color: inherit !important;
+    margin-right: 0;
+}
+
+.efficiency-badge.excellent {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    color: #155724;
+    border: 1px solid #28a745;
+}
+
+.efficiency-badge.good {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    color: #856404;
+    border: 1px solid #ffc107;
+}
+
+.efficiency-badge.average {
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    color: #721c24;
+    border: 1px solid #dc3545;
+}
+
+/* Path comparison row - flexible layout */
+.round-summary-row.path-comparison {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+/* Stats row - flexible layout */
+.round-summary-row.stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.optimal-path-continue-btn {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    animation: slideInRight 0.4s ease 0.2s both;
+    align-self: flex-end;
+}
+
+.optimal-path-continue-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+/* Responsive overlay for smaller screens */
+@media (max-width: 900px) {
+    .optimal-path-overlay {
+        align-items: center;
+        justify-content: flex-end;
+        padding-bottom: 1.5rem;
+    }
+
+    .optimal-path-message {
+        animation: slideInUp 0.4s ease;
+    }
+
+    .round-summary {
+        animation: slideInUp 0.4s ease 0.1s both;
+        max-width: 95%;
+    }
+
+    .optimal-path-continue-btn {
+        animation: slideInUp 0.4s ease 0.2s both;
+        align-self: center;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Wall hit animation */
+.maze-cell.wall-hit {
+    animation: wallHitShake 0.3s ease;
+}
+
+@keyframes wallHitShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+/* Player wall hit feedback */
+.maze-cell.player.error {
+    animation: playerError 0.3s ease !important;
+    background: linear-gradient(145deg, #EF5350, #E53935) !important;
+    border-color: #C62828 !important;
+}
+
+.maze-cell.player.error::after {
+    content: '😵';
+}
+
+@keyframes playerError {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(0.9) rotate(-10deg); }
+    75% { transform: scale(0.9) rotate(10deg); }
+}
+
+/* ===== Maze Legend ===== */
+.maze-legend {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-sm);
+    background: var(--card-bg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.legend-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    position: relative;
+}
+
+.legend-icon.start {
+    background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+    border: 2px dashed #4CAF50;
+}
+
+.legend-icon.exit {
+    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+    border: 2px dashed #FF9800;
+}
+
+.legend-icon.player {
+    background: linear-gradient(145deg, #42A5F5, #1E88E5);
+    border: 2px solid #1565C0;
+    border-radius: 50%;
+}
+
+/* ===== Round Complete Screen ===== */
+.round-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    max-width: 450px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    animation: slideUp 0.4s ease;
+}
+
+.round-icon {
+    font-size: 3.5rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.round-card h2 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+    font-size: 1.8rem;
+}
+
+.round-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.round-stat {
+    background: var(--secondary-color);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+}
+
+.round-stat.full-width {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, var(--primary-color), #3a7a8a);
+}
+
+.round-stat.full-width .round-stat-label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.round-stat.full-width .round-stat-value {
+    color: white;
+    font-size: 2rem;
+}
+
+.round-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.2rem;
+}
+
+.round-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.round-stat-value.highlight {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.continue-btn {
+    width: 100%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.continue-btn:hover {
+    background: #3a7a8a;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ===== Result Screen ===== */
+.result-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    max-width: 500px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    animation: slideUp 0.4s ease;
+}
+
+.result-icon {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.result-card h2 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+    font-size: 2rem;
+}
+
+.result-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.result-stat {
+    background: var(--secondary-color);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+}
+
+.result-stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+}
+
+.result-stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.result-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.result-btn {
+    width: 100%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.result-btn:hover {
+    background: #3a7a8a;
+    transform: translateY(-2px);
+}
+
+.result-btn.secondary {
+    background: var(--text-secondary);
+}
+
+.result-btn.secondary:hover {
+    background: #5a5c6d;
+}
+
+/* ===== Time Out Overlay ===== */
+.timeout-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: fadeIn 0.3s ease;
+}
+
+.timeout-message {
+    background: var(--card-bg);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    animation: slideUp 0.3s ease;
+}
+
+.timeout-message h2 {
+    color: var(--accent-color);
+    font-size: 2rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.timeout-message p {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+/* ===== Responsive Design ===== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .config-card {
+        max-width: 550px;
+    }
+
+    .modal-content {
+        max-width: 550px;
+        padding: var(--spacing-md);
+    }
+
+    .maze-grid.size-7 .maze-cell { width: 40px; height: 40px; }
+    .maze-grid.size-9 .maze-cell { width: 35px; height: 35px; }
+    .maze-grid.size-11 .maze-cell { width: 32px; height: 32px; }
+    .maze-grid.size-13 .maze-cell { width: 28px; height: 28px; }
+    .maze-grid.size-15 .maze-cell { width: 25px; height: 25px; }
+}
+
+/* Mobile Landscape / Small Tablet */
+@media (max-width: 768px) {
+    .game-header {
+        gap: var(--spacing-xs);
+    }
+
+    .game-header h1 {
+        font-size: 1.5rem;
+        flex: none;
+        width: 100%;
+        order: -1;
+    }
+
+    .back-btn,
+    .help-btn {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .config-card {
+        padding: var(--spacing-md);
+        max-width: 100%;
+    }
+
+    .config-card h2 {
+        font-size: 1.6rem;
+    }
+
+    .option-buttons {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: var(--spacing-xs);
+    }
+
+    .option-btn {
+        padding: var(--spacing-xs);
+        font-size: 0.9rem;
+    }
+
+    .option-btn small {
+        font-size: 0.75rem;
+    }
+
+    .start-btn {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 1.1rem;
+    }
+
+    .stats-panel {
+        padding: var(--spacing-sm);
+        gap: var(--spacing-xs);
+    }
+
+    .stat-item {
+        min-width: 70px;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+
+    .stat-value {
+        font-size: 1.2rem;
+    }
+
+    .timer-container {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .timer-bar {
+        height: 10px;
+    }
+
+    .timer-text {
+        font-size: 1rem;
+    }
+
+    .maze-container {
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .maze-grid {
+        padding: var(--spacing-xs);
+    }
+
+    .maze-grid.size-7 .maze-cell { width: 38px; height: 38px; font-size: 0.9rem; }
+    .maze-grid.size-9 .maze-cell { width: 32px; height: 32px; font-size: 0.85rem; }
+    .maze-grid.size-11 .maze-cell { width: 28px; height: 28px; font-size: 0.8rem; }
+    .maze-grid.size-13 .maze-cell { width: 25px; height: 25px; font-size: 0.75rem; }
+    .maze-grid.size-15 .maze-cell { width: 22px; height: 22px; font-size: 0.7rem; }
+
+    .maze-legend {
+        gap: var(--spacing-md);
+        padding: var(--spacing-xs);
+    }
+
+    .legend-item {
+        font-size: 0.8rem;
+    }
+
+    .legend-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .round-card,
+    .result-card {
+        padding: var(--spacing-lg);
+        margin: var(--spacing-sm);
+    }
+
+    .round-card h2,
+    .result-card h2 {
+        font-size: 1.5rem;
+    }
+
+    .round-icon {
+        font-size: 3rem;
+    }
+
+    .result-icon {
+        font-size: 3rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .round-stats,
+    .result-stats {
+        gap: var(--spacing-sm);
+    }
+
+    .round-stat,
+    .result-stat {
+        padding: var(--spacing-sm);
+    }
+
+    .round-stat-value,
+    .result-stat-value {
+        font-size: 1.4rem;
+    }
+
+    .modal-content {
+        max-width: 90%;
+        padding: var(--spacing-md);
+        margin: var(--spacing-sm);
+    }
+
+    .modal-content h2 {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .help-section h3 {
+        font-size: 1.1rem;
+    }
+
+    .help-section ul {
+        font-size: 0.9rem;
+    }
+}
+
+/* Mobile Portrait */
+@media (max-width: 599px) {
+    .config-card {
+        padding: var(--spacing-sm);
+    }
+
+    .config-card h2 {
+        font-size: 1.4rem;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .option-buttons {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
+    }
+
+    .stats-panel {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-xs);
+    }
+
+    .stat-item {
+        padding: var(--spacing-xs);
+    }
+
+    .maze-grid.size-7 .maze-cell { width: 35px; height: 35px; }
+    .maze-grid.size-9 .maze-cell { width: 30px; height: 30px; }
+    .maze-grid.size-11 .maze-cell { width: 26px; height: 26px; }
+    .maze-grid.size-13 .maze-cell { width: 23px; height: 23px; }
+    .maze-grid.size-15 .maze-cell { width: 20px; height: 20px; }
+}
+
+/* ===== Fog of War Mode ===== */
+
+/* Fog mode container styles */
+.maze-grid.fog-mode {
+    position: relative;
+}
+
+/* Visible cells in fog mode - fully visible */
+.maze-grid.fog-mode .maze-cell.fog-visible {
+    opacity: 1;
+    transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Remembered cells in light fog - dimmed but visible */
+.maze-grid.fog-mode .maze-cell.fog-remembered {
+    opacity: 0.5;
+    filter: saturate(0.5) brightness(0.8);
+    transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Remembered cells keep their base appearance but dimmed */
+.maze-grid.fog-mode .maze-cell.fog-remembered.wall {
+    opacity: 0.4;
+    background: #3a3a5a;
+}
+
+.maze-grid.fog-mode .maze-cell.fog-remembered.path {
+    opacity: 0.5;
+    background: #c0c8d0;
+}
+
+.maze-grid.fog-mode .maze-cell.fog-remembered.visited {
+    opacity: 0.6;
+    background: linear-gradient(135deg, #d0d8e0, #b8c4d0);
+}
+
+/* Hidden cells - completely obscured */
+.maze-grid.fog-mode .maze-cell.fog-hidden {
+    opacity: 1;
+    background: #1a1a2e !important;
+    border-color: #12121f !important;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s ease, background 0.3s ease;
+}
+
+/* Hidden cells should not show any content */
+.maze-grid.fog-mode .maze-cell.fog-hidden::before,
+.maze-grid.fog-mode .maze-cell.fog-hidden::after {
+    display: none !important;
+}
+
+/* Hidden cells remove special styling */
+.maze-grid.fog-mode .maze-cell.fog-hidden.start-zone,
+.maze-grid.fog-mode .maze-cell.fog-hidden.finish-zone,
+.maze-grid.fog-mode .maze-cell.fog-hidden.entrance-opening,
+.maze-grid.fog-mode .maze-cell.fog-hidden.exit-opening {
+    background: #1a1a2e !important;
+    border: 1px solid #12121f !important;
+    animation: none !important;
+}
+
+/* Player cell is always fully visible */
+.maze-grid.fog-mode .maze-cell.player {
+    opacity: 1 !important;
+    filter: none !important;
+    z-index: 20;
+}
+
+/* Clickable cells in fog mode */
+.maze-grid.fog-mode .maze-cell.clickable.fog-visible {
+    cursor: pointer;
+    background: #E8F4F8;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 8px rgba(74, 144, 164, 0.3);
+}
+
+.maze-grid.fog-mode .maze-cell.clickable.fog-visible:hover {
+    background: #D0E8F0;
+    transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(74, 144, 164, 0.5);
+}
+
+/* Hidden cells cannot be clicked */
+.maze-grid.fog-mode .maze-cell.fog-hidden.clickable {
+    cursor: default;
+    pointer-events: none;
+}
+
+/* Light Fog specific - softer fog edges */
+.maze-grid.fog-light .maze-cell.fog-hidden {
+    background: linear-gradient(135deg, #1a1a2e, #252540) !important;
+}
+
+/* Heavy Fog specific - darker, more intense fog */
+.maze-grid.fog-heavy .maze-cell.fog-hidden {
+    background: #0a0a14 !important;
+    border-color: #050508 !important;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+}
+
+/* Heavy fog has more dramatic visibility radius */
+.maze-grid.fog-heavy .maze-cell.fog-visible {
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+/* Heavy fog player has a glowing effect to show position */
+.maze-grid.fog-heavy .maze-cell.player {
+    box-shadow: 0 0 15px rgba(74, 144, 164, 0.6), 0 0 30px rgba(74, 144, 164, 0.3);
+}
+
+/* Heavy fog exit glows more intensely to guide player */
+.maze-grid.fog-heavy .maze-cell.fog-visible.exit-opening,
+.maze-grid.fog-heavy .maze-cell.fog-visible.finish-zone {
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+}
+
+/* Fog reveal animation when cells become visible */
+@keyframes fogReveal {
+    from {
+        opacity: 0;
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+.maze-grid.fog-mode .maze-cell.fog-visible:not(.player) {
+    animation: fogReveal 0.3s ease-out;
+}
+
+/* Fog effect on exit/finish zones - make them glow when visible */
+.maze-grid.fog-mode .maze-cell.fog-visible.finish-zone {
+    animation: finishPulse 1.5s ease-in-out infinite, fogReveal 0.3s ease-out;
+}
+
+.maze-grid.fog-mode .maze-cell.fog-visible.exit-opening {
+    animation: exitOpeningGlow 1.5s ease-in-out infinite, fogReveal 0.3s ease-out;
+}
+
+/* End of round fog reveal animation - reveals entire maze */
+@keyframes fogRevealAll {
+    from {
+        opacity: 0;
+        filter: blur(6px) brightness(0.5);
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0) brightness(1);
+        transform: scale(1);
+    }
+}
+
+.maze-cell.fog-revealed {
+    animation: fogRevealAll 0.5s ease-out forwards;
+}
+
+/* Stagger the reveal animation for a wave effect */
+.maze-cell.fog-revealed {
+    animation-delay: calc(var(--cell-index, 0) * 5ms);
+}
+
+/* Fog indicator badge */
+.fog-indicator {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(26, 26, 46, 0.9);
+    color: #a0a0c0;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+.fog-indicator::before {
+    content: '🌫️ ';
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .game-header h1 {
+        font-size: 1.3rem;
+    }
+
+    .back-btn,
+    .help-btn {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.7rem;
+    }
+
+    .config-card {
+        padding: var(--spacing-xs);
+    }
+
+    .config-card h2 {
+        font-size: 1.2rem;
+    }
+
+    .config-label {
+        font-size: 1rem;
+    }
+
+    .start-btn {
+        padding: var(--spacing-sm);
+        font-size: 1rem;
+    }
+
+    .stats-panel {
+        padding: var(--spacing-xs);
+        gap: 0.3rem;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+    }
+
+    .timer-bar {
+        height: 8px;
+    }
+
+    .timer-text {
+        font-size: 0.9rem;
+        min-width: 40px;
+    }
+
+    .maze-container {
+        padding: var(--spacing-xs);
+    }
+
+    .maze-grid {
+        gap: 1px;
+        padding: 4px;
+    }
+
+    .maze-grid.size-7 .maze-cell { width: 32px; height: 32px; }
+    .maze-grid.size-9 .maze-cell { width: 28px; height: 28px; }
+    .maze-grid.size-11 .maze-cell { width: 24px; height: 24px; }
+    .maze-grid.size-13 .maze-cell { width: 21px; height: 21px; }
+    .maze-grid.size-15 .maze-cell { width: 18px; height: 18px; }
+
+    /* Smaller player emoji for small screens */
+    .maze-cell.player::after {
+        font-size: 0.55em;
+    }
+
+    /* Smaller labels for small screens */
+    .maze-cell.start-zone::before,
+    .maze-cell.finish-zone::before {
+        font-size: 0.28em;
+    }
+
+    .maze-cell.entrance-opening::after,
+    .maze-cell.exit-opening::after {
+        font-size: 0.4em;
+    }
+
+    .maze-legend {
+        gap: var(--spacing-sm);
+    }
+
+    .legend-item {
+        font-size: 0.75rem;
+    }
+
+    .legend-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .round-card,
+    .result-card {
+        padding: var(--spacing-md);
+        margin: var(--spacing-xs);
+    }
+
+    .round-card h2,
+    .result-card h2 {
+        font-size: 1.3rem;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .round-icon {
+        font-size: 2.5rem;
+    }
+
+    .result-icon {
+        font-size: 2.5rem;
+    }
+
+    .round-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-xs);
+    }
+
+    .result-stats {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
+    }
+
+    .round-stat,
+    .result-stat {
+        padding: var(--spacing-xs);
+    }
+
+    .result-stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .round-stat-label,
+    .result-stat-label {
+        font-size: 0.75rem;
+    }
+
+    .round-stat-value {
+        font-size: 1.2rem;
+    }
+
+    .result-stat-value {
+        font-size: 1.3rem;
+    }
+
+    .continue-btn,
+    .result-btn {
+        padding: var(--spacing-sm);
+        font-size: 1rem;
+    }
+
+    .modal-content {
+        padding: var(--spacing-sm);
+        max-width: 95%;
+        max-height: 85vh;
+    }
+
+    .modal-content h2 {
+        font-size: 1.3rem;
+        margin-bottom: var(--spacing-sm);
+        padding-right: var(--spacing-lg);
+    }
+
+    .close-btn {
+        font-size: 1.8rem;
+        right: 0.5rem;
+        top: 0.5rem;
+    }
+
+    .help-section {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .help-section h3 {
+        font-size: 1rem;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .help-section p,
+    .help-section ul {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
+    .help-section li {
+        margin-bottom: 0.3rem;
+    }
+}

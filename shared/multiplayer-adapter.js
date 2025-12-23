@@ -317,16 +317,8 @@ class MultiplayerGameAdapter {
         }
 
         const gameType = roomData.meta.gameType;
-        const gameFiles = {
-            'math-game': 'math-game.html',
-            'pixel-game': 'pixel-game.html',
-            'expression-puzzle': 'expression-puzzle.html',
-            'dual-n-back': 'dual-n-back.html',
-            'memory-matrix': 'memory-matrix.html',
-            'word-recall': 'word-recall.html'
-        };
-
-        const gameFile = gameFiles[gameType];
+        // Use centralized mapping from constants.js
+        const gameFile = MP_CONSTANTS.GAME_FILES[gameType];
         if (!gameFile) {
             console.error('[MultiplayerAdapter] Unknown game type:', gameType);
             return;

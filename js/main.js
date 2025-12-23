@@ -49,22 +49,12 @@ const games = [
         url: 'games/word-recall.html'
     },
     {
-        id: 'memory',
-        title: 'Memory Cards',
-        description: 'Improve memory with image recognition exercises',
-        icon: '🧩',
-        tag: 'Memory',
-        url: '#',
-        comingSoon: true
-    },
-    {
-        id: 'pattern',
-        title: 'Pattern Recognition',
-        description: 'Develop pattern recognition and logical reasoning',
-        icon: '🎯',
-        tag: 'Logic',
-        url: '#',
-        comingSoon: true
+        id: 'maze-game',
+        title: 'Maze Runner',
+        description: 'Navigate mazes to train spatial thinking and problem-solving',
+        icon: '🗺️',
+        tag: 'Spatial',
+        url: 'games/maze-game.html'
     },
     {
         id: 'word',
@@ -164,16 +154,9 @@ async function initializeMultiplayer() {
                     sessionStorage.setItem('multiplayerRoomId', roomCode);
                     sessionStorage.setItem('multiplayerRole', 'player');
                     
-                    // Get game URL based on gameType
-                    const gameUrls = {
-                        'math-game': 'games/math-game.html',
-                        'pixel-game': 'games/pixel-game.html',
-                        'expression-puzzle': 'games/expression-puzzle.html',
-                        'dual-n-back': 'games/dual-n-back.html',
-                        'memory-matrix': 'games/memory-matrix.html',
-                        'word-recall': 'games/word-recall.html'
-                    };
-                    const gameUrl = gameUrls[gameType] || 'games/math-game.html';
+                    // Get game URL from centralized mapping in constants.js
+                    const gameFile = MP_CONSTANTS.GAME_FILES[gameType];
+                    const gameUrl = gameFile ? `games/${gameFile}` : 'games/math-game.html';
                     window.location.href = gameUrl;
                 }
             });
@@ -214,17 +197,10 @@ async function initializeMultiplayer() {
                     // Cancel disconnect handler to prevent player removal when navigating
                     mpCore.cancelDisconnectHandler();
 
-                    // Navigate to game
+                    // Navigate to game using centralized mapping from constants.js
                     const gameType = roomData.meta.gameType;
-                    const gameUrls = {
-                        'math-game': 'games/math-game.html',
-                        'pixel-game': 'games/pixel-game.html',
-                        'expression-puzzle': 'games/expression-puzzle.html',
-                        'dual-n-back': 'games/dual-n-back.html',
-                        'memory-matrix': 'games/memory-matrix.html',
-                        'word-recall': 'games/word-recall.html'
-                    };
-                    window.location.href = gameUrls[gameType] || 'games/math-game.html';
+                    const gameFile = MP_CONSTANTS.GAME_FILES[gameType];
+                    window.location.href = gameFile ? `games/${gameFile}` : 'games/math-game.html';
                 }
             });
             
