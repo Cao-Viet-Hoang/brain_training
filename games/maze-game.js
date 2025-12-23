@@ -1011,6 +1011,42 @@ class MazeRenderer {
     getCell(x, y) {
         return this.cells[y] && this.cells[y][x];
     }
+
+    /**
+     * Show optimal path with animation
+     * @param {Array} path - Array of {x, y} coordinates
+     * @param {number} delay - Delay between each step (ms)
+     */
+    showOptimalPath(path, delay = 100) {
+        if (!path || path.length === 0) return Promise.resolve();
+
+        return new Promise((resolve) => {
+            let index = 0;
+            const intervalId = setInterval(() => {
+                if (index >= path.length) {
+                    clearInterval(intervalId);
+                    resolve();
+                    return;
+                }
+
+                const pos = path[index];
+                const cell = this.getCell(pos.x, pos.y);
+                if (cell) {
+                    cell.classList.add('optimal-path');
+                }
+                index++;
+            }, delay);
+        });
+    }
+
+    /**
+     * Clear optimal path highlighting
+     */
+    clearOptimalPath() {
+        this.container.querySelectorAll('.optimal-path').forEach(cell => {
+            cell.classList.remove('optimal-path');
+        });
+    }
 }
 
 // ============================================================================
@@ -1334,8 +1370,9 @@ class MazeGame {
         const timeLimit = this.config.getTimeLimit(this.state.currentRound);
 
         // Get optimal path length for scoring
+        // shortestPath.length + 3 = total steps (see completeRound for explanation)
         const optimalPathLength = this.currentMaze.shortestPath
-            ? this.currentMaze.shortestPath.length
+            ? this.currentMaze.shortestPath.length + 3
             : 0;
 
         // Initialize round state with optimal path info
@@ -1412,16 +1449,65 @@ class MazeGame {
         // Update time remaining in state
         this.state.timeRemaining = this.timer.getTimeRemaining();
 
-        // Get the optimal path length (shortest path to the single exit)
+        // Get the optimal path length for scoring
+        // shortestPath contains cells from entranceInside to exitOpening (N cells = N-1 steps)
+        // Player walks: start -> entrance -> entranceInside -> ... -> exitOpening -> exit -> finish
+        // Extra steps: start->entrance (1) + entrance->entranceInside (1) + exitOpening->exit (1) + exit->finish (1) = 4
+        // Total optimal steps = (N - 1) + 4 = N + 3
         let optimalPathLength = null;
         if (success && this.currentMaze.shortestPath) {
-            optimalPathLength = this.currentMaze.shortestPath.length;
+            optimalPathLength = this.currentMaze.shortestPath.length + 3;
         }
 
         // Calculate score with path efficiency
         // Shorter path = higher score (multiple routes possible due to braiding)
         const scoreDetails = this.state.calculateRoundScore(this.config, optimalPathLength);
 
+        // Show optimal path if round was successful
+        if (success && this.currentMaze.shortestPath) {
+            // Show path with animation, then wait for user to click continue
+            const userSteps = this.state.roundSteps;
+            const optimalSteps = optimalPathLength;
+            this.showOptimalPathOverlay(userSteps, optimalSteps, () => {
+                this.hideOptimalPathOverlay();
+                this.renderer.clearOptimalPath();
+                this.showRoundCompleteModal(success, scoreDetails);
+            });
+            this.renderer.showOptimalPath(this.currentMaze.shortestPath, 50);
+        } else {
+            // No path to show, go directly to modal
+            this.showRoundCompleteModal(success, scoreDetails);
+        }
+    }
+
+    showOptimalPathOverlay(userSteps, optimalSteps, onContinue) {
+        // Create overlay message with stats and continue button
+        const overlay = document.createElement('div');
+        overlay.id = 'optimalPathOverlay';
+        overlay.className = 'optimal-path-overlay';
+        overlay.innerHTML = `
+            <div class="optimal-path-message">✨ Optimal Path ✨</div>
+            <div class="optimal-path-stats">
+                <span>Your steps: ${userSteps}</span>
+                <span>Optimal: ${optimalSteps}</span>
+            </div>
+            <button class="optimal-path-continue-btn">Continue</button>
+        `;
+        document.body.appendChild(overlay);
+
+        // Add click handler for continue button
+        const continueBtn = overlay.querySelector('.optimal-path-continue-btn');
+        continueBtn.addEventListener('click', onContinue);
+    }
+
+    hideOptimalPathOverlay() {
+        const overlay = document.getElementById('optimalPathOverlay');
+        if (overlay) {
+            overlay.remove();
+        }
+    }
+
+    showRoundCompleteModal(success, scoreDetails) {
         // Update round complete screen
         if (success) {
             if (scoreDetails.pathEfficiency >= 95) {
