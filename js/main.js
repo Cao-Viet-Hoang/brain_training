@@ -49,6 +49,14 @@ const games = [
         url: 'games/word-recall.html'
     },
     {
+        id: 'maze-game',
+        title: 'Maze Runner',
+        description: 'Navigate mazes to train spatial thinking and problem-solving',
+        icon: '🧩',
+        tag: 'Spatial',
+        url: 'games/maze-game.html'
+    },
+    {
         id: 'memory',
         title: 'Memory Cards',
         description: 'Improve memory with image recognition exercises',

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Runner - Brain Training</title>
+
+    <!-- Google Analytics -->
+    <script src="../js/analytics.js"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/maze-game.css">
+</head>
+<body>
+    <div class="container">
+        <header class="game-header">
+            <a href="../index.html" class="back-btn">← Back</a>
+            <h1>🧩 Maze Runner</h1>
+            <button class="help-btn" id="helpBtn">❓ How to Play</button>
+        </header>
+
+        <!-- How to Play Modal -->
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeHelpModal">&times;</span>
+                <h2>📖 How to Play</h2>
+                <div class="help-content">
+                    <div class="help-section">
+                        <h3>🎯 Objective</h3>
+                        <p>Navigate through the maze from the Start position to the Exit within the time limit.</p>
+                        <p>Train your spatial thinking and problem-solving skills!</p>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>⚙️ Game Modes</h3>
+                        <ul>
+                            <li><strong>Classic:</strong> Full maze visibility, multiple valid paths</li>
+                            <li><strong>Light Fog:</strong> Limited visibility around player (Coming Soon)</li>
+                            <li><strong>Heavy Fog:</strong> Minimal visibility, no path memory (Coming Soon)</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>🎮 Controls</h3>
+                        <ul>
+                            <li><strong>Click/Tap:</strong> Click on adjacent cells to move</li>
+                            <li><strong>Keyboard:</strong> Use arrow keys (↑ ↓ ← →) on desktop</li>
+                            <li>You can only move to cells directly above, below, left, or right</li>
+                            <li>Diagonal movement is not allowed</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>📈 Difficulty Progression</h3>
+                        <ul>
+                            <li><strong>Maze Size:</strong> Grows larger as you progress</li>
+                            <li><strong>Complexity:</strong> More dead ends and wrong turns</li>
+                            <li><strong>Time Limit:</strong> Decreases with each level</li>
+                            <li><strong>Wall Density:</strong> Higher at advanced levels</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>🏆 Scoring</h3>
+                        <ul>
+                            <li><strong>Completion:</strong> Points for reaching the exit</li>
+                            <li><strong>Time Bonus:</strong> Extra points for remaining time</li>
+                            <li><strong>Efficiency:</strong> Fewer steps = higher score</li>
+                            <li><strong>Penalty:</strong> Points deducted for wall collisions</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>💡 Tips</h3>
+                        <ul>
+                            <li>Plan your route before moving</li>
+                            <li>Follow walls to avoid getting lost</li>
+                            <li>Watch the timer - speed matters!</li>
+                            <li>Backtracking is allowed but costs time</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Screen -->
+        <div id="configScreen" class="screen active">
+            <div class="config-card">
+                <h2>Game Configuration</h2>
+
+                <div class="config-section">
+                    <div class="config-item">
+                        <label class="config-label">Game Mode</label>
+                        <div class="option-buttons" id="gameModeButtons">
+                            <button class="option-btn active" data-value="classic">Classic<br><small>Full visibility</small></button>
+                            <button class="option-btn disabled" data-value="fog_light" disabled>Light Fog<br><small>Coming Soon</small></button>
+                            <button class="option-btn disabled" data-value="fog_heavy" disabled>Heavy Fog<br><small>Coming Soon</small></button>
+                        </div>
+                    </div>
+
+                    <div class="config-item">
+                        <label class="config-label">Starting Difficulty</label>
+                        <div class="option-buttons" id="difficultyButtons">
+                            <button class="option-btn active" data-value="easy">Easy<br><small>7x7 maze</small></button>
+                            <button class="option-btn" data-value="medium">Medium<br><small>11x11 maze</small></button>
+                            <button class="option-btn" data-value="hard">Hard<br><small>15x15 maze</small></button>
+                        </div>
+                    </div>
+
+                    <div class="config-item">
+                        <label class="config-label">Number of Rounds</label>
+                        <div class="option-buttons" id="roundButtons">
+                            <button class="option-btn" data-value="3">3<br><small>Quick</small></button>
+                            <button class="option-btn active" data-value="5">5<br><small>Standard</small></button>
+                            <button class="option-btn" data-value="10">10<br><small>Extended</small></button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="start-btn" id="startGameBtn">🚀 Start Game</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <!-- Stats Panel -->
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <div class="stat-label">Round</div>
+                    <div class="stat-value" id="roundDisplay">1/5</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="scoreDisplay">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Steps</div>
+                    <div class="stat-value" id="stepsDisplay">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Errors</div>
+                    <div class="stat-value" id="errorsDisplay">0</div>
+                </div>
+            </div>
+
+            <!-- Timer Bar -->
+            <div class="timer-container">
+                <div class="timer-bar">
+                    <div class="timer-fill" id="timerFill"></div>
+                </div>
+                <div class="timer-text" id="timerText">60s</div>
+            </div>
+
+            <!-- Maze Container -->
+            <div class="maze-container">
+                <div id="mazeGrid" class="maze-grid">
+                    <!-- Maze cells will be generated dynamically -->
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="maze-legend">
+                <div class="legend-item">
+                    <div class="legend-icon start"></div>
+                    <span>Start</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon exit"></div>
+                    <span>Exit</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon player"></div>
+                    <span>You</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Round Complete Screen -->
+        <div id="roundCompleteScreen" class="screen">
+            <div class="round-card">
+                <div id="roundIcon" class="round-icon">✅</div>
+                <h2 id="roundTitle">Round Complete!</h2>
+
+                <div class="round-stats">
+                    <div class="round-stat">
+                        <div class="round-stat-label">Time Remaining</div>
+                        <div class="round-stat-value" id="roundTimeRemaining">30s</div>
+                    </div>
+                    <div class="round-stat">
+                        <div class="round-stat-label">Steps Taken</div>
+                        <div class="round-stat-value" id="roundSteps">25</div>
+                    </div>
+                    <div class="round-stat">
+                        <div class="round-stat-label">Wall Hits</div>
+                        <div class="round-stat-value" id="roundErrors">2</div>
+                    </div>
+                    <div class="round-stat">
+                        <div class="round-stat-label">Round Score</div>
+                        <div class="round-stat-value" id="roundScore">150</div>
+                    </div>
+                </div>
+
+                <button class="continue-btn" id="nextRoundBtn">➡️ Next Round</button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="resultScreen" class="screen">
+            <div class="result-card">
+                <div id="resultIcon" class="result-icon">🏆</div>
+                <h2 id="resultTitle">Game Complete!</h2>
+
+                <div class="result-stats">
+                    <div class="result-stat">
+                        <div class="result-stat-label">Rounds Completed</div>
+                        <div class="result-stat-value" id="finalRounds">0/5</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Final Score</div>
+                        <div class="result-stat-value" id="finalScore">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Total Steps</div>
+                        <div class="result-stat-value" id="totalSteps">0</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-label">Total Errors</div>
+                        <div class="result-stat-value" id="totalErrors">0</div>
+                    </div>
+                </div>
+
+                <div class="result-actions">
+                    <button class="result-btn" id="playAgainBtn">🎮 Play Again</button>
+                    <button class="result-btn secondary" id="backToMenuBtn">📋 Main Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Script -->
+    <script src="maze-game.js"></script>
+</body>
+</html>
