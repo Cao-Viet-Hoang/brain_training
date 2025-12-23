@@ -1471,6 +1471,29 @@
     background: linear-gradient(135deg, #1a1a2e, #252540) !important;
 }
 
+/* Heavy Fog specific - darker, more intense fog */
+.maze-grid.fog-heavy .maze-cell.fog-hidden {
+    background: #0a0a14 !important;
+    border-color: #050508 !important;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+}
+
+/* Heavy fog has more dramatic visibility radius */
+.maze-grid.fog-heavy .maze-cell.fog-visible {
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+/* Heavy fog player has a glowing effect to show position */
+.maze-grid.fog-heavy .maze-cell.player {
+    box-shadow: 0 0 15px rgba(74, 144, 164, 0.6), 0 0 30px rgba(74, 144, 164, 0.3);
+}
+
+/* Heavy fog exit glows more intensely to guide player */
+.maze-grid.fog-heavy .maze-cell.fog-visible.exit-opening,
+.maze-grid.fog-heavy .maze-cell.fog-visible.finish-zone {
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+}
+
 /* Fog reveal animation when cells become visible */
 @keyframes fogReveal {
     from {
@@ -1494,6 +1517,29 @@
 
 .maze-grid.fog-mode .maze-cell.fog-visible.exit-opening {
     animation: exitOpeningGlow 1.5s ease-in-out infinite, fogReveal 0.3s ease-out;
+}
+
+/* End of round fog reveal animation - reveals entire maze */
+@keyframes fogRevealAll {
+    from {
+        opacity: 0;
+        filter: blur(6px) brightness(0.5);
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0) brightness(1);
+        transform: scale(1);
+    }
+}
+
+.maze-cell.fog-revealed {
+    animation: fogRevealAll 0.5s ease-out forwards;
+}
+
+/* Stagger the reveal animation for a wave effect */
+.maze-cell.fog-revealed {
+    animation-delay: calc(var(--cell-index, 0) * 5ms);
 }
 
 /* Fog indicator badge */

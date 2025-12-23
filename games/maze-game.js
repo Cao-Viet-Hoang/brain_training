@@ -1043,11 +1043,11 @@ class MazeGameConfig {
         const reduction = (round - 1) * 5;
         baseTime = baseTime - reduction;
 
-        // Fog mode time bonus: light fog gets 25% more time due to limited visibility
+        // Fog mode time bonus: more time due to limited visibility
         if (this.mode === 'fog_light') {
-            baseTime = Math.floor(baseTime * 1.25);
+            baseTime = Math.floor(baseTime * 1.25); // +25% for light fog
         } else if (this.mode === 'fog_heavy') {
-            baseTime = Math.floor(baseTime * 1.5);
+            baseTime = Math.floor(baseTime * 1.75); // +75% for heavy fog
         }
 
         return Math.max(this.minTime, Math.min(baseTime, this.maxTime));
@@ -1519,6 +1519,39 @@ class MazeRenderer {
             cell.classList.remove('optimal-path');
         });
     }
+
+    /**
+     * Reveal all cells (remove fog) - used at end of round in fog modes
+     * Shows the entire maze so player can see the full layout
+     */
+    revealAllCells() {
+        if (this.fogMode === 'classic') return;
+
+        // Remove fog mode classes from container for cleaner reveal
+        this.container.classList.remove('fog-mode', 'fog-light', 'fog-heavy');
+
+        // Reveal all cells with animation (wave effect from center outward)
+        const centerY = Math.floor(this.cells.length / 2);
+        const centerX = this.cells[0] ? Math.floor(this.cells[0].length / 2) : 0;
+
+        for (let y = 0; y < this.cells.length; y++) {
+            if (!this.cells[y]) continue;
+            for (let x = 0; x < this.cells[y].length; x++) {
+                const cell = this.cells[y][x];
+                if (!cell) continue;
+
+                // Remove all fog visibility classes
+                cell.classList.remove('fog-visible', 'fog-remembered', 'fog-hidden');
+
+                // Calculate distance from center for stagger effect
+                const distance = Math.abs(x - centerX) + Math.abs(y - centerY);
+                cell.style.setProperty('--cell-index', distance);
+
+                // Add reveal animation class
+                cell.classList.add('fog-revealed');
+            }
+        }
+    }
 }
 
 // ============================================================================
@@ -1931,6 +1964,11 @@ class MazeGame {
         this.state.isPlaying = false;
         this.input.disable();
         this.timer.stop();
+
+        // Reveal all cells if in fog mode (so player can see the full maze)
+        if (this.config.mode !== 'classic') {
+            this.renderer.revealAllCells();
+        }
 
         // Update time remaining in state
         this.state.timeRemaining = this.timer.getTimeRemaining();
