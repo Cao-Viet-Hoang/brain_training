@@ -152,7 +152,7 @@ class MultiplayerUI {
                         <option value="dual-n-back">🔄 Dual N-Back</option>
                         <option value="memory-matrix">🔲 Memory Matrix</option>
                         <option value="word-recall">💭 Word Recall</option>
-                        <option value="maze-game">🧩 Maze Runner</option>
+                        <option value="maze-game">🗺️ Maze Runner</option>
                     </select>
                 </div>
 

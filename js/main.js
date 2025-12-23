@@ -52,27 +52,9 @@ const games = [
         id: 'maze-game',
         title: 'Maze Runner',
         description: 'Navigate mazes to train spatial thinking and problem-solving',
-        icon: '🧩',
+        icon: '🗺️',
         tag: 'Spatial',
         url: 'games/maze-game.html'
-    },
-    {
-        id: 'memory',
-        title: 'Memory Cards',
-        description: 'Improve memory with image recognition exercises',
-        icon: '🧩',
-        tag: 'Memory',
-        url: '#',
-        comingSoon: true
-    },
-    {
-        id: 'pattern',
-        title: 'Pattern Recognition',
-        description: 'Develop pattern recognition and logical reasoning',
-        icon: '🎯',
-        tag: 'Logic',
-        url: '#',
-        comingSoon: true
     },
     {
         id: 'word',
