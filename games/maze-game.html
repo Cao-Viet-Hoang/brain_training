@@ -36,66 +36,70 @@
                 <div class="help-content">
                     <div class="help-section">
                         <h3>🎯 Objective</h3>
-                        <p>Navigate through the maze from the Start position to the Exit within the time limit.</p>
-                        <p>Train your spatial thinking and problem-solving skills!</p>
+                        <p>Navigate from the Start (outside the maze) through the entrance, solve the maze, and reach the Exit within the time limit.</p>
+                        <p>Train your spatial thinking, pathfinding, and problem-solving skills!</p>
                     </div>
 
                     <div class="help-section">
                         <h3>⚙️ Game Modes</h3>
                         <ul>
-                            <li><strong>Classic:</strong> Full maze visibility with multiple paths</li>
-                            <li><strong>Light Fog:</strong> See only 3 cells around you. Visited areas are remembered but dimmed - tests spatial memory!</li>
-                            <li><strong>Heavy Fog:</strong> See only 1 cell around you, no memory of visited areas - extreme challenge!</li>
+                            <li><strong>Classic:</strong> Full maze visibility - see all paths and walls clearly</li>
+                            <li><strong>Light Fog:</strong> See only 3 cells around you. Previously visited areas remain dimly visible, testing your spatial memory!</li>
+                            <li><strong>Heavy Fog:</strong> See only 1 cell around you with no memory - ultimate navigation challenge requiring pure pathfinding skills!</li>
                         </ul>
                     </div>
 
                     <div class="help-section">
-                        <h3>🛤️ Multiple Paths</h3>
+                        <h3>🛤️ Maze Features</h3>
                         <ul>
-                            <li>Each maze has <strong>multiple routes</strong> to the exit</li>
-                            <li><strong>Shorter paths = Higher scores!</strong> Find the quickest route</li>
-                            <li>Loops and junctions create alternative paths</li>
-                            <li>Path efficiency is tracked - aim for 100%!</li>
+                            <li>Each maze has <strong>one optimal path</strong> calculated from entrance to exit</li>
+                            <li><strong>Multiple alternative routes</strong> with dead-ends, loops, and junctions</li>
+                            <li><strong>Fake paths</strong> and confusing branches designed to challenge you</li>
+                            <li>Path efficiency is tracked - taking the shortest route maximizes your score!</li>
                         </ul>
                     </div>
 
                     <div class="help-section">
                         <h3>🎮 Controls</h3>
                         <ul>
-                            <li><strong>Click/Tap:</strong> Click on adjacent cells to move</li>
-                            <li><strong>Keyboard:</strong> Use arrow keys (↑ ↓ ← →) on desktop</li>
-                            <li>You can only move to cells directly above, below, left, or right</li>
+                            <li><strong>Mouse/Touch:</strong> Click or tap on adjacent cells (highlighted) to move</li>
+                            <li><strong>Keyboard:</strong> Use arrow keys (↑ ↓ ← →) or WASD keys</li>
+                            <li>Move one cell at a time: up, down, left, or right</li>
                             <li>Diagonal movement is not allowed</li>
+                            <li>Trying to move into a wall counts as an error</li>
                         </ul>
                     </div>
 
                     <div class="help-section">
                         <h3>📈 Difficulty Progression</h3>
                         <ul>
-                            <li><strong>Maze Size:</strong> Fixed (you choose the size)</li>
-                            <li><strong>Complexity:</strong> More dead ends and wrong turns each round</li>
-                            <li><strong>Time Limit:</strong> Decreases with each round</li>
-                            <li><strong>Fake Paths:</strong> Increase each round to confuse you</li>
+                            <li><strong>Maze Size:</strong> Fixed (you choose 10-35) - stays constant across all rounds</li>
+                            <li><strong>Complexity:</strong> Increases each round with more dead-ends, confusing junctions, and fake paths</li>
+                            <li><strong>Time Limit:</strong> Decreases by 5 seconds each round</li>
+                            <li><strong>Starting Difficulty:</strong> Choose Easy, Medium, or Hard for different base complexity levels</li>
                         </ul>
                     </div>
 
                     <div class="help-section">
-                        <h3>🏆 Scoring</h3>
+                        <h3>🏆 Scoring System</h3>
                         <ul>
-                            <li><strong>Base Score:</strong> 100 points for reaching the exit</li>
-                            <li><strong>Time Bonus:</strong> +2 points per second remaining</li>
-                            <li><strong>Efficiency Bonus:</strong> Up to +75 points for taking shortest path</li>
-                            <li><strong>Penalty:</strong> -5 points per wall collision</li>
+                            <li><strong>Base Score:</strong> 100 points for completing each round</li>
+                            <li><strong>Path Efficiency Bonus:</strong> Up to +150 points (optimal steps ÷ actual steps × 150)</li>
+                            <li><strong>Time Bonus:</strong> +3 points per second remaining</li>
+                            <li><strong>Time Efficiency Bonus:</strong> Up to +50 points based on % of time saved</li>
+                            <li><strong>Error Penalty:</strong> -10 points per wall collision</li>
                         </ul>
+                        <p><small>Perfect round example: 100 (base) + 150 (perfect path) + time bonuses - 0 errors = 300+ points!</small></p>
                     </div>
 
                     <div class="help-section">
-                        <h3>💡 Tips</h3>
+                        <h3>💡 Pro Tips</h3>
                         <ul>
-                            <li>Plan your route before moving</li>
-                            <li>Follow walls to avoid getting lost</li>
-                            <li>Watch the timer - speed matters!</li>
-                            <li>Backtracking is allowed but costs time</li>
+                            <li><strong>Scout first:</strong> In Classic mode, study the maze before moving</li>
+                            <li><strong>Follow walls:</strong> The right-hand or left-hand rule can help find the exit</li>
+                            <li><strong>Mark mentally:</strong> In fog modes, remember which paths you've tried</li>
+                            <li><strong>Balance speed & accuracy:</strong> Both time and path efficiency matter for max score</li>
+                            <li><strong>Avoid backtracking:</strong> Each extra step reduces your efficiency bonus</li>
                         </ul>
                     </div>
                 </div>
