@@ -818,15 +818,46 @@
     animation: bounceIn 0.5s ease;
 }
 
-.optimal-path-stats {
+/* Round Summary - displayed on overlay after completing a round */
+.round-summary {
     display: flex;
-    gap: 1.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
     background: rgba(255, 255, 255, 0.95);
-    padding: 0.5rem 1.25rem;
+    padding: 0.75rem 1.5rem;
     border-radius: var(--radius-md);
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 500;
     color: #333;
+    min-width: 300px;
+}
+
+.round-summary-row {
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.round-summary-row.score-row {
+    border-top: 1px solid #ddd;
+    padding-top: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.summary-item {
+    white-space: nowrap;
+}
+
+.summary-item.score-item {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+/* Timeout message styling */
+.timeout-message-text {
+    background: linear-gradient(135deg, #FF6B6B, #EE5A24) !important;
 }
 
 .optimal-path-continue-btn {

@@ -974,7 +974,7 @@ class MazeGameConfig {
 
         // Time limits (in seconds) based on maze size
         // Larger mazes need more time
-        this.baseTimePerCell = 0.8; // seconds per cell approximately
+        this.baseTimePerCell = 0.1; // seconds per cell approximately (reduced by 87.5%)
         this.minTime = 30;
         this.maxTime = 300;
 
@@ -1552,7 +1552,6 @@ class MazeGame {
         this.screens = {
             config: document.getElementById('configScreen'),
             game: document.getElementById('gameScreen'),
-            roundComplete: document.getElementById('roundCompleteScreen'),
             result: document.getElementById('resultScreen')
         };
 
@@ -1566,14 +1565,6 @@ class MazeGame {
             // Timer
             timerFill: document.getElementById('timerFill'),
             timerText: document.getElementById('timerText'),
-
-            // Round complete
-            roundIcon: document.getElementById('roundIcon'),
-            roundTitle: document.getElementById('roundTitle'),
-            roundTimeRemaining: document.getElementById('roundTimeRemaining'),
-            roundSteps: document.getElementById('roundSteps'),
-            roundErrors: document.getElementById('roundErrors'),
-            roundScore: document.getElementById('roundScore'),
 
             // Results
             resultIcon: document.getElementById('resultIcon'),
@@ -1638,11 +1629,6 @@ class MazeGame {
         // Start button
         document.getElementById('startGameBtn').addEventListener('click', () => {
             this.startGame();
-        });
-
-        // Next round button
-        document.getElementById('nextRoundBtn').addEventListener('click', () => {
-            this.startNextRound();
         });
 
         // Result screen buttons
@@ -1818,7 +1804,7 @@ class MazeGame {
 
         // Calculate score with path efficiency
         // Shorter path = higher score (multiple routes possible due to braiding)
-        const scoreDetails = this.state.calculateRoundScore(this.config, optimalPathLength);
+        this.state.calculateRoundScore(this.config, optimalPathLength);
 
         // Show optimal path if round was successful
         if (success && this.currentMaze.shortestPath) {
@@ -1828,27 +1814,106 @@ class MazeGame {
             this.showOptimalPathOverlay(userSteps, optimalSteps, () => {
                 this.hideOptimalPathOverlay();
                 this.renderer.clearOptimalPath();
-                this.showRoundCompleteModal(success, scoreDetails);
+                // Go directly to next round or results
+                this.proceedToNextRoundOrResults();
             });
             this.renderer.showOptimalPath(this.currentMaze.shortestPath, 50);
         } else {
-            // No path to show, go directly to modal
-            this.showRoundCompleteModal(success, scoreDetails);
+            // Time's up - show time up overlay then proceed
+            this.showTimeUpOverlay(() => {
+                this.hideTimeUpOverlay();
+                this.proceedToNextRoundOrResults();
+            });
+        }
+    }
+
+    /**
+     * Show time up overlay when player fails to complete in time
+     */
+    showTimeUpOverlay(onContinue) {
+        const currentRound = this.state.currentRound;
+        const totalRounds = this.config.totalRounds;
+        const isLastRound = currentRound >= totalRounds;
+        const buttonText = isLastRound ? 'View Results' : 'Next Round';
+
+        const overlay = document.createElement('div');
+        overlay.id = 'timeUpOverlay';
+        overlay.className = 'optimal-path-overlay';
+        overlay.innerHTML = `
+            <div class="optimal-path-message timeout-message-text">Time's Up!</div>
+            <div class="round-summary">
+                <div class="round-summary-row">
+                    <span class="summary-item"><strong>Steps:</strong> ${this.state.roundSteps}</span>
+                    <span class="summary-item"><strong>Errors:</strong> ${this.state.roundErrors}</span>
+                </div>
+                <div class="round-summary-row score-row">
+                    <span class="summary-item score-item"><strong>Round Score:</strong> +${this.state.roundScore}</span>
+                </div>
+            </div>
+            <button class="optimal-path-continue-btn">${buttonText}</button>
+        `;
+        document.body.appendChild(overlay);
+
+        const continueBtn = overlay.querySelector('.optimal-path-continue-btn');
+        continueBtn.addEventListener('click', onContinue);
+    }
+
+    hideTimeUpOverlay() {
+        const overlay = document.getElementById('timeUpOverlay');
+        if (overlay) {
+            overlay.remove();
+        }
+    }
+
+    /**
+     * Proceed to next round or show final results
+     */
+    proceedToNextRoundOrResults() {
+        this.state.nextRound();
+
+        if (this.state.isGameOver(this.config.totalRounds)) {
+            this.showResults();
+        } else {
+            this.startRound();
         }
     }
 
     showOptimalPathOverlay(userSteps, optimalSteps, onContinue) {
+        // Calculate path efficiency
+        const efficiency = optimalSteps > 0 ? Math.min(100, Math.round((optimalSteps / userSteps) * 100)) : 100;
+
+        // Get round score details
+        const timeRemaining = this.timer.getTimeRemaining();
+        const roundScore = this.state.roundScore;
+        const wallHits = this.state.roundErrors;
+        const currentRound = this.state.currentRound;
+        const totalRounds = this.config.totalRounds;
+
+        // Determine if this is the last round
+        const isLastRound = currentRound >= totalRounds;
+        const buttonText = isLastRound ? 'View Results' : 'Next Round';
+
         // Create overlay message with stats and continue button
         const overlay = document.createElement('div');
         overlay.id = 'optimalPathOverlay';
         overlay.className = 'optimal-path-overlay';
         overlay.innerHTML = `
-            <div class="optimal-path-message">✨ Optimal Path ✨</div>
-            <div class="optimal-path-stats">
-                <span>Your steps: ${userSteps}</span>
-                <span>Optimal: ${optimalSteps}</span>
+            <div class="optimal-path-message">Round ${currentRound} Complete!</div>
+            <div class="round-summary">
+                <div class="round-summary-row">
+                    <span class="summary-item"><strong>Your Steps:</strong> ${userSteps}</span>
+                    <span class="summary-item"><strong>Optimal:</strong> ${optimalSteps}</span>
+                    <span class="summary-item"><strong>Efficiency:</strong> ${efficiency}%</span>
+                </div>
+                <div class="round-summary-row">
+                    <span class="summary-item"><strong>Time Left:</strong> ${timeRemaining}s</span>
+                    <span class="summary-item"><strong>Errors:</strong> ${wallHits}</span>
+                </div>
+                <div class="round-summary-row score-row">
+                    <span class="summary-item score-item"><strong>Round Score:</strong> +${roundScore}</span>
+                </div>
             </div>
-            <button class="optimal-path-continue-btn">Continue</button>
+            <button class="optimal-path-continue-btn">${buttonText}</button>
         `;
         document.body.appendChild(overlay);
 
@@ -1861,60 +1926,6 @@ class MazeGame {
         const overlay = document.getElementById('optimalPathOverlay');
         if (overlay) {
             overlay.remove();
-        }
-    }
-
-    showRoundCompleteModal(success, scoreDetails) {
-        // Update round complete screen
-        if (success) {
-            if (scoreDetails.pathEfficiency >= 95) {
-                this.elements.roundIcon.textContent = '🌟';
-                this.elements.roundTitle.textContent = 'Perfect Path!';
-            } else if (scoreDetails.pathEfficiency >= 80) {
-                this.elements.roundIcon.textContent = '✅';
-                this.elements.roundTitle.textContent = 'Great Job!';
-            } else if (scoreDetails.pathEfficiency >= 60) {
-                this.elements.roundIcon.textContent = '👍';
-                this.elements.roundTitle.textContent = 'Round Complete!';
-            } else {
-                this.elements.roundIcon.textContent = '🔄';
-                this.elements.roundTitle.textContent = 'Try a shorter path!';
-            }
-        } else {
-            this.elements.roundIcon.textContent = '⏰';
-            this.elements.roundTitle.textContent = 'Time\'s Up!';
-        }
-
-        this.elements.roundTimeRemaining.textContent = `${this.state.timeRemaining}s`;
-        this.elements.roundSteps.textContent = this.state.roundSteps;
-        this.elements.roundErrors.textContent = this.state.roundErrors;
-        this.elements.roundScore.textContent = scoreDetails.roundScore;
-
-        // Update efficiency display if element exists
-        const efficiencyDisplay = document.getElementById('roundEfficiency');
-        if (efficiencyDisplay) {
-            efficiencyDisplay.textContent = `${scoreDetails.pathEfficiency}%`;
-        }
-
-        // Update button text based on whether there are more rounds
-        const nextRoundBtn = document.getElementById('nextRoundBtn');
-        if (this.state.currentRound >= this.config.totalRounds) {
-            nextRoundBtn.textContent = '🏆 View Results';
-        } else {
-            nextRoundBtn.textContent = '➡️ Next Round';
-        }
-
-        // Show round complete screen
-        this.showScreen('roundComplete');
-    }
-
-    startNextRound() {
-        this.state.nextRound();
-
-        if (this.state.isGameOver(this.config.totalRounds)) {
-            this.showResults();
-        } else {
-            this.startRound();
         }
     }
 
