@@ -978,11 +978,31 @@ class MazeGameConfig {
         this.minTime = 30;
         this.maxTime = 300;
 
-        // Scoring
-        this.baseScore = 100;
-        this.timeBonus = 2; // Points per second remaining
-        this.stepPenalty = 0; // No penalty for extra steps
-        this.errorPenalty = 5; // Points lost per wall hit
+        // Scoring Configuration
+        // New scoring formula based on: optimal path, errors, and completion time
+        this.scoring = {
+            // Base score for completing a round
+            baseScore: 100,
+
+            // Path efficiency scoring (comparing actual steps vs optimal path)
+            // Score = maxPathBonus * (optimalSteps / actualSteps)
+            // Perfect efficiency (optimalSteps == actualSteps) = maxPathBonus points
+            maxPathBonus: 150,
+
+            // Error penalty (hitting walls)
+            // Each wall hit deducts points
+            errorPenalty: 10,
+
+            // Time bonus scoring
+            // Bonus = timeRemaining * timeBonusPerSecond
+            // Rewards faster completion
+            timeBonusPerSecond: 3,
+
+            // Time efficiency bonus (percentage of time remaining)
+            // Additional bonus for completing quickly relative to time limit
+            // Score = maxTimeEfficiencyBonus * (timeRemaining / totalTime)
+            maxTimeEfficiencyBonus: 50
+        };
 
         // Difficulty-based noise and complexity settings (base values)
         // These increase each round to make later rounds harder
@@ -1138,40 +1158,80 @@ class GameStateManager {
     }
 
     /**
-     * Calculate round score with path efficiency bonus
-     * Shorter path = higher score (single exit, multiple paths)
+     * Calculate round score based on optimal path, errors, and completion time
+     *
+     * Scoring Formula:
+     * 1. Base Score: Fixed points for completing the round
+     * 2. Path Efficiency Bonus: maxPathBonus * (optimalSteps / actualSteps)
+     *    - Perfect path = full bonus, extra steps reduce bonus
+     * 3. Error Penalty: errorPenalty * numberOfErrors
+     *    - Each wall hit deducts points
+     * 4. Time Bonus: timeBonusPerSecond * timeRemaining
+     *    - Faster completion = more points
+     * 5. Time Efficiency Bonus: maxTimeEfficiencyBonus * (timeRemaining / totalTime)
+     *    - Additional bonus based on percentage of time saved
+     *
+     * Final Score = Base + PathBonus + TimeBonus + TimeEfficiencyBonus - ErrorPenalty
      */
-    calculateRoundScore(config, optimalPathLength = null) {
-        const baseScore = config.baseScore;
-        const timeBonus = Math.floor(this.timeRemaining * config.timeBonus);
-        const errorDeduction = this.roundErrors * config.errorPenalty;
+    calculateRoundScore(config, optimalPathLength = null, totalTime = null) {
+        const scoring = config.scoring;
 
-        // Calculate path efficiency bonus
-        // Player takes one of many possible paths to single exit
-        // Efficiency = optimal path length / actual steps taken
-        let efficiencyBonus = 0;
+        // 1. Base score for completing the round
+        const baseScore = scoring.baseScore;
+
+        // 2. Path efficiency bonus
+        // Compare actual steps taken vs optimal path length
+        let pathEfficiencyBonus = 0;
         if (optimalPathLength && optimalPathLength > 0 && this.roundSteps > 0) {
-            // Efficiency = optimal / actual (capped at 1.0)
+            // Efficiency ratio: optimal / actual (capped at 1.0 for perfect or better)
             this.pathEfficiency = Math.min(1, optimalPathLength / this.roundSteps);
-
-            // Bonus points for efficiency (max 75 points for perfect efficiency)
-            // This rewards finding the shortest of multiple paths
-            efficiencyBonus = Math.floor(this.pathEfficiency * 75);
+            // Bonus = maxPathBonus * efficiency
+            pathEfficiencyBonus = Math.floor(scoring.maxPathBonus * this.pathEfficiency);
         } else {
             this.pathEfficiency = 1; // Default to 100% if no path data
+            pathEfficiencyBonus = scoring.maxPathBonus;
         }
 
-        this.roundScore = Math.max(0, baseScore + timeBonus + efficiencyBonus - errorDeduction);
+        // 3. Error penalty (wall hits)
+        const errorPenalty = this.roundErrors * scoring.errorPenalty;
+
+        // 4. Time bonus (points per second remaining)
+        const timeBonus = Math.floor(this.timeRemaining * scoring.timeBonusPerSecond);
+
+        // 5. Time efficiency bonus (percentage of time remaining)
+        let timeEfficiencyBonus = 0;
+        if (totalTime && totalTime > 0) {
+            const timeEfficiency = this.timeRemaining / totalTime;
+            timeEfficiencyBonus = Math.floor(scoring.maxTimeEfficiencyBonus * timeEfficiency);
+        }
+
+        // Calculate final round score (minimum 0)
+        this.roundScore = Math.max(0,
+            baseScore +
+            pathEfficiencyBonus +
+            timeBonus +
+            timeEfficiencyBonus -
+            errorPenalty
+        );
+
+        // Update totals
         this.totalScore += this.roundScore;
         this.roundsCompleted++;
 
+        // Return detailed breakdown for display
         return {
             roundScore: this.roundScore,
             baseScore,
+            pathEfficiencyBonus,
+            pathEfficiency: Math.round(this.pathEfficiency * 100),
+            optimalSteps: optimalPathLength || 0,
+            actualSteps: this.roundSteps,
+            errorPenalty,
+            errorCount: this.roundErrors,
             timeBonus,
-            efficiencyBonus,
-            errorDeduction,
-            pathEfficiency: Math.round(this.pathEfficiency * 100)
+            timeEfficiencyBonus,
+            timeRemaining: this.timeRemaining,
+            totalTime: totalTime || 0
         };
     }
 
@@ -2010,16 +2070,16 @@ class MazeGame {
             optimalPathLength = this.currentMaze.shortestPath.length + 3;
         }
 
-        // Calculate score with path efficiency
-        // Shorter path = higher score (multiple routes possible due to braiding)
-        this.state.calculateRoundScore(this.config, optimalPathLength);
+        // Get total time for this round
+        const totalTime = this.timer.totalTime;
+
+        // Calculate score with new formula (optimal path, errors, time)
+        const scoreDetails = this.state.calculateRoundScore(this.config, optimalPathLength, totalTime);
 
         // Show optimal path if round was successful
         if (success && this.currentMaze.shortestPath) {
             // Show path with animation, then wait for user to click continue
-            const userSteps = this.state.roundSteps;
-            const optimalSteps = optimalPathLength;
-            this.showOptimalPathOverlay(userSteps, optimalSteps, () => {
+            this.showOptimalPathOverlay(scoreDetails, () => {
                 this.hideOptimalPathOverlay();
                 this.renderer.clearOptimalPath();
                 // Go directly to next round or results
@@ -2028,7 +2088,7 @@ class MazeGame {
             this.renderer.showOptimalPath(this.currentMaze.shortestPath, 50);
         } else {
             // Time's up - show time up overlay then proceed
-            this.showTimeUpOverlay(() => {
+            this.showTimeUpOverlay(scoreDetails, () => {
                 this.hideTimeUpOverlay();
                 this.proceedToNextRoundOrResults();
             });
@@ -2037,8 +2097,10 @@ class MazeGame {
 
     /**
      * Show time up overlay when player fails to complete in time
+     * @param {Object} scoreDetails - Detailed scoring breakdown
+     * @param {Function} onContinue - Callback when continue button is clicked
      */
-    showTimeUpOverlay(onContinue) {
+    showTimeUpOverlay(scoreDetails, onContinue) {
         const currentRound = this.state.currentRound;
         const totalRounds = this.config.totalRounds;
         const isLastRound = currentRound >= totalRounds;
@@ -2051,11 +2113,24 @@ class MazeGame {
             <div class="optimal-path-message timeout-message-text">Time's Up!</div>
             <div class="round-summary">
                 <div class="round-summary-row">
-                    <span class="summary-item"><strong>Steps:</strong> ${this.state.roundSteps}</span>
-                    <span class="summary-item"><strong>Errors:</strong> ${this.state.roundErrors}</span>
+                    <span class="summary-item"><strong>Steps:</strong> ${scoreDetails.actualSteps}</span>
+                    <span class="summary-item"><strong>Errors:</strong> ${scoreDetails.errorCount}</span>
                 </div>
-                <div class="round-summary-row score-row">
-                    <span class="summary-item score-item"><strong>Round Score:</strong> +${this.state.roundScore}</span>
+                <div class="score-breakdown">
+                    <div class="score-breakdown-title">Score Breakdown</div>
+                    <div class="score-breakdown-item">
+                        <span>Base Score:</span>
+                        <span class="score-value positive">+${scoreDetails.baseScore}</span>
+                    </div>
+                    <div class="score-breakdown-item">
+                        <span>Error Penalty (${scoreDetails.errorCount} hits):</span>
+                        <span class="score-value negative">-${scoreDetails.errorPenalty}</span>
+                    </div>
+                    <div class="score-breakdown-divider"></div>
+                    <div class="score-breakdown-item total">
+                        <span>Round Score:</span>
+                        <span class="score-value">${scoreDetails.roundScore}</span>
+                    </div>
                 </div>
             </div>
             <button class="optimal-path-continue-btn">${buttonText}</button>
@@ -2086,14 +2161,12 @@ class MazeGame {
         }
     }
 
-    showOptimalPathOverlay(userSteps, optimalSteps, onContinue) {
-        // Calculate path efficiency
-        const efficiency = optimalSteps > 0 ? Math.min(100, Math.round((optimalSteps / userSteps) * 100)) : 100;
-
-        // Get round score details
-        const timeRemaining = this.timer.getTimeRemaining();
-        const roundScore = this.state.roundScore;
-        const wallHits = this.state.roundErrors;
+    /**
+     * Show round complete overlay with detailed scoring breakdown
+     * @param {Object} scoreDetails - Detailed scoring breakdown from calculateRoundScore
+     * @param {Function} onContinue - Callback when continue button is clicked
+     */
+    showOptimalPathOverlay(scoreDetails, onContinue) {
         const currentRound = this.state.currentRound;
         const totalRounds = this.config.totalRounds;
 
@@ -2101,24 +2174,50 @@ class MazeGame {
         const isLastRound = currentRound >= totalRounds;
         const buttonText = isLastRound ? 'View Results' : 'Next Round';
 
-        // Create overlay message with stats and continue button
+        // Calculate total time bonus (time bonus + time efficiency bonus)
+        const totalTimeBonus = scoreDetails.timeBonus + scoreDetails.timeEfficiencyBonus;
+
+        // Create overlay message with detailed scoring breakdown
         const overlay = document.createElement('div');
         overlay.id = 'optimalPathOverlay';
         overlay.className = 'optimal-path-overlay';
         overlay.innerHTML = `
             <div class="optimal-path-message">Round ${currentRound} Complete!</div>
             <div class="round-summary">
-                <div class="round-summary-row">
-                    <span class="summary-item"><strong>Your Steps:</strong> ${userSteps}</span>
-                    <span class="summary-item"><strong>Optimal:</strong> ${optimalSteps}</span>
-                    <span class="summary-item"><strong>Efficiency:</strong> ${efficiency}%</span>
+                <div class="round-summary-row path-comparison">
+                    <span class="summary-item"><strong>Your Steps:</strong> ${scoreDetails.actualSteps}</span>
+                    <span class="summary-item"><strong>Optimal:</strong> ${scoreDetails.optimalSteps}</span>
+                    <span class="summary-item efficiency-badge ${scoreDetails.pathEfficiency >= 90 ? 'excellent' : scoreDetails.pathEfficiency >= 70 ? 'good' : 'average'}">
+                        <strong>Efficiency:</strong> ${scoreDetails.pathEfficiency}%
+                    </span>
                 </div>
-                <div class="round-summary-row">
-                    <span class="summary-item"><strong>Time Left:</strong> ${timeRemaining}s</span>
-                    <span class="summary-item"><strong>Errors:</strong> ${wallHits}</span>
+                <div class="round-summary-row stats-row">
+                    <span class="summary-item"><strong>Time Left:</strong> ${scoreDetails.timeRemaining}s / ${scoreDetails.totalTime}s</span>
+                    <span class="summary-item"><strong>Errors:</strong> ${scoreDetails.errorCount}</span>
                 </div>
-                <div class="round-summary-row score-row">
-                    <span class="summary-item score-item"><strong>Round Score:</strong> +${roundScore}</span>
+                <div class="score-breakdown">
+                    <div class="score-breakdown-title">Score Breakdown</div>
+                    <div class="score-breakdown-item">
+                        <span>Base Score:</span>
+                        <span class="score-value positive">+${scoreDetails.baseScore}</span>
+                    </div>
+                    <div class="score-breakdown-item">
+                        <span>Path Efficiency (${scoreDetails.pathEfficiency}%):</span>
+                        <span class="score-value positive">+${scoreDetails.pathEfficiencyBonus}</span>
+                    </div>
+                    <div class="score-breakdown-item">
+                        <span>Time Bonus (${scoreDetails.timeRemaining}s left):</span>
+                        <span class="score-value positive">+${totalTimeBonus}</span>
+                    </div>
+                    <div class="score-breakdown-item">
+                        <span>Error Penalty (${scoreDetails.errorCount} hits):</span>
+                        <span class="score-value negative">-${scoreDetails.errorPenalty}</span>
+                    </div>
+                    <div class="score-breakdown-divider"></div>
+                    <div class="score-breakdown-item total">
+                        <span>Round Score:</span>
+                        <span class="score-value">${scoreDetails.roundScore}</span>
+                    </div>
                 </div>
             </div>
             <button class="optimal-path-continue-btn">${buttonText}</button>
