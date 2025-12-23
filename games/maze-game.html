@@ -37,9 +37,19 @@
                     <div class="help-section">
                         <h3>⚙️ Game Modes</h3>
                         <ul>
-                            <li><strong>Classic:</strong> Full maze visibility, multiple valid paths</li>
+                            <li><strong>Classic:</strong> Full maze visibility with multiple paths</li>
                             <li><strong>Light Fog:</strong> Limited visibility around player (Coming Soon)</li>
                             <li><strong>Heavy Fog:</strong> Minimal visibility, no path memory (Coming Soon)</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>🛤️ Multiple Paths</h3>
+                        <ul>
+                            <li>Each maze has <strong>multiple routes</strong> to the exit</li>
+                            <li><strong>Shorter paths = Higher scores!</strong> Find the quickest route</li>
+                            <li>Loops and junctions create alternative paths</li>
+                            <li>Path efficiency is tracked - aim for 100%!</li>
                         </ul>
                     </div>
 
@@ -66,10 +76,10 @@
                     <div class="help-section">
                         <h3>🏆 Scoring</h3>
                         <ul>
-                            <li><strong>Completion:</strong> Points for reaching the exit</li>
-                            <li><strong>Time Bonus:</strong> Extra points for remaining time</li>
-                            <li><strong>Efficiency:</strong> Fewer steps = higher score</li>
-                            <li><strong>Penalty:</strong> Points deducted for wall collisions</li>
+                            <li><strong>Base Score:</strong> 100 points for reaching the exit</li>
+                            <li><strong>Time Bonus:</strong> +2 points per second remaining</li>
+                            <li><strong>Efficiency Bonus:</strong> Up to +75 points for taking shortest path</li>
+                            <li><strong>Penalty:</strong> -5 points per wall collision</li>
                         </ul>
                     </div>
 
@@ -194,12 +204,16 @@
                         <div class="round-stat-value" id="roundSteps">25</div>
                     </div>
                     <div class="round-stat">
+                        <div class="round-stat-label">Path Efficiency</div>
+                        <div class="round-stat-value" id="roundEfficiency">100%</div>
+                    </div>
+                    <div class="round-stat">
                         <div class="round-stat-label">Wall Hits</div>
                         <div class="round-stat-value" id="roundErrors">2</div>
                     </div>
-                    <div class="round-stat">
+                    <div class="round-stat full-width">
                         <div class="round-stat-label">Round Score</div>
-                        <div class="round-stat-value" id="roundScore">150</div>
+                        <div class="round-stat-value highlight" id="roundScore">150</div>
                     </div>
                 </div>
 

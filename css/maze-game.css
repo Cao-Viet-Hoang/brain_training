@@ -764,6 +764,20 @@
     border-radius: var(--radius-md);
 }
 
+.round-stat.full-width {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, var(--primary-color), #3a7a8a);
+}
+
+.round-stat.full-width .round-stat-label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.round-stat.full-width .round-stat-value {
+    color: white;
+    font-size: 2rem;
+}
+
 .round-stat-label {
     font-size: 0.8rem;
     color: var(--text-secondary);
@@ -774,6 +788,11 @@
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--primary-color);
+}
+
+.round-stat-value.highlight {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .continue-btn {
