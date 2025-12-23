@@ -172,16 +172,9 @@ async function initializeMultiplayer() {
                     sessionStorage.setItem('multiplayerRoomId', roomCode);
                     sessionStorage.setItem('multiplayerRole', 'player');
                     
-                    // Get game URL based on gameType
-                    const gameUrls = {
-                        'math-game': 'games/math-game.html',
-                        'pixel-game': 'games/pixel-game.html',
-                        'expression-puzzle': 'games/expression-puzzle.html',
-                        'dual-n-back': 'games/dual-n-back.html',
-                        'memory-matrix': 'games/memory-matrix.html',
-                        'word-recall': 'games/word-recall.html'
-                    };
-                    const gameUrl = gameUrls[gameType] || 'games/math-game.html';
+                    // Get game URL from centralized mapping in constants.js
+                    const gameFile = MP_CONSTANTS.GAME_FILES[gameType];
+                    const gameUrl = gameFile ? `games/${gameFile}` : 'games/math-game.html';
                     window.location.href = gameUrl;
                 }
             });
@@ -222,17 +215,10 @@ async function initializeMultiplayer() {
                     // Cancel disconnect handler to prevent player removal when navigating
                     mpCore.cancelDisconnectHandler();
 
-                    // Navigate to game
+                    // Navigate to game using centralized mapping from constants.js
                     const gameType = roomData.meta.gameType;
-                    const gameUrls = {
-                        'math-game': 'games/math-game.html',
-                        'pixel-game': 'games/pixel-game.html',
-                        'expression-puzzle': 'games/expression-puzzle.html',
-                        'dual-n-back': 'games/dual-n-back.html',
-                        'memory-matrix': 'games/memory-matrix.html',
-                        'word-recall': 'games/word-recall.html'
-                    };
-                    window.location.href = gameUrls[gameType] || 'games/math-game.html';
+                    const gameFile = MP_CONSTANTS.GAME_FILES[gameType];
+                    window.location.href = gameFile ? `games/${gameFile}` : 'games/math-game.html';
                 }
             });
             

@@ -152,6 +152,7 @@ class MultiplayerUI {
                         <option value="dual-n-back">🔄 Dual N-Back</option>
                         <option value="memory-matrix">🔲 Memory Matrix</option>
                         <option value="word-recall">💭 Word Recall</option>
+                        <option value="maze-game">🧩 Maze Runner</option>
                     </select>
                 </div>
 
@@ -326,16 +327,9 @@ class MultiplayerUI {
                 sessionStorage.setItem('multiplayerRoomId', roomData.roomId);
                 sessionStorage.setItem('multiplayerRole', 'host');
                 
-                // Get game URL from room data or use mapping
-                const gameUrls = {
-                    'math-game': 'games/math-game.html',
-                    'pixel-game': 'games/pixel-game.html',
-                    'expression-puzzle': 'games/expression-puzzle.html',
-                    'dual-n-back': 'games/dual-n-back.html',
-                    'memory-matrix': 'games/memory-matrix.html',
-                    'word-recall': 'games/word-recall.html'
-                };
-                const gameUrl = gameUrls[roomData.gameType] || 'games/math-game.html';
+                // Get game URL from centralized mapping in constants.js
+                const gameFile = MP_CONSTANTS.GAME_FILES[roomData.gameType];
+                const gameUrl = gameFile ? `games/${gameFile}` : 'games/math-game.html';
                 
                 // Store player name in sessionStorage for game page
                 sessionStorage.setItem('multiplayerPlayerName', this.playerName);

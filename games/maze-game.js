@@ -2300,6 +2300,60 @@ class MazeGame {
 // ============================================================================
 // INITIALIZE GAME
 // ============================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    window.mazeGame = new MazeGame();
+let gameInstance = null; // Global reference for multiplayer adapter
+
+document.addEventListener('DOMContentLoaded', async () => {
+    gameInstance = new MazeGame();
+    window.mazeGame = gameInstance; // Expose globally for debugging and multiplayer
+
+    // Check if this is multiplayer mode
+    const roomId = sessionStorage.getItem('multiplayerRoomId');
+    const role = sessionStorage.getItem('multiplayerRole');
+
+    if (roomId && typeof MazeGameMultiplayerAdapter !== 'undefined') {
+        console.log('[MazeGame] Checking multiplayer room validity:', { roomId, role });
+
+        // Validate room exists and is still active
+        try {
+            const roomRef = database.ref(`rooms/${roomId}`);
+            const snapshot = await roomRef.once('value');
+            const roomData = snapshot.val();
+
+            // Check if room exists and is in valid state
+            if (!roomData || roomData.meta.status === 'closed' || roomData.meta.status === 'finished') {
+                console.log('[MazeGame] Room no longer valid, clearing multiplayer state');
+                sessionStorage.removeItem('multiplayerRoomId');
+                sessionStorage.removeItem('multiplayerRole');
+                console.log('[MazeGame] Single player mode');
+                return; // Exit and let game run in single player mode
+            }
+
+            console.log('[MazeGame] Room valid, initializing multiplayer mode');
+            const adapter = new MazeGameMultiplayerAdapter(gameInstance);
+
+            if (role === 'host') {
+                // Initialize as host (will intercept game start)
+                adapter.initAsHost(roomId).catch(err => {
+                    console.error('[MazeGame] Failed to initialize multiplayer as host:', err);
+                    alert('Failed to initialize multiplayer: ' + err.message);
+                });
+            } else if (role === 'player') {
+                // Initialize as player (will wait for maze data and auto-start)
+                adapter.initAsPlayer(roomId).catch(err => {
+                    console.error('[MazeGame] Failed to initialize multiplayer as player:', err);
+                    alert('Failed to initialize multiplayer: ' + err.message);
+                });
+            }
+
+            // Expose adapter globally
+            window.mazeGameAdapter = adapter;
+        } catch (error) {
+            console.error('[MazeGame] Error checking room validity:', error);
+            sessionStorage.removeItem('multiplayerRoomId');
+            sessionStorage.removeItem('multiplayerRole');
+            console.log('[MazeGame] Single player mode');
+        }
+    } else {
+        console.log('[MazeGame] Single player mode');
+    }
 });

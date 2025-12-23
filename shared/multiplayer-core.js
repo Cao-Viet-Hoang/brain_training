@@ -100,30 +100,9 @@ class MultiplayerCore {
         // Create room
         this.roomRef = database.ref(`rooms/${roomCode}`);
         
-        // Determine game URL based on game type
-        let gameUrl = '';
-        switch(gameType || 'generic') {
-            case 'math-game':
-                gameUrl = 'games/math-game.html';
-                break;
-            case 'pixel-game':
-                gameUrl = 'games/pixel-game.html';
-                break;
-            case 'expression-puzzle':
-                gameUrl = 'games/expression-puzzle.html';
-                break;
-            case 'dual-n-back':
-                gameUrl = 'games/dual-n-back.html';
-                break;
-            case 'memory-matrix':
-                gameUrl = 'games/memory-matrix.html';
-                break;
-            case 'word-recall':
-                gameUrl = 'games/word-recall.html';
-                break;
-            default:
-                gameUrl = gameType ? `games/${gameType}.html` : '';
-        }
+        // Determine game URL based on game type (use centralized mapping from constants.js)
+        const gameFile = MP_CONSTANTS.GAME_FILES[gameType] || `${gameType}.html`;
+        const gameUrl = gameFile ? `games/${gameFile}` : '';
         
         await this.roomRef.set({
             meta: {
