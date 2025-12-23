@@ -36,9 +36,7 @@ class MazeGenerator {
     generate(width, height, options = {}) {
         const {
             candidates = 50,           // Number of mazes to generate
-            braidAmount = 0.15,        // Percentage of dead-ends to remove (0-1)
-            multipleExits = true,      // Enable multiple exits
-            exitCount = 3              // Number of exits (if multipleExits)
+            braidAmount = 0.15         // Percentage of dead-ends to remove (0-1)
         } = options;
 
         // Ensure odd dimensions for proper maze structure
@@ -70,10 +68,8 @@ class MazeGenerator {
             }
         }
 
-        // Create openings for the best maze
-        const openings = multipleExits
-            ? this.createMultipleExits(bestMaze, width, height, totalWidth, totalHeight, exitCount)
-            : this.createOpenings(bestMaze, width, height, totalWidth, totalHeight);
+        // Create entrance and exit openings for the best maze
+        const openings = this.createOpenings(bestMaze, width, height, totalWidth, totalHeight);
 
         // Calculate optimal paths to all exits
         const pathData = this.calculatePathsToExits(bestMaze, openings);
@@ -368,66 +364,7 @@ class MazeGenerator {
     }
 
     /**
-     * Create multiple exit openings for distance-based scoring
-     */
-    createMultipleExits(grid, mazeWidth, mazeHeight, totalWidth, totalHeight, exitCount) {
-        const edges = ['top', 'bottom', 'left', 'right'];
-
-        // Randomly select entrance edge
-        const startEdgeIndex = Math.floor(Math.random() * 4);
-        const startEdge = edges[startEdgeIndex];
-
-        // Create entrance
-        const entrancePos = this.findOpeningPosition(grid, startEdge, totalWidth, totalHeight);
-        grid[entrancePos.wallY][entrancePos.wallX] = 'entrance';
-        grid[entrancePos.outsideY][entrancePos.outsideX] = 'start';
-
-        // Create multiple exits on different edges
-        const allExits = [];
-        const exitOpenings = [];
-        const exitEdges = [];
-        const usedPositions = new Set();
-
-        // Prioritize opposite edge for primary exit
-        const oppositeEdgeIndex = (startEdgeIndex + 2) % 4;
-        const edgeOrder = [
-            edges[oppositeEdgeIndex],
-            edges[(startEdgeIndex + 1) % 4],
-            edges[(startEdgeIndex + 3) % 4]
-        ];
-
-        for (let i = 0; i < Math.min(exitCount, 3); i++) {
-            const exitEdge = edgeOrder[i % edgeOrder.length];
-            const exitPos = this.findOpeningPosition(grid, exitEdge, totalWidth, totalHeight, usedPositions);
-
-            if (exitPos) {
-                const exitType = i === 0 ? 'exit' : `exit${i + 1}`;
-                const finishType = i === 0 ? 'finish' : `finish${i + 1}`;
-
-                grid[exitPos.wallY][exitPos.wallX] = exitType;
-                grid[exitPos.outsideY][exitPos.outsideX] = finishType;
-
-                usedPositions.add(`${exitPos.wallX},${exitPos.wallY}`);
-
-                allExits.push({ x: exitPos.outsideX, y: exitPos.outsideY, index: i });
-                exitOpenings.push({ x: exitPos.insideX, y: exitPos.insideY });
-                exitEdges.push(exitEdge);
-            }
-        }
-
-        return {
-            playerStart: { x: entrancePos.outsideX, y: entrancePos.outsideY },
-            entranceInside: { x: entrancePos.insideX, y: entrancePos.insideY },
-            primaryExit: allExits[0] || { x: entrancePos.outsideX, y: entrancePos.outsideY },
-            allExits,
-            exitOpenings,
-            startEdge,
-            exitEdges
-        };
-    }
-
-    /**
-     * Calculate optimal paths to all exits using BFS
+     * Calculate optimal path to exit using BFS
      */
     calculatePathsToExits(grid, openings) {
         const start = openings.entranceInside;
@@ -502,19 +439,15 @@ class MazeGenerator {
      */
     createOpenings(grid, mazeWidth, mazeHeight, totalWidth, totalHeight) {
         const edges = ['top', 'bottom', 'left', 'right'];
+        // Opposite pairs: top(0) <-> bottom(1), left(2) <-> right(3)
+        const oppositeEdge = { 'top': 'bottom', 'bottom': 'top', 'left': 'right', 'right': 'left' };
 
         // Randomly select entrance edge
         const startEdgeIndex = Math.floor(Math.random() * 4);
         const startEdge = edges[startEdgeIndex];
 
-        // Select exit edge (opposite or perpendicular, never same)
-        let exitEdgeIndex;
-        if (Math.random() < 0.7) {
-            exitEdgeIndex = (startEdgeIndex + 2) % 4;
-        } else {
-            exitEdgeIndex = (startEdgeIndex + (Math.random() < 0.5 ? 1 : 3)) % 4;
-        }
-        const exitEdge = edges[exitEdgeIndex];
+        // Exit MUST be on the opposite edge (entrance and exit on opposite sides)
+        const exitEdge = oppositeEdge[startEdge];
 
         // Find opening positions
         const entrancePos = this.findOpeningPosition(grid, startEdge, totalWidth, totalHeight);
@@ -1359,9 +1292,7 @@ class MazeGame {
         // Higher braid = more alternative routes
         const mazeOptions = {
             candidates: this.config.difficulty === 'easy' ? 30 : 50,
-            braidAmount: this.config.difficulty === 'easy' ? 0.15 : 0.25, // More braiding = more paths
-            multipleExits: false,  // Single exit only
-            exitCount: 1
+            braidAmount: this.config.difficulty === 'easy' ? 0.15 : 0.25 // More braiding = more paths
         };
 
         this.currentMaze = this.mazeGenerator.generate(mazeSize, mazeSize, mazeOptions);
