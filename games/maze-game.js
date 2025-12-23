@@ -984,41 +984,45 @@ class MazeGameConfig {
         this.stepPenalty = 0; // No penalty for extra steps
         this.errorPenalty = 5; // Points lost per wall hit
 
-        // Difficulty-based noise and complexity settings
+        // Difficulty-based noise and complexity settings (base values)
+        // These increase each round to make later rounds harder
         this.difficultySettings = {
             easy: {
-                noiseLevel: 0.15,      // Less fake paths
-                braidAmount: 0.15,     // Fewer loops
+                noiseLevel: 0.10,      // Less fake paths (base)
+                braidAmount: 0.10,     // Fewer loops (base)
                 candidates: 50,        // Less candidates = slightly less optimal mazes
                 algorithm: 'growing_tree',
-                sizeIncrease: 2        // Size increase per 2 rounds
+                // Per-round increases
+                noiseIncreasePerRound: 0.03,
+                braidIncreasePerRound: 0.02
             },
             medium: {
-                noiseLevel: 0.30,      // Moderate fake paths
-                braidAmount: 0.25,     // More loops to confuse
+                noiseLevel: 0.20,      // Moderate fake paths (base)
+                braidAmount: 0.15,     // More loops to confuse (base)
                 candidates: 80,        // More candidates for better maze selection
                 algorithm: 'hybrid',
-                sizeIncrease: 3        // Size increase per 2 rounds
+                // Per-round increases
+                noiseIncreasePerRound: 0.04,
+                braidIncreasePerRound: 0.03
             },
             hard: {
-                noiseLevel: 0.45,      // Maximum fake paths
-                braidAmount: 0.35,     // Many loops and alternative routes
+                noiseLevel: 0.30,      // High fake paths (base)
+                braidAmount: 0.20,     // Many loops (base)
                 candidates: 100,       // Maximum candidates for most challenging mazes
                 algorithm: 'hybrid',
-                sizeIncrease: 4        // Size increase per 2 rounds
+                // Per-round increases
+                noiseIncreasePerRound: 0.05,
+                braidIncreasePerRound: 0.04
             }
         };
     }
 
     /**
      * Get maze size for a specific round
-     * Uses custom size as base, increases based on difficulty
+     * Size remains constant across all rounds (user-defined)
      */
     getMazeSize(round) {
-        const settings = this.difficultySettings[this.difficulty];
-        const increase = Math.floor((round - 1) / 2) * settings.sizeIncrease;
-        const maxSize = 35; // Maximum supported size
-        return Math.min(this.customMazeSize + increase, maxSize);
+        return this.customMazeSize;
     }
 
     /**
@@ -1054,19 +1058,26 @@ class MazeGameConfig {
     }
 
     /**
-     * Get maze generation options based on difficulty
+     * Get maze generation options based on difficulty and round
+     * Later rounds have more noise, braiding, and complexity
      */
     getMazeOptions(round) {
         const settings = this.difficultySettings[this.difficulty];
 
-        // Increase noise slightly each round
-        const roundNoiseBonus = (round - 1) * 0.02;
+        // Calculate round-based increases (round 1 = base values)
+        const roundMultiplier = round - 1;
+        const noiseIncrease = roundMultiplier * settings.noiseIncreasePerRound;
+        const braidIncrease = roundMultiplier * settings.braidIncreasePerRound;
+
+        // Cap maximum values to prevent over-complexity
+        const maxNoise = 0.55;
+        const maxBraid = 0.50;
 
         return {
             candidates: settings.candidates,
-            braidAmount: Math.min(0.45, settings.braidAmount + (round - 1) * 0.02),
+            braidAmount: Math.min(maxBraid, settings.braidAmount + braidIncrease),
             algorithm: settings.algorithm,
-            noiseLevel: Math.min(0.5, settings.noiseLevel + roundNoiseBonus)
+            noiseLevel: Math.min(maxNoise, settings.noiseLevel + noiseIncrease)
         };
     }
 }
@@ -1764,9 +1775,25 @@ class MazeGame {
             this.config.difficulty = value;
         });
 
-        this.setupOptionButtons('roundButtons', (value) => {
-            this.config.totalRounds = parseInt(value);
-        });
+        // Rounds input
+        const roundsInput = document.getElementById('roundsInput');
+        if (roundsInput) {
+            roundsInput.addEventListener('input', () => {
+                let value = parseInt(roundsInput.value) || 1;
+                value = Math.max(1, Math.min(20, value));
+                this.config.totalRounds = value;
+            });
+
+            roundsInput.addEventListener('blur', () => {
+                let value = parseInt(roundsInput.value) || 1;
+                value = Math.max(1, Math.min(20, value));
+                roundsInput.value = value;
+                this.config.totalRounds = value;
+            });
+
+            // Initialize with default value
+            this.config.totalRounds = parseInt(roundsInput.value) || 5;
+        }
 
         // Maze size input
         const mazeSizeInput = document.getElementById('mazeSizeInput');

@@ -191,13 +191,30 @@
 .config-item {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: 0.5rem;
 }
 
 .config-label {
+    display: block;
+    margin-bottom: 0;
     font-weight: 600;
     color: var(--text-primary);
     font-size: 1.1rem;
+}
+
+.config-item input[type="number"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.config-item input[type="number"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
 }
 
 .option-buttons {

@@ -66,10 +66,10 @@
                     <div class="help-section">
                         <h3>📈 Difficulty Progression</h3>
                         <ul>
-                            <li><strong>Maze Size:</strong> Grows larger as you progress</li>
-                            <li><strong>Complexity:</strong> More dead ends and wrong turns</li>
-                            <li><strong>Time Limit:</strong> Decreases with each level</li>
-                            <li><strong>Wall Density:</strong> Higher at advanced levels</li>
+                            <li><strong>Maze Size:</strong> Fixed (you choose the size)</li>
+                            <li><strong>Complexity:</strong> More dead ends and wrong turns each round</li>
+                            <li><strong>Time Limit:</strong> Decreases with each round</li>
+                            <li><strong>Fake Paths:</strong> Increase each round to confuse you</li>
                         </ul>
                     </div>
 
@@ -119,7 +119,7 @@
                                 <span class="size-label">x</span>
                                 <span class="size-display" id="mazeSizeDisplay">15</span>
                             </div>
-                            <div class="size-hint">Min: 10 | Max: 35 (increases each round)</div>
+                            <div class="size-hint">Min: 10 | Max: 35 (fixed for all rounds)</div>
                         </div>
                     </div>
 
@@ -133,12 +133,8 @@
                     </div>
 
                     <div class="config-item">
-                        <label class="config-label">Number of Rounds</label>
-                        <div class="option-buttons" id="roundButtons">
-                            <button class="option-btn" data-value="3">3<br><small>Quick</small></button>
-                            <button class="option-btn active" data-value="5">5<br><small>Standard</small></button>
-                            <button class="option-btn" data-value="10">10<br><small>Extended</small></button>
-                        </div>
+                        <label class="config-label" for="roundsInput">Number of Rounds</label>
+                        <input type="number" id="roundsInput" min="1" max="20" value="5" placeholder="1-20" inputmode="numeric" pattern="[0-9]*">
                     </div>
                 </div>
 
