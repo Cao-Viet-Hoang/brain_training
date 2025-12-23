@@ -1168,13 +1168,96 @@ class GameStateManager {
 
 // ============================================================================
 // MODULE 4: MAZE RENDERER
-// Supports multiple exits with visual distinction
+// Supports multiple exits with visual distinction and fog of war modes
 // ============================================================================
 class MazeRenderer {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
         this.cells = [];
         this.playerDirection = 'down';
+
+        // Fog of war settings
+        this.fogMode = 'classic'; // 'classic', 'fog_light', 'fog_heavy'
+        this.visibilityRadius = 3; // Cells visible around player in light fog
+        this.visitedCells = new Set(); // Track visited cells for fog memory
+    }
+
+    /**
+     * Set fog mode for the renderer
+     * @param {string} mode - 'classic', 'fog_light', or 'fog_heavy'
+     */
+    setFogMode(mode) {
+        this.fogMode = mode;
+        // Adjust visibility radius based on mode
+        if (mode === 'fog_light') {
+            this.visibilityRadius = 3;
+        } else if (mode === 'fog_heavy') {
+            this.visibilityRadius = 1;
+        }
+    }
+
+    /**
+     * Reset fog state for new round
+     */
+    resetFogState() {
+        this.visitedCells.clear();
+    }
+
+    /**
+     * Calculate distance between two cells (Manhattan distance)
+     */
+    getDistance(x1, y1, x2, y2) {
+        return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+    }
+
+    /**
+     * Check if a cell is visible based on fog mode
+     * @param {number} cellX - Cell X position
+     * @param {number} cellY - Cell Y position
+     * @param {number} playerX - Player X position
+     * @param {number} playerY - Player Y position
+     * @param {string} cellType - Type of cell (for special visibility rules)
+     * @returns {string} - 'visible', 'remembered', or 'hidden'
+     */
+    getCellVisibility(cellX, cellY, playerX, playerY, cellType = null) {
+        if (this.fogMode === 'classic') {
+            return 'visible';
+        }
+
+        // Exit and finish zones are always visible (so player knows the goal)
+        if (cellType === 'exit' || cellType === 'finish') {
+            return 'visible';
+        }
+
+        const distance = this.getDistance(cellX, cellY, playerX, playerY);
+        const cellKey = `${cellX},${cellY}`;
+
+        // Cell is within visibility radius
+        if (distance <= this.visibilityRadius) {
+            return 'visible';
+        }
+
+        // For light fog: show visited cells as remembered (dimmed)
+        if (this.fogMode === 'fog_light' && this.visitedCells.has(cellKey)) {
+            return 'remembered';
+        }
+
+        // Heavy fog: no memory, everything outside radius is hidden
+        return 'hidden';
+    }
+
+    /**
+     * Mark a cell as visited (for fog memory)
+     */
+    markCellVisited(x, y) {
+        // Mark the cell and its visible neighbors as visited
+        for (let dy = -this.visibilityRadius; dy <= this.visibilityRadius; dy++) {
+            for (let dx = -this.visibilityRadius; dx <= this.visibilityRadius; dx++) {
+                if (this.getDistance(0, 0, dx, dy) <= this.visibilityRadius) {
+                    this.visitedCells.add(`${x + dx},${y + dy}`);
+                }
+            }
+        }
     }
 
     render(mazeData, playerPos) {
@@ -1184,8 +1267,16 @@ class MazeRenderer {
         this.container.innerHTML = '';
         this.cells = [];
 
-        // Set grid size class
+        // Set grid size class with fog mode
         this.container.className = `maze-grid size-${width}`;
+        if (this.fogMode !== 'classic') {
+            this.container.classList.add('fog-mode', `fog-${this.fogMode.replace('fog_', '')}`);
+        }
+
+        // Mark initial player position as visited for fog
+        if (this.fogMode !== 'classic') {
+            this.markCellVisited(playerPos.x, playerPos.y);
+        }
 
         // Create cells
         for (let y = 0; y < height; y++) {
@@ -1196,6 +1287,7 @@ class MazeRenderer {
                 cell.dataset.y = y;
 
                 const cellType = grid[y][x];
+                cell.dataset.cellType = cellType; // Store for fog updates
 
                 switch (cellType) {
                     case 'wall':
@@ -1229,6 +1321,12 @@ class MazeRenderer {
                         break;
                     default:
                         cell.classList.add('path');
+                }
+
+                // Apply fog visibility
+                if (this.fogMode !== 'classic') {
+                    const visibility = this.getCellVisibility(x, y, playerPos.x, playerPos.y, cellType);
+                    cell.classList.add(`fog-${visibility}`);
                 }
 
                 // Check if player is here
@@ -1294,6 +1392,37 @@ class MazeRenderer {
             setTimeout(() => {
                 newCell.classList.remove('player-moving');
             }, 200);
+        }
+
+        // Update fog visibility if fog mode is active
+        if (this.fogMode !== 'classic') {
+            this.updateFogVisibility(newPos);
+        }
+    }
+
+    /**
+     * Update fog visibility around player's new position
+     * @param {Object} playerPos - Current player position {x, y}
+     */
+    updateFogVisibility(playerPos) {
+        // Mark current area as visited
+        this.markCellVisited(playerPos.x, playerPos.y);
+
+        // Update all cells' fog state
+        for (let y = 0; y < this.cells.length; y++) {
+            if (!this.cells[y]) continue;
+            for (let x = 0; x < this.cells[y].length; x++) {
+                const cell = this.cells[y][x];
+                if (!cell) continue;
+
+                // Remove old fog classes
+                cell.classList.remove('fog-visible', 'fog-remembered', 'fog-hidden');
+
+                // Add new fog class (use stored cellType for exit visibility)
+                const cellType = cell.dataset.cellType;
+                const visibility = this.getCellVisibility(x, y, playerPos.x, playerPos.y, cellType);
+                cell.classList.add(`fog-${visibility}`);
+            }
         }
     }
 
@@ -1696,10 +1825,17 @@ class MazeGame {
 
     startGame() {
         this.state.reset();
+
+        // Set fog mode for renderer
+        this.renderer.setFogMode(this.config.mode);
+
         this.startRound();
     }
 
     startRound() {
+        // Reset fog state for new round
+        this.renderer.resetFogState();
+
         // Generate maze for current round with advanced options
         const mazeSize = this.config.getMazeSize(this.state.currentRound);
 
@@ -1984,6 +2120,8 @@ class MazeGame {
 
     resetGame() {
         this.state.reset();
+        this.renderer.resetFogState();
+        this.renderer.setFogMode('classic'); // Reset to default
         this.showScreen('config');
     }
 }

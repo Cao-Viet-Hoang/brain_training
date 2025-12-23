@@ -1378,6 +1378,144 @@
     .maze-grid.size-15 .maze-cell { width: 20px; height: 20px; }
 }
 
+/* ===== Fog of War Mode ===== */
+
+/* Fog mode container styles */
+.maze-grid.fog-mode {
+    position: relative;
+}
+
+/* Visible cells in fog mode - fully visible */
+.maze-grid.fog-mode .maze-cell.fog-visible {
+    opacity: 1;
+    transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Remembered cells in light fog - dimmed but visible */
+.maze-grid.fog-mode .maze-cell.fog-remembered {
+    opacity: 0.5;
+    filter: saturate(0.5) brightness(0.8);
+    transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Remembered cells keep their base appearance but dimmed */
+.maze-grid.fog-mode .maze-cell.fog-remembered.wall {
+    opacity: 0.4;
+    background: #3a3a5a;
+}
+
+.maze-grid.fog-mode .maze-cell.fog-remembered.path {
+    opacity: 0.5;
+    background: #c0c8d0;
+}
+
+.maze-grid.fog-mode .maze-cell.fog-remembered.visited {
+    opacity: 0.6;
+    background: linear-gradient(135deg, #d0d8e0, #b8c4d0);
+}
+
+/* Hidden cells - completely obscured */
+.maze-grid.fog-mode .maze-cell.fog-hidden {
+    opacity: 1;
+    background: #1a1a2e !important;
+    border-color: #12121f !important;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s ease, background 0.3s ease;
+}
+
+/* Hidden cells should not show any content */
+.maze-grid.fog-mode .maze-cell.fog-hidden::before,
+.maze-grid.fog-mode .maze-cell.fog-hidden::after {
+    display: none !important;
+}
+
+/* Hidden cells remove special styling */
+.maze-grid.fog-mode .maze-cell.fog-hidden.start-zone,
+.maze-grid.fog-mode .maze-cell.fog-hidden.finish-zone,
+.maze-grid.fog-mode .maze-cell.fog-hidden.entrance-opening,
+.maze-grid.fog-mode .maze-cell.fog-hidden.exit-opening {
+    background: #1a1a2e !important;
+    border: 1px solid #12121f !important;
+    animation: none !important;
+}
+
+/* Player cell is always fully visible */
+.maze-grid.fog-mode .maze-cell.player {
+    opacity: 1 !important;
+    filter: none !important;
+    z-index: 20;
+}
+
+/* Clickable cells in fog mode */
+.maze-grid.fog-mode .maze-cell.clickable.fog-visible {
+    cursor: pointer;
+    background: #E8F4F8;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 8px rgba(74, 144, 164, 0.3);
+}
+
+.maze-grid.fog-mode .maze-cell.clickable.fog-visible:hover {
+    background: #D0E8F0;
+    transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(74, 144, 164, 0.5);
+}
+
+/* Hidden cells cannot be clicked */
+.maze-grid.fog-mode .maze-cell.fog-hidden.clickable {
+    cursor: default;
+    pointer-events: none;
+}
+
+/* Light Fog specific - softer fog edges */
+.maze-grid.fog-light .maze-cell.fog-hidden {
+    background: linear-gradient(135deg, #1a1a2e, #252540) !important;
+}
+
+/* Fog reveal animation when cells become visible */
+@keyframes fogReveal {
+    from {
+        opacity: 0;
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+.maze-grid.fog-mode .maze-cell.fog-visible:not(.player) {
+    animation: fogReveal 0.3s ease-out;
+}
+
+/* Fog effect on exit/finish zones - make them glow when visible */
+.maze-grid.fog-mode .maze-cell.fog-visible.finish-zone {
+    animation: finishPulse 1.5s ease-in-out infinite, fogReveal 0.3s ease-out;
+}
+
+.maze-grid.fog-mode .maze-cell.fog-visible.exit-opening {
+    animation: exitOpeningGlow 1.5s ease-in-out infinite, fogReveal 0.3s ease-out;
+}
+
+/* Fog indicator badge */
+.fog-indicator {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(26, 26, 46, 0.9);
+    color: #a0a0c0;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+.fog-indicator::before {
+    content: '🌫️ ';
+}
+
 /* Small Mobile */
 @media (max-width: 480px) {
     .game-header h1 {
