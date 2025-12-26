@@ -35,6 +35,9 @@ class PixelGameMultiplayerAdapter extends MultiplayerGameAdapter {
         this.multiplayerState.role = 'host';
         this.isMultiplayerMode = true; // Set base class flag
 
+        // Load saved settings into game config (ensures settings are applied even if UI not yet updated)
+        this.loadSavedSettingsToConfig();
+
         // Initialize core without container (we're in game page)
         await this.init(null, roomId);
 
@@ -49,6 +52,36 @@ class PixelGameMultiplayerAdapter extends MultiplayerGameAdapter {
         this.showMultiplayerBadge('HOST');
 
         console.log('[PixelGameAdapter] Host initialization complete');
+    }
+
+    /**
+     * Load saved settings from window.GAME_SETTINGS into game config
+     * This ensures settings are restored for multiplayer mode
+     */
+    loadSavedSettingsToConfig() {
+        if (!window.GAME_SETTINGS) {
+            console.log('[PixelGameAdapter] No saved settings found, using defaults');
+            return;
+        }
+
+        const settings = window.GAME_SETTINGS;
+        console.log('[PixelGameAdapter] Loading saved settings into config:', settings);
+
+        // Apply saved settings to game config
+        if (settings.cardCount !== undefined) {
+            this.game.config.cardCount = settings.cardCount;
+        }
+        if (settings.targetCount !== undefined) {
+            this.game.config.targetCount = settings.targetCount;
+        }
+        if (settings.roundTimeLimit !== undefined) {
+            this.game.config.roundTimeLimit = settings.roundTimeLimit;
+        }
+        if (settings.penaltyMode !== undefined) {
+            this.game.config.penaltyMode = settings.penaltyMode;
+        }
+
+        console.log('[PixelGameAdapter] Config after loading settings:', this.game.config);
     }
 
     /**
@@ -93,6 +126,9 @@ class PixelGameMultiplayerAdapter extends MultiplayerGameAdapter {
             if (!this.game.validateConfig()) {
                 return;
             }
+
+            // Save settings when starting multiplayer game (same as single player)
+            this.game.saveCurrentSettings();
 
             try {
                 // Generate game data using game's logic

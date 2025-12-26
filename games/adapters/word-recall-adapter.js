@@ -39,6 +39,9 @@ class WordRecallMultiplayerAdapter extends MultiplayerGameAdapter {
         this.multiplayerState.role = 'host';
         this.isMultiplayerMode = true; // Set base class flag
 
+        // Load saved settings into engine config (ensures settings are applied even if UI not yet updated)
+        this.loadSavedSettingsToConfig();
+
         await this.init(null, roomId);
 
         this.interceptHostGameStart();
@@ -48,6 +51,42 @@ class WordRecallMultiplayerAdapter extends MultiplayerGameAdapter {
         this.showMultiplayerBadge('HOST');
 
         console.log('[WordRecallAdapter] Host initialization complete');
+    }
+
+    /**
+     * Load saved settings from window.GAME_SETTINGS into engine config
+     * This ensures settings are restored for multiplayer mode
+     */
+    loadSavedSettingsToConfig() {
+        if (!window.GAME_SETTINGS) {
+            console.log('[WordRecallAdapter] No saved settings found, using defaults');
+            return;
+        }
+
+        const settings = window.GAME_SETTINGS;
+        console.log('[WordRecallAdapter] Loading saved settings into config:', settings);
+
+        // Apply saved settings to engine config
+        if (settings.sessionRounds !== undefined) {
+            this.engine.config.sessionRounds = settings.sessionRounds;
+        }
+        if (settings.startK !== undefined) {
+            this.engine.config.startK = settings.startK;
+        }
+        if (settings.maxK !== undefined) {
+            this.engine.config.maxK = settings.maxK;
+        }
+        if (settings.memorizeMsBase !== undefined) {
+            this.engine.config.memorizeMsBase = settings.memorizeMsBase;
+        }
+        if (settings.testTimeLimitMs !== undefined) {
+            this.engine.config.testTimeLimitMs = settings.testTimeLimitMs;
+        }
+        if (settings.distractorEnabled !== undefined) {
+            this.engine.config.distractorEnabled = settings.distractorEnabled;
+        }
+
+        console.log('[WordRecallAdapter] Config after loading settings:', this.engine.config);
     }
 
     /**
@@ -81,6 +120,9 @@ class WordRecallMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.uiController.handleStartGame = async () => {
             console.log('[WordRecallAdapter] Host starting game - intercepted');
+
+            // Save settings when starting multiplayer game (same as single player)
+            this.uiController.saveCurrentSettings();
 
             try {
                 const gameData = await this.prepareMultiplayerGame();

@@ -44,6 +44,9 @@ class MazeGameMultiplayerAdapter extends MultiplayerGameAdapter {
         this.multiplayerState.role = 'host';
         this.isMultiplayerMode = true;
 
+        // Load saved settings into game config (ensures settings are applied even if UI not yet updated)
+        this.loadSavedSettingsToConfig();
+
         // Initialize core and UI without container (we're in game page)
         await this.init(null, roomId);
 
@@ -58,6 +61,36 @@ class MazeGameMultiplayerAdapter extends MultiplayerGameAdapter {
         this.showMultiplayerBadge('HOST');
 
         console.log('[MazeGameAdapter] Host initialization complete');
+    }
+
+    /**
+     * Load saved settings from window.GAME_SETTINGS into game config
+     * This ensures settings are restored for multiplayer mode
+     */
+    loadSavedSettingsToConfig() {
+        if (!window.GAME_SETTINGS) {
+            console.log('[MazeGameAdapter] No saved settings found, using defaults');
+            return;
+        }
+
+        const settings = window.GAME_SETTINGS;
+        console.log('[MazeGameAdapter] Loading saved settings into config:', settings);
+
+        // Apply saved settings to game config
+        if (settings.totalRounds !== undefined) {
+            this.game.config.totalRounds = settings.totalRounds;
+        }
+        if (settings.customMazeSize !== undefined) {
+            this.game.config.customMazeSize = settings.customMazeSize;
+        }
+        if (settings.mode !== undefined) {
+            this.game.config.mode = settings.mode;
+        }
+        if (settings.difficulty !== undefined) {
+            this.game.config.difficulty = settings.difficulty;
+        }
+
+        console.log('[MazeGameAdapter] Config after loading settings:', this.game.config);
     }
 
     /**
@@ -98,6 +131,9 @@ class MazeGameMultiplayerAdapter extends MultiplayerGameAdapter {
         // Override with multiplayer version
         this.game.startGame = async () => {
             console.log('[MazeGameAdapter] Host starting game - intercepted');
+
+            // Save settings when starting multiplayer game (same as single player)
+            this.game.saveCurrentSettings();
 
             try {
                 // Generate maze data using game's logic

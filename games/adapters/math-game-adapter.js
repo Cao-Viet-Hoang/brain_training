@@ -36,20 +36,59 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
         this.multiplayerState.role = 'host';
         this.isMultiplayerMode = true; // Set base class flag
 
+        // Load saved settings into game config (ensures settings are applied even if UI not yet updated)
+        this.loadSavedSettingsToConfig();
+
         // Initialize core and UI without container (we're in game page)
         await this.init(null, roomId);
-        
+
         // Intercept game start to publish questions
         this.interceptHostGameStart();
-        
+
         // Setup multiplayer hooks
         this.setupScoreSync();
         this.setupGameEndDetection();
-        
+
         // Show notification that this is multiplayer mode
         this.showMultiplayerBadge('HOST');
-        
+
         console.log('[MathGameAdapter] Host initialization complete');
+    }
+
+    /**
+     * Load saved settings from window.GAME_SETTINGS into game config
+     * This ensures settings are restored for multiplayer mode
+     */
+    loadSavedSettingsToConfig() {
+        if (!window.GAME_SETTINGS) {
+            console.log('[MathGameAdapter] No saved settings found, using defaults');
+            return;
+        }
+
+        const settings = window.GAME_SETTINGS;
+        console.log('[MathGameAdapter] Loading saved settings into config:', settings);
+
+        // Apply saved settings to game config
+        if (settings.minNumber !== undefined) {
+            this.game.config.minNumber = settings.minNumber;
+        }
+        if (settings.maxNumber !== undefined) {
+            this.game.config.maxNumber = settings.maxNumber;
+        }
+        if (settings.operations !== undefined && Array.isArray(settings.operations)) {
+            this.game.config.operations = settings.operations;
+        }
+        if (settings.operandCount !== undefined) {
+            this.game.config.operandCount = settings.operandCount;
+        }
+        if (settings.questionCount !== undefined) {
+            this.game.config.questionCount = settings.questionCount;
+        }
+        if (settings.timePerQuestion !== undefined) {
+            this.game.config.timePerQuestion = settings.timePerQuestion;
+        }
+
+        console.log('[MathGameAdapter] Config after loading settings:', this.game.config);
     }
 
     /**
@@ -90,12 +129,15 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
         // Override with multiplayer version
         this.game.startGame = async () => {
             console.log('[MathGameAdapter] Host starting game - intercepted');
-            
+
             // Validate config first (use original validation)
             if (!this.game.validateConfig()) {
                 return;
             }
-            
+
+            // Save settings when starting multiplayer game (same as single player)
+            this.game.saveCurrentSettings();
+
             try {
                 // Generate questions using game's logic
                 const gameData = await this.prepareMultiplayerGame();

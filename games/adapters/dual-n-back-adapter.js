@@ -37,6 +37,9 @@ class DualNBackMultiplayerAdapter extends MultiplayerGameAdapter {
         this.multiplayerState.role = 'host';
         this.isMultiplayerMode = true; // Set base class flag
 
+        // Load saved settings into game config (ensures settings are applied even if UI not yet updated)
+        this.loadSavedSettingsToConfig();
+
         await this.init(null, roomId);
 
         this.interceptHostGameStart();
@@ -46,6 +49,39 @@ class DualNBackMultiplayerAdapter extends MultiplayerGameAdapter {
         this.showMultiplayerBadge('HOST');
 
         console.log('[DualNBackAdapter] Host initialization complete');
+    }
+
+    /**
+     * Load saved settings from window.GAME_SETTINGS into game config
+     * This ensures settings are restored for multiplayer mode
+     */
+    loadSavedSettingsToConfig() {
+        if (!window.GAME_SETTINGS) {
+            console.log('[DualNBackAdapter] No saved settings found, using defaults');
+            return;
+        }
+
+        const settings = window.GAME_SETTINGS;
+        console.log('[DualNBackAdapter] Loading saved settings into config:', settings);
+
+        // Apply saved settings to game config
+        if (settings.N !== undefined) {
+            this.game.config.N = settings.N;
+        }
+        if (settings.gridSize !== undefined) {
+            this.game.config.gridSize = settings.gridSize;
+        }
+        if (settings.totalTrials !== undefined) {
+            this.game.config.totalTrials = settings.totalTrials;
+        }
+        if (settings.stimulusDurationMs !== undefined) {
+            this.game.config.stimulusDurationMs = settings.stimulusDurationMs;
+        }
+        if (settings.intervalBetweenMs !== undefined) {
+            this.game.config.interTrialIntervalMs = settings.intervalBetweenMs;
+        }
+
+        console.log('[DualNBackAdapter] Config after loading settings:', this.game.config);
     }
 
     /**
@@ -79,6 +115,9 @@ class DualNBackMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.uiController.startGame = async () => {
             console.log('[DualNBackAdapter] Host starting game - intercepted');
+
+            // Save settings when starting multiplayer game (same as single player)
+            this.uiController.saveCurrentSettings();
 
             try {
                 const gameData = await this.prepareMultiplayerGame();

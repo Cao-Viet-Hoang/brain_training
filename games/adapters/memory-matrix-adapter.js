@@ -39,6 +39,9 @@ class MemoryMatrixMultiplayerAdapter extends MultiplayerGameAdapter {
         this.multiplayerState.role = 'host';
         this.isMultiplayerMode = true; // Set base class flag
 
+        // Load saved settings into engine config (ensures settings are applied even if UI not yet updated)
+        this.loadSavedSettingsToConfig();
+
         await this.init(null, roomId);
 
         this.interceptHostGameStart();
@@ -48,6 +51,33 @@ class MemoryMatrixMultiplayerAdapter extends MultiplayerGameAdapter {
         this.showMultiplayerBadge('HOST');
 
         console.log('[MemoryMatrixAdapter] Host initialization complete');
+    }
+
+    /**
+     * Load saved settings from window.GAME_SETTINGS into engine config
+     * This ensures settings are restored for multiplayer mode
+     */
+    loadSavedSettingsToConfig() {
+        if (!window.GAME_SETTINGS) {
+            console.log('[MemoryMatrixAdapter] No saved settings found, using defaults');
+            return;
+        }
+
+        const settings = window.GAME_SETTINGS;
+        console.log('[MemoryMatrixAdapter] Loading saved settings into config:', settings);
+
+        // Apply saved settings to engine config
+        if (settings.mode !== undefined) {
+            this.engine.config.mode = settings.mode;
+        }
+        if (settings.mistakePolicy !== undefined) {
+            this.engine.config.mistakePolicy = settings.mistakePolicy;
+        }
+        if (settings.startGridSize !== undefined) {
+            this.engine.config.startGridSize = settings.startGridSize;
+        }
+
+        console.log('[MemoryMatrixAdapter] Config after loading settings:', this.engine.config);
     }
 
     /**
@@ -81,6 +111,9 @@ class MemoryMatrixMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.ui.handleStartGame = async () => {
             console.log('[MemoryMatrixAdapter] Host starting game - intercepted');
+
+            // Save settings when starting multiplayer game (same as single player)
+            this.ui.saveCurrentSettings();
 
             try {
                 const gameData = await this.prepareMultiplayerGame();
