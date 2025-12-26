@@ -16,6 +16,11 @@ class MultiplayerCore {
     // ==================== AUTHENTICATION ====================
 
     async initAuth() {
+        // Initialize Firebase if not already done
+        if (typeof initFirebase === 'function') {
+            initFirebase();
+        }
+        
         if (!auth) {
             throw new Error('Firebase auth not initialized. Please check firebase-config.js');
         }
@@ -54,6 +59,11 @@ class MultiplayerCore {
     }
 
     async createRoom(gameType, config, playerName) {
+        // Initialize Firebase if not already done
+        if (typeof initFirebase === 'function') {
+            initFirebase();
+        }
+        
         if (!database) {
             throw new Error('Firebase database not initialized. Please check firebase-config.js');
         }
@@ -137,6 +147,11 @@ class MultiplayerCore {
     }
 
     async joinRoom(roomCode, playerName) {
+        // Initialize Firebase if not already done
+        if (typeof initFirebase === 'function') {
+            initFirebase();
+        }
+        
         if (!database) {
             throw new Error('Firebase database not initialized. Please check firebase-config.js');
         }

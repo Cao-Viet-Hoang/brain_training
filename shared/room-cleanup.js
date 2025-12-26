@@ -42,7 +42,13 @@ class RoomCleanup {
      */
     async cleanupExpiredRooms() {
         if (!database) {
-            console.warn('⚠️ Database not initialized');
+            console.warn('⚠️ Database not initialized, skipping cleanup');
+            return;
+        }
+
+        // Check if we have proper connection
+        if (typeof firebase === 'undefined' || !firebase.apps || firebase.apps.length === 0) {
+            console.warn('⚠️ Firebase not connected, skipping cleanup');
             return;
         }
 

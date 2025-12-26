@@ -848,8 +848,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (roomId && typeof PixelGameMultiplayerAdapter !== 'undefined') {
         console.log('[PixelGame] Checking multiplayer room validity:', { roomId, role });
 
+        // Initialize Firebase first
+        if (typeof initFirebase === 'function') {
+            initFirebase();
+        }
+
         // Validate room exists and is still active
         try {
+            if (!database) {
+                throw new Error('Firebase not initialized');
+            }
             const roomRef = database.ref(`rooms/${roomId}`);
             const snapshot = await roomRef.once('value');
             const roomData = snapshot.val();
