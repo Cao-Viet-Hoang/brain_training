@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * Multiplayer Result Modal
  * Shows game results with real-time updates and ranking
  */

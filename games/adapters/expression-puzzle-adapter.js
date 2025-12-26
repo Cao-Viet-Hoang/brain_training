@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * Expression Puzzle Game Multiplayer Adapter
  * Extends MultiplayerGameAdapter to integrate multiplayer functionality into Expression Puzzle Game
  */

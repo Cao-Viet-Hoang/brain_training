@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * Pixel Number Game Multiplayer Adapter
  * Extends MultiplayerGameAdapter to integrate multiplayer functionality into Pixel Number Game
  */

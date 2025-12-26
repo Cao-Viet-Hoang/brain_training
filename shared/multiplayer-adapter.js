@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * Multiplayer Game Adapter
  * Base class for integrating multiplayer functionality into games
  */
@@ -25,6 +31,11 @@ class MultiplayerGameAdapter {
         try {
             console.log('[MultiplayerAdapter] Initializing...');
             
+            // Initialize Firebase if not already done
+            if (typeof initFirebase === 'function') {
+                initFirebase();
+            }
+            
             // Initialize core
             await this.core.initAuth();
             
@@ -38,6 +49,10 @@ class MultiplayerGameAdapter {
             
             // If roomId provided, reconnect to that room
             if (roomId) {
+                if (!database) {
+                    throw new Error('Firebase database not initialized');
+                }
+                
                 this.roomId = roomId;  // NEW - Store roomId in adapter
                 this.core.roomId = roomId;
                 this.core.roomRef = database.ref(`rooms/${roomId}`);

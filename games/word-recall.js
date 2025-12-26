@@ -1,3 +1,9 @@
+/**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
 // ============================================================================
 // WORD RECALL GAME - Complete Implementation
 // ============================================================================
@@ -642,6 +648,68 @@ class UIController {
         this.testStartTime = 0; // Track test phase start time
         this.initElements();
         this.attachEventListeners();
+        this.loadSavedSettings();
+    }
+    
+    /**
+     * Load saved settings from localStorage into UI
+     */
+    loadSavedSettings() {
+        if (!window.GAME_SETTINGS) return;
+        
+        const settings = window.GAME_SETTINGS;
+        
+        if (settings.sessionRounds !== undefined) {
+            document.getElementById('sessionRounds').value = settings.sessionRounds;
+        }
+        if (settings.startK !== undefined) {
+            document.getElementById('startK').value = settings.startK;
+        }
+        if (settings.maxK !== undefined) {
+            document.getElementById('maxK').value = settings.maxK;
+        }
+        if (settings.memorizeMsBase !== undefined) {
+            document.getElementById('memorizeMsBase').value = settings.memorizeMsBase;
+        }
+        if (settings.testTimeLimitMs !== undefined) {
+            document.getElementById('testTimeLimitMs').value = settings.testTimeLimitMs;
+        }
+        if (settings.distractorEnabled !== undefined) {
+            document.getElementById('distractorEnabled').checked = settings.distractorEnabled;
+        }
+        
+        console.log('[WordRecall] Settings restored:', settings);
+    }
+    
+    /**
+     * Save current settings to localStorage
+     */
+    saveCurrentSettings() {
+        if (typeof window.updateGameSettings !== 'function') return;
+        
+        try {
+            const sessionRounds = parseInt(document.getElementById('sessionRounds').value);
+            const startK = parseInt(document.getElementById('startK').value);
+            const maxK = parseInt(document.getElementById('maxK').value);
+            const memorizeMsBase = parseInt(document.getElementById('memorizeMsBase').value);
+            const testTimeLimitMs = parseInt(document.getElementById('testTimeLimitMs').value);
+            const distractorEnabled = document.getElementById('distractorEnabled').checked;
+            
+            // Only save if valid
+            if (!isNaN(sessionRounds) && !isNaN(startK) && !isNaN(maxK) && !isNaN(memorizeMsBase) && !isNaN(testTimeLimitMs)) {
+                window.updateGameSettings({
+                    sessionRounds,
+                    startK,
+                    maxK,
+                    memorizeMsBase,
+                    testTimeLimitMs,
+                    distractorEnabled
+                });
+                console.log('[WordRecall] Settings saved');
+            }
+        } catch (error) {
+            console.error('[WordRecall] Error saving settings:', error);
+        }
     }
 
     /**
@@ -760,6 +828,9 @@ class UIController {
      * Handle start game
      */
     handleStartGame() {
+        // Save settings when starting game
+        this.saveCurrentSettings();
+        
         // Update config
         this.gameEngine.config.sessionRounds = parseInt(this.elements.sessionRounds.value);
         this.gameEngine.config.startK = parseInt(this.elements.startK.value);
@@ -1205,8 +1276,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (roomId && typeof WordRecallMultiplayerAdapter !== 'undefined') {
         console.log('[WordRecall] Checking multiplayer room validity:', { roomId, role });
 
+        // Initialize Firebase first
+        if (typeof initFirebase === 'function') {
+            initFirebase();
+        }
+
         // Validate room exists and is still active
         try {
+            if (!database) {
+                throw new Error('Firebase not initialized');
+            }
             const roomRef = database.ref(`rooms/${roomId}`);
             const snapshot = await roomRef.once('value');
             const roomData = snapshot.val();

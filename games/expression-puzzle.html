@@ -1,3 +1,8 @@
+<!--
+  Brain Training Games
+  Author: Cao Viet Hoang
+  Created: 2025
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -285,6 +290,17 @@
     <script src="../shared/multiplayer-adapter.js"></script>
     <script src="../shared/multiplayer-result-modal.js"></script>
     <script src="adapters/expression-puzzle-adapter.js"></script>
+
+    <!-- Settings System -->
+    <script type="module">
+        import { loadGameSettings, updateGameSettings } from '../settings/index.js';
+        window.GAME_SETTINGS = loadGameSettings('expression-puzzle');
+        window.updateGameSettings = (patch) => {
+            window.GAME_SETTINGS = updateGameSettings('expression-puzzle', patch);
+            return window.GAME_SETTINGS;
+        };
+        console.log('[ExpressionPuzzle] Loaded settings:', window.GAME_SETTINGS);
+    </script>
 
     <!-- Game Script (LAST) -->
     <script src="expression-puzzle.js"></script>

@@ -1,3 +1,9 @@
+/**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
 // Pixel Number Game Logic
 
 // Constants
@@ -160,6 +166,9 @@ class PixelNumberGame {
     }
 
     setupEventListeners() {
+        // Load saved settings into UI
+        this.loadSavedSettings();
+        
         // Start game
         document.getElementById('startGameBtn').addEventListener('click', () => this.startGame());
 
@@ -174,6 +183,57 @@ class PixelNumberGame {
 
         // Play again
         document.getElementById('playAgainBtn').addEventListener('click', () => this.resetGame());
+    }
+    
+    /**
+     * Load saved settings from localStorage into UI
+     */
+    loadSavedSettings() {
+        if (!window.GAME_SETTINGS) return;
+        
+        const settings = window.GAME_SETTINGS;
+        
+        if (settings.cardCount !== undefined) {
+            document.getElementById('cardCount').value = settings.cardCount;
+        }
+        if (settings.targetCount !== undefined) {
+            document.getElementById('targetCount').value = settings.targetCount;
+        }
+        if (settings.roundTimeLimit !== undefined) {
+            document.getElementById('roundTimeLimit').value = settings.roundTimeLimit;
+        }
+        if (settings.penaltyMode !== undefined) {
+            document.getElementById('penaltyMode').value = settings.penaltyMode;
+        }
+        
+        console.log('[PixelGame] Settings restored:', settings);
+    }
+    
+    /**
+     * Save current settings to localStorage
+     */
+    saveCurrentSettings() {
+        if (typeof window.updateGameSettings !== 'function') return;
+        
+        try {
+            const cardCount = parseInt(document.getElementById('cardCount').value);
+            const targetCount = parseInt(document.getElementById('targetCount').value);
+            const roundTimeLimit = parseInt(document.getElementById('roundTimeLimit').value);
+            const penaltyMode = document.getElementById('penaltyMode').value;
+            
+            // Only save if valid
+            if (!isNaN(cardCount) && !isNaN(targetCount) && !isNaN(roundTimeLimit)) {
+                window.updateGameSettings({
+                    cardCount,
+                    targetCount,
+                    roundTimeLimit,
+                    penaltyMode
+                });
+                console.log('[PixelGame] Settings saved');
+            }
+        } catch (error) {
+            console.error('[PixelGame] Error saving settings:', error);
+        }
     }
 
     showScreen(screenName) {
@@ -207,6 +267,9 @@ class PixelNumberGame {
 
     startGame() {
         if (!this.validateConfig()) return;
+        
+        // Save settings when starting game
+        this.saveCurrentSettings();
 
         // Read configuration
         this.config = {
@@ -791,8 +854,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (roomId && typeof PixelGameMultiplayerAdapter !== 'undefined') {
         console.log('[PixelGame] Checking multiplayer room validity:', { roomId, role });
 
+        // Initialize Firebase first
+        if (typeof initFirebase === 'function') {
+            initFirebase();
+        }
+
         // Validate room exists and is still active
         try {
+            if (!database) {
+                throw new Error('Firebase not initialized');
+            }
             const roomRef = database.ref(`rooms/${roomId}`);
             const snapshot = await roomRef.once('value');
             const roomData = snapshot.val();

@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * Multiplayer UI Manager
  * Handles all UI rendering and interactions for multiplayer feature
  */

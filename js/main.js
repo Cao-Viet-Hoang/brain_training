@@ -1,3 +1,9 @@
+/**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
 // Game data configuration
 const games = [
     {
@@ -89,7 +95,8 @@ const games = [
 document.addEventListener('DOMContentLoaded', () => {
     initializeGames();
     initializeMultiplayer();
-    initializeRoomCleanup();
+    // Don't auto-start cleanup - only start when multiplayer is actually used
+    // initializeRoomCleanup();
 });
 
 // Create game cards
@@ -102,12 +109,14 @@ function initializeGames() {
     });
 }
 
-// Initialize room cleanup
+// Initialize room cleanup (only when multiplayer is used)
 function initializeRoomCleanup() {
-    if (typeof roomCleanup !== 'undefined') {
+    if (typeof roomCleanup !== 'undefined' && database) {
         // Start automatic cleanup (runs every 5 minutes)
         roomCleanup.startAutoCleanup();
         console.log('✅ Room cleanup service started');
+    } else {
+        console.log('ℹ️ Room cleanup not started (multiplayer not active)');
     }
 }
 
@@ -118,6 +127,8 @@ async function initializeMultiplayer() {
 
     // Set up callbacks
     mpUI.onCreateRoom(async (playerName, gameType, gameConfig) => {
+        // Start cleanup service when multiplayer is first used
+        initializeRoomCleanup();
         console.log('Create room requested:', playerName, 'Game:', gameType, gameConfig);
         
         try {
@@ -168,6 +179,9 @@ async function initializeMultiplayer() {
     });
     
     mpUI.onJoinRoom(async (roomCode, playerName) => {
+        // Start cleanup service when multiplayer is first used
+        initializeRoomCleanup();
+        
         console.log('Join room requested:', roomCode, playerName);
         
         try {

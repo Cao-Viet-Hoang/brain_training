@@ -1,3 +1,9 @@
+/**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
 // ============================================================================
 // MEMORY MATRIX GAME - Complete Implementation
 // ============================================================================
@@ -8,24 +14,24 @@
 class GameConfig {
     constructor(options = {}) {
         // Grid settings
-        this.startGridSize = options.startGridSize || 3;
-        this.maxGridSize = options.maxGridSize || 7;
+        this.startGridSize = options.startGridSize ?? 3;
+        this.maxGridSize = options.maxGridSize ?? 7;
         
         // Target cells settings
         this.startTargets = options.startTargets || 3;
         this.maxTargets = options.maxTargets || 20;
         
         // Timing settings
-        this.showDurationMsBase = options.showDurationMsBase || 1200;
+        this.showDurationMsBase = options.showDurationMsBase ?? 1200;
         this.showDurationMsMin = options.showDurationMsMin || 450;
-        this.betweenFlashMs = options.betweenFlashMs || 350;
+        this.betweenFlashMs = options.betweenFlashMs ?? 350;
         this.inputTimeLimitMs = options.inputTimeLimitMs || 0; // 0 = no limit
         this.resultDelayMs = options.resultDelayMs || 800;
         
         // Game mode settings
-        this.mode = options.mode || 'classic'; // 'classic', 'sequence', 'timed'
-        this.mistakePolicy = options.mistakePolicy || 'fail_level'; // 'fail_level', 'lose_life'
-        this.lives = options.lives || 3;
+        this.mode = options.mode ?? 'classic'; // 'classic', 'sequence', 'timed'
+        this.mistakePolicy = options.mistakePolicy ?? 'fail_level'; // 'fail_level', 'lose_life'
+        this.lives = options.lives ?? 3;
         
         // Scoring settings
         this.baseScorePerLevel = options.baseScorePerLevel || 100;
@@ -607,6 +613,9 @@ class UIController {
         this.setupOptionButtons(this.elements.mistakePolicyButtons);
         this.setupOptionButtons(this.elements.startGridButtons);
         
+        // Load saved settings into UI
+        this.loadSavedSettings();
+        
         // Start game
         this.elements.startGameBtn.addEventListener('click', () => this.handleStartGame());
         
@@ -639,6 +648,55 @@ class UIController {
             });
         });
     }
+    
+    /**
+     * Save current settings to persistent storage
+     */
+    saveCurrentSettings() {
+        if (typeof window.updateGameSettings === 'function') {
+            const config = this.getConfigValues();
+            window.updateGameSettings(config);
+            console.log('[MemoryMatrix] Settings saved:', config);
+        }
+    }
+    
+    /**
+     * Load saved settings into UI
+     */
+    loadSavedSettings() {
+        if (window.GAME_SETTINGS) {
+            const settings = window.GAME_SETTINGS;
+            
+            // Set game mode
+            if (settings.mode) {
+                const modeBtn = this.elements.gameModeButtons.querySelector(`[data-value="${settings.mode}"]`);
+                if (modeBtn) {
+                    this.elements.gameModeButtons.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+                    modeBtn.classList.add('active');
+                }
+            }
+            
+            // Set mistake policy
+            if (settings.mistakePolicy) {
+                const policyBtn = this.elements.mistakePolicyButtons.querySelector(`[data-value="${settings.mistakePolicy}"]`);
+                if (policyBtn) {
+                    this.elements.mistakePolicyButtons.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+                    policyBtn.classList.add('active');
+                }
+            }
+            
+            // Set start grid size
+            if (settings.startGridSize) {
+                const gridBtn = this.elements.startGridButtons.querySelector(`[data-value="${settings.startGridSize}"]`);
+                if (gridBtn) {
+                    this.elements.startGridButtons.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+                    gridBtn.classList.add('active');
+                }
+            }
+            
+            console.log('[MemoryMatrix] Settings restored:', settings);
+        }
+    }
 
     /**
      * Get selected config values
@@ -656,6 +714,9 @@ class UIController {
      */
     handleStartGame() {
         const config = this.getConfigValues();
+        
+        // Save settings when starting game
+        this.saveCurrentSettings();
         
         // Update engine config
         this.engine.config.mode = config.mode;
@@ -1157,8 +1218,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (roomId && typeof MemoryMatrixMultiplayerAdapter !== 'undefined') {
         console.log('[MemoryMatrix] Checking multiplayer room validity:', { roomId, role });
 
+        // Initialize Firebase first
+        if (typeof initFirebase === 'function') {
+            initFirebase();
+        }
+
         // Validate room exists and is still active
         try {
+            if (!database) {
+                throw new Error('Firebase not initialized');
+            }
             const roomRef = database.ref(`rooms/${roomId}`);
             const snapshot = await roomRef.once('value');
             const roomData = snapshot.val();

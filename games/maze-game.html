@@ -1,3 +1,8 @@
+<!--
+  Brain Training Games
+  Author: Cao Viet Hoang
+  Created: 2025
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -249,6 +254,17 @@
     <script src="../shared/multiplayer-adapter.js"></script>
     <script src="../shared/multiplayer-result-modal.js"></script>
     <script src="adapters/maze-game-adapter.js"></script>
+
+    <!-- Settings System -->
+    <script type="module">
+        import { loadGameSettings, updateGameSettings } from '../settings/index.js';
+        window.GAME_SETTINGS = loadGameSettings('maze-game');
+        window.updateGameSettings = (patch) => {
+            window.GAME_SETTINGS = updateGameSettings('maze-game', patch);
+            return window.GAME_SETTINGS;
+        };
+        console.log('[MazeGame] Loaded settings:', window.GAME_SETTINGS);
+    </script>
 
     <!-- Game Script -->
     <script src="maze-game.js"></script>

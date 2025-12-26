@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * Firebase Configuration
  * Replace with your Firebase project credentials
  * 
@@ -27,21 +33,32 @@ const firebaseConfig = {
 let database = null;
 let auth = null;
 
-try {
-    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-        database = firebase.database();
-        auth = firebase.auth();
-        console.log('✅ Firebase initialized successfully');
-    } else if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-        database = firebase.database();
-        auth = firebase.auth();
+// Don't auto-initialize - let multiplayer code initialize when needed
+// This prevents unnecessary Firebase connections in single-player mode
+function initFirebase() {
+    if (database && auth) {
         console.log('✅ Firebase already initialized');
-    } else {
-        console.warn('⚠️ Firebase SDK not loaded. Make sure to include Firebase scripts in HTML.');
+        return { database, auth };
     }
-} catch (error) {
-    console.error('❌ Firebase initialization error:', error);
+
+    try {
+        if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            auth = firebase.auth();
+            console.log('✅ Firebase initialized successfully');
+        } else if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
+            database = firebase.database();
+            auth = firebase.auth();
+            console.log('✅ Firebase already initialized');
+        } else {
+            console.warn('⚠️ Firebase SDK not loaded. Make sure to include Firebase scripts in HTML.');
+        }
+    } catch (error) {
+        console.error('❌ Firebase initialization error:', error);
+    }
+
+    return { database, auth };
 }
 
 // Export database and auth references
