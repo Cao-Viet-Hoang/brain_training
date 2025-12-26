@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * Word Recall Game Settings Schema
  * Version 1
  */

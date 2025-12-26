@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * Google Analytics Integration
  * Centralized analytics configuration for Brain Training App
  */

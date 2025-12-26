@@ -1,3 +1,9 @@
+/**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
 // ============================================================================
 // MAZE RUNNER GAME - Brain Training
 // Navigate through mazes to train spatial thinking

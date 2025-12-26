@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * Settings Manager
  * Core logic for managing game settings with validation, migration, and persistence
  * Decoupled from specific storage implementation and game logic

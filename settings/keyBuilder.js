@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * Key Builder
  * Centralized key generation for storage
  * Prevents key conflicts and provides consistent naming

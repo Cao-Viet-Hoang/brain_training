@@ -1,3 +1,9 @@
+/**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
 // Expression Puzzle Game - Senior Engineer Implementation
 // Complete AST-based puzzle generation with quality filters and unique solution validation
 

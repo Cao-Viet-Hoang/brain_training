@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * Multiplayer Game Adapter
  * Base class for integrating multiplayer functionality into games
  */

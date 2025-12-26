@@ -1,3 +1,9 @@
+/**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
 // Math Game Logic
 class MathGame {
     constructor() {

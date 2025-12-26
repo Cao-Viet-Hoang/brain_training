@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * Game Adapter Interface
  * Interface definition for game-specific multiplayer adapters
  * 

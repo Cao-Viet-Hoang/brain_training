@@ -1,4 +1,10 @@
 /**
+ * Brain Training Games
+ * Author: Cao Viet Hoang
+ * Created: 2025
+ */
+
+/**
  * LocalStorage Adapter
  * Provides a standardized interface for localStorage operations
  * Can be replaced with other storage backends (IndexedDB, Database) without changing consumer code
