@@ -212,6 +212,20 @@
     <script src="../shared/multiplayer-result-modal.js"></script>
     <script src="adapters/memory-matrix-adapter.js"></script>
 
+    <!-- Settings System -->
+    <script type="module">
+        import { loadGameSettings, updateGameSettings } from '../settings/index.js';
+        
+        // Load saved settings and expose globally
+        window.GAME_SETTINGS = loadGameSettings('memory-matrix');
+        window.updateGameSettings = (patch) => {
+            window.GAME_SETTINGS = updateGameSettings('memory-matrix', patch);
+            return window.GAME_SETTINGS;
+        };
+        
+        console.log('[MemoryMatrix] Loaded settings:', window.GAME_SETTINGS);
+    </script>
+
     <!-- Game Script (LAST) -->
     <script src="memory-matrix.js"></script>
 </body>

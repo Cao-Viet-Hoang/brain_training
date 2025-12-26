@@ -726,8 +726,79 @@ function prettyPrint(puzzle) {
 // GAME UI LOGIC
 // ============================================================================
 
+// ============================================================================
+// SETTINGS PERSISTENCE
+// ============================================================================
+function loadSavedSettings() {
+    if (!window.GAME_SETTINGS) return null;
+    
+    const settings = window.GAME_SETTINGS;
+    
+    // Apply settings to UI
+    if (settings.difficulty !== undefined) {
+        // Restore difficulty button
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.difficulty === settings.difficulty) {
+                btn.classList.add('active');
+            }
+        });
+    }
+    
+    if (settings.puzzleCount !== undefined) {
+        document.getElementById('puzzleCount').value = settings.puzzleCount;
+    }
+    if (settings.timePerPuzzle !== undefined) {
+        document.getElementById('timePerPuzzle').value = settings.timePerPuzzle;
+    }
+    if (settings.minTarget !== undefined) {
+        document.getElementById('minTarget').value = settings.minTarget;
+    }
+    if (settings.maxTarget !== undefined) {
+        document.getElementById('maxTarget').value = settings.maxTarget;
+    }
+    if (settings.requireUnique !== undefined) {
+        document.getElementById('requireUnique').checked = settings.requireUnique;
+    }
+    
+    console.log('[ExpressionPuzzle] Settings restored:', settings);
+    return settings;
+}
+
+function saveCurrentSettings() {
+    if (typeof window.updateGameSettings !== 'function') return;
+    
+    try {
+        const difficulty = document.querySelector('.difficulty-btn.active')?.dataset.difficulty || 'medium';
+        const puzzleCount = parseInt(document.getElementById('puzzleCount').value);
+        const timePerPuzzle = parseInt(document.getElementById('timePerPuzzle').value);
+        const minTarget = parseInt(document.getElementById('minTarget').value);
+        const maxTarget = parseInt(document.getElementById('maxTarget').value);
+        const requireUnique = document.getElementById('requireUnique').checked;
+        
+        // Only save if valid
+        if (!isNaN(puzzleCount) && !isNaN(timePerPuzzle) && !isNaN(minTarget) && !isNaN(maxTarget)) {
+            window.updateGameSettings({
+                difficulty,
+                puzzleCount,
+                timePerPuzzle,
+                minTarget,
+                maxTarget,
+                requireUnique
+            });
+            console.log('[ExpressionPuzzle] Settings saved');
+        }
+    } catch (error) {
+        console.error('[ExpressionPuzzle] Error saving settings:', error);
+    }
+}
+
 class ExpressionPuzzleGame {
     constructor() {
+        // Load saved settings
+        const savedSettings = loadSavedSettings();
+        this.savedDifficulty = savedSettings?.difficulty || 'medium';
+        
         this.currentPuzzle = null;
         this.puzzleCount = 10;
         this.currentPuzzleIndex = 0;
@@ -806,7 +877,11 @@ class ExpressionPuzzleGame {
     
     startGame() {
         // Get configuration
-        const difficulty = document.querySelector('.difficulty-btn.active')?.dataset.difficulty || 'medium';
+        const difficulty = document.querySelector('.difficulty-btn.active')?.dataset.difficulty || this.savedDifficulty || 'medium';
+        
+        // Save settings when starting game
+        saveCurrentSettings();
+        
         const puzzleCount = parseInt(document.getElementById('puzzleCount').value) || 10;
         const requireUnique = document.getElementById('requireUnique').checked;
         const minTarget = parseInt(document.getElementById('minTarget').value) || 1;

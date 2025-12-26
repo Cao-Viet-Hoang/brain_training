@@ -289,6 +289,17 @@
     <script src="../shared/multiplayer-result-modal.js"></script>
     <script src="adapters/dual-n-back-adapter.js"></script>
 
+    <!-- Settings System -->
+    <script type="module">
+        import { loadGameSettings, updateGameSettings } from '../settings/index.js';
+        window.GAME_SETTINGS = loadGameSettings('dual-n-back');
+        window.updateGameSettings = (patch) => {
+            window.GAME_SETTINGS = updateGameSettings('dual-n-back', patch);
+            return window.GAME_SETTINGS;
+        };
+        console.log('[DualNBack] Loaded settings:', window.GAME_SETTINGS);
+    </script>
+
     <!-- Game Script (LAST) -->
     <script src="dual-n-back.js"></script>
 </body>

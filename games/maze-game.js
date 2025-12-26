@@ -1817,6 +1817,82 @@ class MazeGame {
 
         // Initialize
         this.init();
+        this.loadSavedSettings();
+    }
+    
+    /**
+     * Load saved settings from localStorage into UI
+     */
+    loadSavedSettings() {
+        if (!window.GAME_SETTINGS) return;
+        
+        const settings = window.GAME_SETTINGS;
+        
+        // Restore rounds input
+        if (settings.totalRounds !== undefined) {
+            document.getElementById('roundsInput').value = settings.totalRounds;
+            this.config.totalRounds = settings.totalRounds;
+        }
+        
+        // Restore maze size
+        if (settings.customMazeSize !== undefined) {
+            const sizeInput = document.getElementById('mazeSizeInput');
+            const sizeDisplay = document.getElementById('mazeSizeDisplay');
+            sizeInput.value = settings.customMazeSize;
+            sizeDisplay.textContent = settings.customMazeSize;
+            this.config.customMazeSize = settings.customMazeSize;
+        }
+        
+        // Restore game mode buttons
+        if (settings.mode !== undefined) {
+            document.querySelectorAll('#gameModeButtons .option-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.value === settings.mode) {
+                    btn.classList.add('active');
+                }
+            });
+            this.config.mode = settings.mode;
+        }
+        
+        // Restore difficulty buttons
+        if (settings.difficulty !== undefined) {
+            document.querySelectorAll('#difficultyButtons .option-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.value === settings.difficulty) {
+                    btn.classList.add('active');
+                }
+            });
+            this.config.difficulty = settings.difficulty;
+        }
+        
+        console.log('[MazeGame] Settings restored:', settings);
+    }
+    
+    /**
+     * Save current settings to localStorage
+     */
+    saveCurrentSettings() {
+        if (typeof window.updateGameSettings !== 'function') return;
+        
+        try {
+            const totalRounds = parseInt(document.getElementById('roundsInput').value);
+            const customMazeSize = parseInt(document.getElementById('mazeSizeInput').value);
+            const mode = document.querySelector('#gameModeButtons .option-btn.active')?.dataset.value || 'classic';
+            const difficulty = document.querySelector('#difficultyButtons .option-btn.active')?.dataset.value || 'medium';
+            
+            // Only save if valid
+            if (!isNaN(totalRounds) && !isNaN(customMazeSize)) {
+                window.updateGameSettings({
+                    totalRounds,
+                    customMazeSize,
+                    mode,
+                    difficulty
+                });
+                console.log('[MazeGame] Settings saved');
+            }
+        } catch (error) {
+            console.error('[MazeGame] Error saving settings:', error);
+        }
     }
 
     init() {
@@ -1951,6 +2027,9 @@ class MazeGame {
     }
 
     startGame() {
+        // Save settings when starting game
+        this.saveCurrentSettings();
+        
         this.state.reset();
 
         // Set fog mode for renderer

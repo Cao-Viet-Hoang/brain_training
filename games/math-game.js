@@ -67,10 +67,21 @@ class MathGame {
     }
     
     setupEventListeners() {
+        // Load saved settings into UI
+        this.loadSavedSettings();
+        
         // Operation buttons
         const operationBtns = document.querySelectorAll('.operation-btn');
         operationBtns.forEach(btn => {
-            btn.addEventListener('click', () => this.toggleOperation(btn));
+            btn.addEventListener('click', () => {
+                this.toggleOperation(btn);
+            });
+        });
+        
+        // Config input changes
+        const configInputs = ['minNumber', 'maxNumber', 'operandCount', 'questionCount', 'timePerQuestion'];
+        configInputs.forEach(id => {
+            const input = document.getElementById(id);
         });
         
         // Start game button
@@ -115,6 +126,82 @@ class MathGame {
             
             // Toggle the clicked button
             btn.classList.toggle('active');
+        }
+    }
+    
+    /**
+     * Load saved settings from localStorage into UI
+     */
+    loadSavedSettings() {
+        if (!window.GAME_SETTINGS) return;
+        
+        const settings = window.GAME_SETTINGS;
+        
+        // Load number inputs
+        if (settings.minNumber !== undefined) {
+            document.getElementById('minNumber').value = settings.minNumber;
+        }
+        if (settings.maxNumber !== undefined) {
+            document.getElementById('maxNumber').value = settings.maxNumber;
+        }
+        if (settings.operandCount !== undefined) {
+            document.getElementById('operandCount').value = settings.operandCount;
+        }
+        if (settings.questionCount !== undefined) {
+            document.getElementById('questionCount').value = settings.questionCount;
+        }
+        if (settings.timePerQuestion !== undefined) {
+            document.getElementById('timePerQuestion').value = settings.timePerQuestion;
+        }
+        
+        // Load operations
+        if (settings.operations && Array.isArray(settings.operations)) {
+            // First, deselect all
+            document.querySelectorAll('.operation-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Then select the saved ones
+            settings.operations.forEach(op => {
+                const btn = document.querySelector(`.operation-btn[data-operation="${op}"]`);
+                if (btn) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        console.log('[MathGame] Settings restored:', settings);
+    }
+    
+    /**
+     * Save current settings to localStorage
+     */
+    saveCurrentSettings() {
+        if (typeof window.updateGameSettings !== 'function') return;
+        
+        try {
+            const minNumber = parseInt(document.getElementById('minNumber').value);
+            const maxNumber = parseInt(document.getElementById('maxNumber').value);
+            const operandCount = parseInt(document.getElementById('operandCount').value);
+            const questionCount = parseInt(document.getElementById('questionCount').value);
+            const timePerQuestion = parseInt(document.getElementById('timePerQuestion').value);
+            const operations = Array.from(document.querySelectorAll('.operation-btn.active'))
+                .map(btn => btn.dataset.operation);
+            
+            // Only save if valid
+            if (!isNaN(minNumber) && !isNaN(maxNumber) && operations.length > 0) {
+                window.updateGameSettings({
+                    minNumber,
+                    maxNumber,
+                    operations,
+                    operandCount: isNaN(operandCount) ? 2 : operandCount,
+                    questionCount: isNaN(questionCount) ? 10 : questionCount,
+                    timePerQuestion: isNaN(timePerQuestion) ? 10 : timePerQuestion
+                });
+                console.log('[MathGame] Settings saved');
+            }
+        } catch (error) {
+            console.error('[MathGame] Error saving settings:', error);
         }
     }
     
@@ -171,6 +258,9 @@ class MathGame {
     
     startGame() {
         if (!this.validateConfig()) return;
+        
+        // Save settings when starting game
+        this.saveCurrentSettings();
         
         // Reset game state
         this.gameState = {

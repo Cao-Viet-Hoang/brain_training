@@ -259,6 +259,17 @@
     <script src="../shared/multiplayer-result-modal.js"></script>
     <script src="adapters/pixel-game-adapter.js"></script>
 
+    <!-- Settings System -->
+    <script type="module">
+        import { loadGameSettings, updateGameSettings } from '../settings/index.js';
+        window.GAME_SETTINGS = loadGameSettings('pixel-game');
+        window.updateGameSettings = (patch) => {
+            window.GAME_SETTINGS = updateGameSettings('pixel-game', patch);
+            return window.GAME_SETTINGS;
+        };
+        console.log('[PixelGame] Loaded settings:', window.GAME_SETTINGS);
+    </script>
+
     <!-- Game Script (LAST) -->
     <script src="pixel-game.js"></script>
 </body>

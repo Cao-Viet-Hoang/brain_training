@@ -616,6 +616,83 @@ class UIController {
         };
         this.currentTrialTimeout = null;
         this.init();
+        this.loadSavedSettings();
+    }
+    
+    /**
+     * Load saved settings from localStorage into UI
+     */
+    loadSavedSettings() {
+        if (!window.GAME_SETTINGS) return;
+        
+        const settings = window.GAME_SETTINGS;
+        
+        // Restore N-back level button
+        if (settings.N !== undefined) {
+            document.querySelectorAll('#nBackLevelButtons .option-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.value) === settings.N) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        // Restore grid size button
+        if (settings.gridSize !== undefined) {
+            document.querySelectorAll('#gridSizeButtons .option-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.value) === settings.gridSize) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        // Restore range inputs
+        if (settings.totalTrials !== undefined) {
+            document.getElementById('totalTrials').value = settings.totalTrials;
+            document.getElementById('totalTrialsValue').textContent = settings.totalTrials;
+        }
+        if (settings.stimulusDurationMs !== undefined) {
+            document.getElementById('stimulusDuration').value = settings.stimulusDurationMs;
+            document.getElementById('stimulusDurationValue').textContent = settings.stimulusDurationMs + 'ms';
+        }
+        if (settings.intervalBetweenMs !== undefined) {
+            document.getElementById('interTrialInterval').value = settings.intervalBetweenMs;
+            document.getElementById('interTrialIntervalValue').textContent = settings.intervalBetweenMs + 'ms';
+        }
+        
+        console.log('[DualNBack] Settings restored:', settings);
+    }
+    
+    /**
+     * Save current settings to localStorage
+     */
+    saveCurrentSettings() {
+        if (typeof window.updateGameSettings !== 'function') return;
+        
+        try {
+            const nBackBtn = document.querySelector('#nBackLevelButtons .option-btn.active');
+            const gridSizeBtn = document.querySelector('#gridSizeButtons .option-btn.active');
+            const totalTrials = parseInt(document.getElementById('totalTrials').value);
+            const stimulusDurationMs = parseInt(document.getElementById('stimulusDuration').value);
+            const intervalBetweenMs = parseInt(document.getElementById('interTrialInterval').value);
+            
+            // Only save if valid
+            if (nBackBtn && gridSizeBtn && !isNaN(totalTrials) && !isNaN(stimulusDurationMs) && !isNaN(intervalBetweenMs)) {
+                window.updateGameSettings({
+                    N: parseInt(nBackBtn.dataset.value),
+                    gridSize: parseInt(gridSizeBtn.dataset.value),
+                    totalTrials,
+                    stimulusDurationMs,
+                    intervalBetweenMs,
+                    targetMatchRatePosition: 0.25,
+                    targetMatchRateLetter: 0.25
+                });
+                console.log('[DualNBack] Settings saved');
+            }
+        } catch (error) {
+            console.error('[DualNBack] Error saving settings:', error);
+        }
     }
 
     init() {
@@ -676,6 +753,9 @@ class UIController {
     }
 
     startGame() {
+        // Save settings when starting game
+        this.saveCurrentSettings();
+        
         // Get configuration from UI
         const nBackBtn = document.querySelector('#nBackLevelButtons .option-btn.active');
         const gridSizeBtn = document.querySelector('#gridSizeButtons .option-btn.active');

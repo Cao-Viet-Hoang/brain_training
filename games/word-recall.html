@@ -331,6 +331,17 @@
     <script src="../shared/multiplayer-result-modal.js"></script>
     <script src="adapters/word-recall-adapter.js"></script>
 
+    <!-- Settings System -->
+    <script type="module">
+        import { loadGameSettings, updateGameSettings } from '../settings/index.js';
+        window.GAME_SETTINGS = loadGameSettings('word-recall');
+        window.updateGameSettings = (patch) => {
+            window.GAME_SETTINGS = updateGameSettings('word-recall', patch);
+            return window.GAME_SETTINGS;
+        };
+        console.log('[WordRecall] Loaded settings:', window.GAME_SETTINGS);
+    </script>
+
     <!-- Game Script (LAST) -->
     <script src="word-recall.js"></script>
 </body>
