@@ -47,10 +47,17 @@ function initFirebase() {
             database = firebase.database();
             auth = firebase.auth();
             console.log('✅ Firebase initialized successfully');
+
+            // Start room cleanup service after Firebase is initialized
+            // This ensures empty rooms are cleaned up even if no one joins multiplayer
+            startRoomCleanupService();
         } else if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
             database = firebase.database();
             auth = firebase.auth();
             console.log('✅ Firebase already initialized');
+
+            // Also start cleanup if Firebase was already initialized
+            startRoomCleanupService();
         } else {
             console.warn('⚠️ Firebase SDK not loaded. Make sure to include Firebase scripts in HTML.');
         }
@@ -59,6 +66,20 @@ function initFirebase() {
     }
 
     return { database, auth };
+}
+
+/**
+ * Start room cleanup service if available
+ * This is called after Firebase is initialized to ensure empty rooms are cleaned up
+ */
+function startRoomCleanupService() {
+    // Use setTimeout to ensure roomCleanup is loaded (it may be loaded after firebase-config)
+    setTimeout(() => {
+        if (typeof roomCleanup !== 'undefined' && database) {
+            roomCleanup.startAutoCleanup();
+            console.log('✅ Room cleanup service auto-started');
+        }
+    }, 100);
 }
 
 // Export database and auth references

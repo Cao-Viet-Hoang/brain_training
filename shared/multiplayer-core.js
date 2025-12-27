@@ -432,6 +432,60 @@ class MultiplayerCore {
         if (this.isHost) {
             this.roomRef.child('meta/hostDisconnected').onDisconnect().set(true);
         }
+
+        // Setup beforeunload handler for immediate cleanup when user closes tab/browser
+        this.setupBeforeUnloadHandler();
+    }
+
+    /**
+     * Setup beforeunload handler for immediate cleanup when user closes tab/browser
+     */
+    setupBeforeUnloadHandler() {
+        // Remove existing handler if any
+        if (this.beforeUnloadHandler) {
+            window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+        }
+
+        this.beforeUnloadHandler = (event) => {
+            // Only cleanup if we're in a room
+            if (!this.roomRef || !this.playerId) {
+                return;
+            }
+
+            console.log('🚪 beforeunload triggered - cleaning up room');
+
+            // Use synchronous Firebase operations via sendBeacon for reliability
+            // Note: This is a best-effort cleanup, onDisconnect is the backup
+            try {
+                // For immediate cleanup, we need to use synchronous approach
+                // Remove player from room immediately
+                const roomId = this.roomId;
+                const playerId = this.playerId;
+
+                // Mark player as disconnected for cleanup detection
+                if (this.roomRef) {
+                    // Use synchronous XMLHttpRequest as fallback (deprecated but works for beforeunload)
+                    const playerRef = this.roomRef.child(`players/${playerId}`);
+                    playerRef.remove();
+                }
+            } catch (error) {
+                console.error('❌ Error during beforeunload cleanup:', error);
+            }
+        };
+
+        window.addEventListener('beforeunload', this.beforeUnloadHandler);
+        console.log('✅ beforeunload handler registered');
+    }
+
+    /**
+     * Remove beforeunload handler
+     */
+    removeBeforeUnloadHandler() {
+        if (this.beforeUnloadHandler) {
+            window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+            this.beforeUnloadHandler = null;
+            console.log('✅ beforeunload handler removed');
+        }
     }
 
     /**
@@ -453,6 +507,9 @@ class MultiplayerCore {
         if (this.isHost) {
             this.roomRef.child('meta/hostDisconnected').onDisconnect().cancel();
         }
+
+        // Also remove beforeunload handler since we're doing intentional navigation
+        this.removeBeforeUnloadHandler();
     }
 
     /**
@@ -510,12 +567,15 @@ class MultiplayerCore {
     cleanup() {
         console.log('🧹 Cleaning up room listeners');
 
+        // Remove beforeunload handler
+        this.removeBeforeUnloadHandler();
+
         // Remove all listeners
         if (this.roomRef) {
             Object.keys(this.listeners).forEach(key => {
                 if (this.listeners[key]) {
-                    this.roomRef.child(key === 'players' ? 'players' : 
-                                      key === 'status' ? 'meta/status' : 
+                    this.roomRef.child(key === 'players' ? 'players' :
+                                      key === 'status' ? 'meta/status' :
                                       key === 'gameData' ? 'gameData' : 'gameState')
                             .off('value', this.listeners[key]);
                 }

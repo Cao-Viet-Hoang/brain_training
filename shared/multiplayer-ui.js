@@ -592,6 +592,24 @@ class MultiplayerUI {
     onLeaveRoom(callback) { this.callbacks.onLeaveRoom = callback; }
     onToggleReady(callback) { this.callbacks.onToggleReady = callback; }
     onStartGame(callback) { this.callbacks.onStartGame = callback; }
+
+    // ==================== GETTERS ====================
+
+    /**
+     * Get current game type from room data
+     * @returns {string|null} Game type or null if not in a room
+     */
+    getCurrentGameType() {
+        return this.roomData?.gameType || null;
+    }
+
+    /**
+     * Get current room data
+     * @returns {Object|null} Room data or null if not in a room
+     */
+    getRoomData() {
+        return this.roomData;
+    }
 }
 
 // Export for use

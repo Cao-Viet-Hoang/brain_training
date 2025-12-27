@@ -35,6 +35,9 @@ class ExpressionPuzzleMultiplayerAdapter extends MultiplayerGameAdapter {
         this.multiplayerState.role = 'host';
         this.isMultiplayerMode = true; // Set base class flag
 
+        // Load saved settings into game (ensures settings are applied even if UI not yet updated)
+        this.loadSavedSettingsToConfig();
+
         await this.init(null, roomId);
 
         this.interceptHostGameStart();
@@ -44,6 +47,37 @@ class ExpressionPuzzleMultiplayerAdapter extends MultiplayerGameAdapter {
         this.showMultiplayerBadge('HOST');
 
         console.log('[ExpressionPuzzleAdapter] Host initialization complete');
+    }
+
+    /**
+     * Load saved settings from window.GAME_SETTINGS into game
+     * This ensures settings are restored for multiplayer mode
+     */
+    loadSavedSettingsToConfig() {
+        if (!window.GAME_SETTINGS) {
+            console.log('[ExpressionPuzzleAdapter] No saved settings found, using defaults');
+            return;
+        }
+
+        const settings = window.GAME_SETTINGS;
+        console.log('[ExpressionPuzzleAdapter] Loading saved settings into config:', settings);
+
+        // Apply saved settings to game
+        if (settings.difficulty !== undefined) {
+            this.game.savedDifficulty = settings.difficulty;
+        }
+        if (settings.puzzleCount !== undefined) {
+            this.game.puzzleCount = settings.puzzleCount;
+        }
+        if (settings.timePerPuzzle !== undefined) {
+            this.game.timePerPuzzle = settings.timePerPuzzle;
+        }
+
+        console.log('[ExpressionPuzzleAdapter] Config after loading settings:', {
+            difficulty: this.game.savedDifficulty,
+            puzzleCount: this.game.puzzleCount,
+            timePerPuzzle: this.game.timePerPuzzle
+        });
     }
 
     /**
@@ -77,6 +111,12 @@ class ExpressionPuzzleMultiplayerAdapter extends MultiplayerGameAdapter {
 
         this.game.startGame = async () => {
             console.log('[ExpressionPuzzleAdapter] Host starting game - intercepted');
+
+            // Save settings when starting multiplayer game (same as single player)
+            // Note: ExpressionPuzzle uses global function saveCurrentSettings()
+            if (typeof saveCurrentSettings === 'function') {
+                saveCurrentSettings();
+            }
 
             try {
                 const gameData = await this.prepareMultiplayerGame();
