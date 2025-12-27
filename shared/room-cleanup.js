@@ -12,6 +12,7 @@ class RoomCleanup {
     constructor() {
         this.cleanupInterval = null;
         this.cleanupIntervalMs = 5 * 60 * 1000; // 5 minutes
+        this.roomListeners = {}; // Track listeners for each room
     }
 
     /**
@@ -30,6 +31,115 @@ class RoomCleanup {
 
         // Run cleanup immediately
         this.cleanupExpiredRooms();
+
+        // Start watching all rooms for empty state
+        this.startWatchingRooms();
+    }
+
+    /**
+     * Watch all rooms and clean up when they become empty
+     */
+    startWatchingRooms() {
+        if (!database) {
+            console.warn('⚠️ Database not initialized, cannot watch rooms');
+            return;
+        }
+
+        console.log('👀 Starting to watch rooms for empty state');
+
+        const roomsRef = database.ref('rooms');
+
+        // Watch for any changes in rooms
+        roomsRef.on('child_changed', async (snapshot) => {
+            const roomId = snapshot.key;
+            const roomData = snapshot.val();
+
+            // Check if room is now empty
+            if (!roomData.players || Object.keys(roomData.players).length === 0) {
+                console.log(`🗑️ Room ${roomId} is now empty - scheduling cleanup`);
+                // Small delay to allow for reconnections
+                setTimeout(async () => {
+                    await this.checkAndCleanupRoom(roomId);
+                }, 3000); // 3 second delay
+            }
+        });
+
+        // Also watch for rooms being added to ensure we catch initial state
+        roomsRef.on('child_added', (snapshot) => {
+            const roomId = snapshot.key;
+            this.watchRoomPlayers(roomId);
+        });
+
+        // Clean up listener when room is removed
+        roomsRef.on('child_removed', (snapshot) => {
+            const roomId = snapshot.key;
+            this.stopWatchingRoomPlayers(roomId);
+            console.log(`✅ Room ${roomId} was removed`);
+        });
+    }
+
+    /**
+     * Watch a specific room's players for changes
+     */
+    watchRoomPlayers(roomId) {
+        if (!database || this.roomListeners[roomId]) {
+            return;
+        }
+
+        const playersRef = database.ref(`rooms/${roomId}/players`);
+
+        this.roomListeners[roomId] = playersRef.on('value', async (snapshot) => {
+            const players = snapshot.val();
+
+            if (!players || Object.keys(players).length === 0) {
+                console.log(`👀 Room ${roomId} players became empty - checking for cleanup`);
+                // Small delay to allow for reconnections
+                setTimeout(async () => {
+                    await this.checkAndCleanupRoom(roomId);
+                }, 3000);
+            }
+        });
+    }
+
+    /**
+     * Stop watching a room's players
+     */
+    stopWatchingRoomPlayers(roomId) {
+        if (this.roomListeners[roomId] && database) {
+            database.ref(`rooms/${roomId}/players`).off('value', this.roomListeners[roomId]);
+            delete this.roomListeners[roomId];
+        }
+    }
+
+    /**
+     * Check if room should be cleaned up and do it
+     */
+    async checkAndCleanupRoom(roomId) {
+        if (!database) {
+            return;
+        }
+
+        try {
+            const roomRef = database.ref(`rooms/${roomId}`);
+            const snapshot = await roomRef.once('value');
+            const roomData = snapshot.val();
+
+            // Room already deleted
+            if (!roomData) {
+                this.stopWatchingRoomPlayers(roomId);
+                return;
+            }
+
+            // Check if still empty
+            const players = roomData.players;
+            if (!players || Object.keys(players).length === 0) {
+                console.log(`🗑️ Cleaning up empty room: ${roomId}`);
+                await roomRef.remove();
+                this.stopWatchingRoomPlayers(roomId);
+            }
+        } catch (error) {
+            console.error(`❌ Error checking room ${roomId}:`, error);
+        }
     }
 
     /**
@@ -41,6 +151,30 @@ class RoomCleanup {
             this.cleanupInterval = null;
             console.log('🛑 Stopped automatic room cleanup');
         }
+
+        // Stop watching all rooms
+        this.stopWatchingRooms();
+    }
+
+    /**
+     * Stop watching all rooms
+     */
+    stopWatchingRooms() {
+        if (!database) {
+            return;
+        }
+
+        // Remove all room listeners
+        Object.keys(this.roomListeners).forEach(roomId => {
+            this.stopWatchingRoomPlayers(roomId);
+        });
+
+        // Remove the main rooms listener
+        database.ref('rooms').off('child_changed');
+        database.ref('rooms').off('child_added');
+        database.ref('rooms').off('child_removed');
+
+        console.log('🛑 Stopped watching rooms');
     }
 
     /**

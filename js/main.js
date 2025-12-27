@@ -95,8 +95,12 @@ const games = [
 document.addEventListener('DOMContentLoaded', () => {
     initializeGames();
     initializeMultiplayer();
-    // Don't auto-start cleanup - only start when multiplayer is actually used
-    // initializeRoomCleanup();
+
+    // Initialize Firebase and start cleanup service on page load
+    // This ensures rooms are cleaned up even if user doesn't join multiplayer
+    if (typeof initFirebase === 'function') {
+        initFirebase(); // This will also start the cleanup service
+    }
 });
 
 // Create game cards
@@ -244,10 +248,23 @@ async function initializeMultiplayer() {
     
     mpUI.onStartGame(async () => {
         try {
+            // Get current room info before navigation
+            const roomId = mpCore.getRoomId();
+            const gameType = mpUI.getCurrentGameType();
+
+            // Store room info for host to use in game page
+            sessionStorage.setItem('multiplayerRoomId', roomId);
+            sessionStorage.setItem('multiplayerRole', 'host');
+            sessionStorage.setItem('multiplayerPlayerName', mpCore.getPlayerName());
+
             await mpCore.setRoomStatus(MP_CONSTANTS.ROOM_STATUS.PLAYING);
 
             // Cancel disconnect handler to prevent player removal when navigating to game page
             mpCore.cancelDisconnectHandler();
+
+            // Navigate host to game page
+            const gameFile = MP_CONSTANTS.GAME_FILES[gameType];
+            window.location.href = gameFile ? `games/${gameFile}` : 'games/math-game.html';
         } catch (error) {
             console.error('Error starting game:', error);
             alert('Failed to start game: ' + error.message);

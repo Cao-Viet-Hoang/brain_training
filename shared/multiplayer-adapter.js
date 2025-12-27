@@ -30,12 +30,18 @@ class MultiplayerGameAdapter {
     async init(containerId = null, roomId = null) {
         try {
             console.log('[MultiplayerAdapter] Initializing...');
-            
+
             // Initialize Firebase if not already done
             if (typeof initFirebase === 'function') {
                 initFirebase();
             }
-            
+
+            // Start room cleanup service (watches for empty rooms and cleans them up)
+            if (typeof roomCleanup !== 'undefined' && database) {
+                roomCleanup.startAutoCleanup();
+                console.log('[MultiplayerAdapter] Room cleanup service started');
+            }
+
             // Initialize core
             await this.core.initAuth();
             
