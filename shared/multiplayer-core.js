@@ -220,14 +220,16 @@ class MultiplayerCore {
         }
 
         // Add player
-        await roomRef.child(`players/${this.playerId}`).set({
+        const newPlayerData = {
             name: playerName,
             isHost: false,
             isReady: false,
             score: 0,
             status: MP_CONSTANTS.PLAYER_STATUS.ACTIVE,
             joinedAt: firebase.database.ServerValue.TIMESTAMP
-        });
+        };
+        
+        await roomRef.child(`players/${this.playerId}`).set(newPlayerData);
 
         this.roomId = roomCode;
         this.roomRef = roomRef;
@@ -235,6 +237,13 @@ class MultiplayerCore {
         this.setupRoomListeners();
         this.setupDisconnectHandler();
         this.startHeartbeat();
+
+        // Add the current player to roomData before returning
+        // This ensures the UI shows the player immediately
+        if (!roomData.players) {
+            roomData.players = {};
+        }
+        roomData.players[this.playerId] = newPlayerData;
 
         console.log('✅ Joined room:', roomCode);
         return roomData;
