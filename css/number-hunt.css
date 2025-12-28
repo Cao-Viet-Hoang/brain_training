@@ -1042,12 +1042,96 @@
     display: none !important;
 }
 
+/* ===== Scrollbar Styling ===== */
+.round-summary-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.round-summary-list::-webkit-scrollbar-track {
+    background: var(--secondary-color);
+    border-radius: 10px;
+}
+
+.round-summary-list::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
+.round-summary-list::-webkit-scrollbar-thumb:hover {
+    background: #8BC9CB;
+}
+
 /* ===== Responsive Design ===== */
-@media (max-width: 768px) {
+
+/* Large Desktop (1400px - 1599px) */
+@media (max-width: 1400px) {
+    .config-card,
+    .result-card {
+        max-width: 750px;
+    }
+    
+    .game-board {
+        max-width: 900px;
+    }
+}
+
+/* Medium Desktop / Laptop (1024px - 1399px) */
+@media (max-width: 1399px) {
+    .config-card,
+    .result-card {
+        max-width: 700px;
+    }
+    
+    .game-board {
+        max-width: 850px;
+    }
+    
+    .number-board {
+        gap: 0.5rem;
+    }
+    
+    .number-chip {
+        padding: 0.75rem;
+        font-size: 1.1rem;
+    }
+}
+
+/* Tablet Landscape (900px - 1023px) */
+@media (max-width: 1023px) {
+    .config-card,
+    .result-card {
+        padding: var(--spacing-md);
+    }
+    
+    .game-board {
+        max-width: 750px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .stat-box.highlight {
+        grid-column: 1 / -1;
+    }
+    
+    .round-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Tablet Portrait (768px - 899px) */
+@media (max-width: 899px) {
+    .config-card h2,
+    .result-card h2 {
+        font-size: 1.7rem;
+    }
+    
     .mode-buttons {
         grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
     }
-
+    
     .game-info-bar {
         gap: 1rem;
         padding: 0.9rem 1rem;
@@ -1060,11 +1144,16 @@
     .info-value {
         font-size: 1.3rem;
     }
-
+    
     .number-board {
-        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-        gap: 0.4rem;
+        grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+        gap: 0.5rem;
         padding: 1rem;
+    }
+    
+    .number-chip {
+        padding: 0.7rem;
+        font-size: 1.05rem;
     }
 
     .stats-grid {
@@ -1074,18 +1163,61 @@
     .round-stats {
         grid-template-columns: 1fr;
     }
+    
+    .stat-value.big {
+        font-size: 2.8rem;
+    }
+    
+    .round-summary-section h3 {
+        font-size: 1.3rem;
+    }
+}
 
+/* Mobile Landscape / Small Tablet (600px - 767px) */
+@media (max-width: 767px) {
     .result-actions {
         flex-direction: column;
+        gap: var(--spacing-sm);
     }
 
     .result-actions a,
     .result-actions button {
         width: 100%;
+        max-width: 100%;
+    }
+    
+    .number-board {
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        gap: 0.4rem;
+    }
+    
+    .number-chip {
+        padding: 0.65rem;
+        font-size: 1rem;
+    }
+    
+    .summary-header {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    
+    .stat-value.big {
+        font-size: 2.5rem;
     }
 }
 
-@media (max-width: 480px) {
+/* Mobile Portrait (480px - 599px) */
+@media (max-width: 599px) {
+    .config-card,
+    .result-card {
+        padding: var(--spacing-sm);
+    }
+    
+    .config-card h2,
+    .result-card h2 {
+        font-size: 1.5rem;
+    }
+    
     .game-info-bar {
         flex-wrap: wrap;
         gap: 0.8rem;
@@ -1103,7 +1235,7 @@
     }
 
     .info-label {
-        font-size: 0.65rem;
+        font-size: 0.7rem;
         letter-spacing: 0.5px;
     }
 
@@ -1112,15 +1244,187 @@
     }
 
     .number-board {
-        grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+        gap: 0.4rem;
+        padding: 0.75rem;
+    }
+
+    .number-chip {
+        padding: 0.6rem;
+        font-size: 0.95rem;
+    }
+
+    .stat-value.big {
+        font-size: 2.3rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+    }
+    
+    .round-summary-section h3 {
+        font-size: 1.2rem;
+    }
+    
+    .summary-item {
+        padding: 0.75rem;
+    }
+    
+    .summary-details {
+        font-size: 0.85rem;
+    }
+}
+
+/* Small Mobile (320px - 479px) */
+@media (max-width: 479px) {
+    .config-card h2,
+    .result-card h2 {
+        font-size: 1.3rem;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .config-group label {
+        font-size: 0.95rem;
+    }
+    
+    .config-group small {
+        font-size: 0.8rem;
+    }
+    
+    .mode-btn {
+        padding: 1rem;
+    }
+    
+    .mode-icon {
+        font-size: 2rem;
+    }
+    
+    .mode-btn h3 {
+        font-size: 1.1rem;
+    }
+    
+    .mode-btn p {
+        font-size: 0.8rem;
+    }
+    
+    .game-info-bar {
+        gap: 0.6rem;
+        padding: 0.7rem;
+    }
+    
+    .info-item {
+        flex: 0 0 calc(50% - 0.3rem);
+    }
+    
+    .info-label {
+        font-size: 0.65rem;
+    }
+    
+    .info-value {
+        font-size: 1.1rem;
+    }
+    
+    .number-board {
+        grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+        gap: 0.35rem;
+        padding: 0.6rem;
     }
 
     .number-chip {
         padding: 0.5rem;
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
-
+    
+    .answer-chips {
+        gap: 0.35rem;
+    }
+    
+    .answer-chip {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+    
     .stat-value.big {
-        font-size: 2.5rem;
+        font-size: 2rem;
+    }
+    
+    .stat-value {
+        font-size: 1.3rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+    }
+    
+    .stat-box {
+        padding: 1rem;
+    }
+    
+    .round-summary-section h3 {
+        font-size: 1.1rem;
+    }
+    
+    .summary-item {
+        padding: 0.65rem;
+    }
+    
+    .summary-header {
+        font-size: 0.9rem;
+    }
+    
+    .summary-details {
+        font-size: 0.8rem;
+    }
+    
+    .round-result h3 {
+        font-size: 1.3rem;
+    }
+    
+    .round-stats {
+        gap: 0.5rem;
+    }
+    
+    .round-stat-item {
+        padding: 0.75rem;
+    }
+    
+    .breakdown-item {
+        font-size: 0.85rem;
+    }
+    
+    .modal-content {
+        padding: var(--spacing-md);
+        max-width: 95%;
+    }
+    
+    .modal-content h2 {
+        font-size: 1.5rem;
+    }
+    
+    .help-section h3 {
+        font-size: 1.1rem;
+    }
+    
+    .help-section p,
+    .help-section li {
+        font-size: 0.9rem;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .back-btn {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.875rem;
+    }
+    
+    .help-btn {
+        font-size: 0.9rem;
+        padding: 0.45rem 0.875rem;
     }
 }
