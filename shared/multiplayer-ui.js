@@ -354,6 +354,14 @@ class MultiplayerUI {
         } else {
             document.getElementById('mpReadyBtn')?.addEventListener('click', () => {
                 this.isReady = !this.isReady;
+                
+                // Update button state immediately for instant feedback
+                const readyBtn = document.getElementById('mpReadyBtn');
+                if (readyBtn) {
+                    readyBtn.className = `mp-ready-btn ${this.isReady ? 'is-ready' : 'not-ready'}`;
+                    readyBtn.textContent = this.isReady ? '⏳ Cancel Ready' : '✅ Ready';
+                }
+                
                 this.callbacks.onToggleReady?.(this.isReady);
             });
             
