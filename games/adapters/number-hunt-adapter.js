@@ -156,13 +156,12 @@ class NumberHuntGameMultiplayerAdapter extends MultiplayerGameAdapter {
         // Load config from UI (same as single player)
         const activeMode = document.querySelector('.mode-btn.active');
         this.game.config.mode = activeMode ? activeMode.dataset.mode : 'missing';
-        // ranges are already in this.game.config.ranges (managed by addRange/removeRange)
-        this.game.config.roundSize = parseInt(document.getElementById('roundSize').value);
+        this.game.config.ranges = this.game.getAllRanges();
         this.game.config.missingCount = parseInt(document.getElementById('missingCount').value);
         this.game.config.extraCount = parseInt(document.getElementById('extraCount').value);
         this.game.config.totalRounds = parseInt(document.getElementById('totalRounds').value);
         this.game.config.maxWrongAttempts = parseInt(document.getElementById('maxWrongAttempts').value);
-        // Use default scoring values from config (baseScore, timeBonusMax, wrongPenalty, timeTarget, minRoundScore)
+        this.game.config.shuffleBoard = document.getElementById('shuffleBoard').checked;
 
         // Generate all rounds
         const rounds = [];
