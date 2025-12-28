@@ -916,11 +916,11 @@ class NumberHuntGame {
             
             // Allow user to try again - keep timer running
             this.showInputError('Wrong answer! Try again.');
-            this.gameState.userAnswers = [];
-            this.updateAnswerList();
             
-            // Keep input enabled, just clear the answer list
-            // Submit button will be re-enabled when user adds enough numbers again
+            // Don't clear the answers - let user modify them
+            // Re-enable submit button so they can try again
+            submitBtn.disabled = false;
+            
             return;
         }
         
