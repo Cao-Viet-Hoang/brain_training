@@ -46,7 +46,8 @@ const MP_CONSTANTS = {
         'dual-n-back': 'dual-n-back.html',
         'memory-matrix': 'memory-matrix.html',
         'word-recall': 'word-recall.html',
-        'maze-game': 'maze-game.html'
+        'maze-game': 'maze-game.html',
+        'number-hunt': 'number-hunt.html'
     }
 };
 

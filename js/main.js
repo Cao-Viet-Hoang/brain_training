@@ -63,6 +63,14 @@ const games = [
         url: 'games/maze-game.html'
     },
     {
+        id: 'number-hunt',
+        title: 'Number Hunt',
+        description: 'Find missing or extra numbers by typing them in',
+        icon: '🔍',
+        tag: 'Logic',
+        url: 'games/number-hunt.html'
+    },
+    {
         id: 'word',
         title: 'Vocabulary',
         description: 'Expand vocabulary and language skills',
