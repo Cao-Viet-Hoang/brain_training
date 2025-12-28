@@ -47,12 +47,12 @@
                     <div class="help-section">
                         <h3>⚙️ Setup</h3>
                         <ul>
-                            <li><strong>Mode:</strong> Choose between Missing (find missing numbers) or Extra (find duplicate/extra numbers)</li>
-                            <li><strong>Number Range:</strong> Set the range of numbers that will appear</li>
-                            <li><strong>Round Size:</strong> Total numbers displayed per round (10-100)</li>
-                            <li><strong>Count:</strong> How many missing/extra numbers to find (1-10)</li>
+                            <li><strong>Mode:</strong> Choose between Missing (find missing numbers) or Extra (find numbers outside the range)</li>
+                            <li><strong>Number Range:</strong> Set the range of numbers that will be in the game</li>
+                            <li><strong>Missing Count:</strong> How many missing numbers to find in Missing mode (1-10)</li>
+                            <li><strong>Extra Count:</strong> How many numbers outside the range to find in Extra mode (1-10)</li>
                             <li><strong>Total Rounds:</strong> Number of rounds to play (1-20)</li>
-                            <li><strong>Max Wrong:</strong> Maximum wrong attempts allowed per round (1-10)</li>
+                            <li><strong>Max Wrong:</strong> Maximum wrong answer submissions allowed per round (1-10)</li>
                             <li><strong>Time Target:</strong> Target time in seconds to get full time bonus (10-60s)</li>
                         </ul>
                     </div>
@@ -62,23 +62,26 @@
                         <ul>
                             <li>Numbers are displayed on the board (you cannot click them)</li>
                             <li>Type a number into the input field</li>
-                            <li>Press Enter to add it to your answer list</li>
+                            <li>Press Enter or click Add to add it to your answer list</li>
+                            <li>You can add multiple numbers to build your answer list</li>
+                            <li>Click Remove (×) to remove any number from your list</li>
                             <li>Submit button enables when you've entered enough numbers</li>
-                            <li>Wrong attempts are tracked - too many fails the round</li>
+                            <li>Click Submit to check your answer - wrong submissions count as wrong attempts</li>
+                            <li>Too many wrong submissions fails the round</li>
                             <li>Complete all rounds to see final results</li>
                         </ul>
                     </div>
                     
                     <div class="help-section">
                         <h3>🎯 Missing Mode</h3>
-                        <p>Numbers from a continuous range are displayed, but some are missing. Find and type the missing numbers!</p>
-                        <p><strong>Example:</strong> Range 1-10, but only [1,2,4,5,7,9,10] are shown → Find 3, 6, 8</p>
+                        <p>All numbers from your configured range are displayed EXCEPT for a few randomly selected missing numbers. Your task is to find and type the missing numbers!</p>
+                        <p><strong>Example:</strong> Range 1-10, missing count 3 → The board shows [1,2,4,5,7,9,10] → You need to find 3, 6, 8</p>
                     </div>
                     
                     <div class="help-section">
                         <h3>🎯 Extra Mode</h3>
-                        <p>A set of numbers is displayed with some appearing multiple times. Find the duplicates or extra numbers!</p>
-                        <p><strong>Example:</strong> [1,2,3,3,4,5,5,6] → Find 3, 5 (they appear twice)</p>
+                        <p>All numbers from your configured range are displayed PLUS some extra numbers that are outside the range. Your task is to find and type the numbers that don't belong!</p>
+                        <p><strong>Example:</strong> Range 1-10, extra count 2 → The board shows [1,2,3,4,5,6,7,8,9,10,25,103] → You need to find 25, 103</p>
                     </div>
                     
                     <div class="help-section">
@@ -139,11 +142,6 @@
                         <button type="button" class="add-range-btn" id="addRangeBtn">+ Add Range</button>
                     </div>
 
-                    <div class="config-group">
-                        <label for="roundSize">Round Size (total numbers displayed):</label>
-                        <input type="number" id="roundSize" value="20" min="10" max="100" inputmode="numeric" pattern="[0-9]*">
-                    </div>
-
                     <div class="config-group" id="missingCountGroup">
                         <label for="missingCount">Missing Count (numbers to find):</label>
                         <input type="number" id="missingCount" value="3" min="1" max="10" inputmode="numeric" pattern="[0-9]*">
@@ -164,6 +162,13 @@
                         <input type="number" id="maxWrongAttempts" value="3" min="1" max="10" inputmode="numeric" pattern="[0-9]*">
                     </div>
 
+                    <div class="config-group">
+                        <label for="shuffleBoard">
+                            <input type="checkbox" id="shuffleBoard" checked>
+                            Shuffle numbers on board
+                        </label>
+                    </div>
+
                     <button class="btn-primary" id="startGameBtn">Start Game</button>
                 </div>
             </div>
@@ -173,26 +178,28 @@
                 <div class="game-content">
                     <!-- Game Header -->
                     <div class="game-info-bar">
-                        <div class="info-item">
-                            <span class="info-label">Mode:</span>
+                        <div class="info-item mode-item">
+                            <span class="info-label">Mode</span>
                             <span class="info-value" id="currentMode">Missing</span>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Round:</span>
-                            <span class="info-value"><span id="currentRound">1</span> / <span id="totalRoundsDisplay">5</span></span>
+                        <div class="info-divider"></div>
+                        <div class="info-item round-item">
+                            <span class="info-label">Round</span>
+                            <span class="info-value"><span id="currentRound">1</span>/<span id="totalRoundsDisplay">5</span></span>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Time:</span>
+                        <div class="info-divider"></div>
+                        <div class="info-item time-item">
+                            <span class="info-label">Time</span>
                             <span class="info-value timer" id="roundTimer">00:00</span>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Wrong:</span>
-                            <span class="info-value wrong-counter">
-                                <span id="wrongCount">0</span> / <span id="maxWrongDisplay">3</span>
-                            </span>
+                        <div class="info-divider"></div>
+                        <div class="info-item wrong-item">
+                            <span class="info-label">Wrong</span>
+                            <span class="info-value wrong-counter"><span id="wrongCount">0</span>/<span id="maxWrongDisplay">3</span></span>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Score:</span>
+                        <div class="info-divider"></div>
+                        <div class="info-item score-item">
+                            <span class="info-label">Score</span>
                             <span class="info-value score-display" id="currentScore">0</span>
                         </div>
                     </div>

@@ -11,11 +11,11 @@ class NumberHuntGame {
             mode: 'missing', // 'missing' or 'extra'
             minRange: 1,
             maxRange: 100,
-            roundSize: 20,
             missingCount: 3,
             extraCount: 3,
             totalRounds: 5,
             maxWrongAttempts: 3,
+            shuffleBoard: true,
             baseScore: 100,
             timeBonusMax: 50,
             wrongPenalty: 10,
@@ -372,7 +372,7 @@ class NumberHuntGame {
         
         // Load all other config values
         const configFields = [
-            'roundSize', 'missingCount', 'extraCount',
+            'missingCount', 'extraCount',
             'totalRounds', 'maxWrongAttempts'
         ];
         
@@ -384,6 +384,14 @@ class NumberHuntGame {
                 }
             }
         });
+        
+        // Load checkbox
+        if (settings.shuffleBoard !== undefined) {
+            const checkbox = document.getElementById('shuffleBoard');
+            if (checkbox) {
+                checkbox.checked = settings.shuffleBoard;
+            }
+        }
         
         console.log('[NumberHunt] Settings restored:', settings);
     }
@@ -398,11 +406,11 @@ class NumberHuntGame {
             const settings = {
                 mode,
                 ranges: this.config.ranges,
-                roundSize: parseInt(document.getElementById('roundSize').value),
                 missingCount: parseInt(document.getElementById('missingCount').value),
                 extraCount: parseInt(document.getElementById('extraCount').value),
                 totalRounds: parseInt(document.getElementById('totalRounds').value),
-                maxWrongAttempts: parseInt(document.getElementById('maxWrongAttempts').value)
+                maxWrongAttempts: parseInt(document.getElementById('maxWrongAttempts').value),
+                shuffleBoard: document.getElementById('shuffleBoard').checked
             };
             
             window.updateGameSettings(settings);
@@ -436,7 +444,6 @@ class NumberHuntGame {
         this.config.ranges = ranges;
         
         const totalRangeSize = this.getTotalRangeSize();
-        const roundSize = parseInt(document.getElementById('roundSize').value);
         const missingCount = parseInt(document.getElementById('missingCount').value);
         const extraCount = parseInt(document.getElementById('extraCount').value);
         const totalRounds = parseInt(document.getElementById('totalRounds').value);
@@ -445,23 +452,18 @@ class NumberHuntGame {
         // Restore ranges
         this.config.ranges = tempRanges;
         
-        if (roundSize > totalRangeSize) {
-            alert(`Round size cannot be larger than total range size (${totalRangeSize})!`);
-            return false;
-        }
-        
         if (mode === 'missing') {
-            if (roundSize <= missingCount) {
-                alert('Round size must be greater than missing count!');
+            if (missingCount >= totalRangeSize) {
+                alert(`Missing count (${missingCount}) must be less than total range size (${totalRangeSize})!`);
                 return false;
             }
-            if (missingCount > totalRangeSize - roundSize) {
-                alert('Missing count is too large for the given ranges!');
+            if (missingCount < 1) {
+                alert('Missing count must be at least 1!');
                 return false;
             }
         } else {
-            if (extraCount >= roundSize) {
-                alert('Extra count must be less than round size!');
+            if (extraCount < 1) {
+                alert('Extra count must be at least 1!');
                 return false;
             }
         }
@@ -501,11 +503,11 @@ class NumberHuntGame {
             this.config.ranges = [{ min, max }];
         }
         
-        this.config.roundSize = parseInt(document.getElementById('roundSize').value);
         this.config.missingCount = parseInt(document.getElementById('missingCount').value);
         this.config.extraCount = parseInt(document.getElementById('extraCount').value);
         this.config.totalRounds = parseInt(document.getElementById('totalRounds').value);
         this.config.maxWrongAttempts = parseInt(document.getElementById('maxWrongAttempts').value);
+        this.config.shuffleBoard = document.getElementById('shuffleBoard').checked;
         // Use default scoring values from config
         // baseScore, timeBonusMax, wrongPenalty, timeTarget, minRoundScore stay at defaults
         
@@ -543,107 +545,92 @@ class NumberHuntGame {
     }
     
     generateMissingRound() {
-        const { roundSize, missingCount } = this.config;
+        const { missingCount } = this.config;
+        // Get all numbers from all ranges
         const allNumbers = this.getUnionNumbers();
         
-        // Shuffle all available numbers
-        this.shuffleArray(allNumbers);
-        
-        // Take roundSize + missingCount numbers to create the full sequence
-        const neededCount = roundSize + missingCount;
-        if (allNumbers.length < neededCount) {
-            // If not enough numbers, use what we have
-            const fullSequence = allNumbers.slice(0, Math.min(allNumbers.length, neededCount));
-            this.shuffleArray(fullSequence);
-            
-            const actualMissing = Math.min(missingCount, Math.floor(fullSequence.length / 2));
-            const missingNumbers = fullSequence.slice(0, actualMissing).sort((a, b) => a - b);
-            const displayNumbers = fullSequence.slice(actualMissing);
+        if (allNumbers.length <= missingCount) {
+            // Not enough numbers to remove
+            const actualMissing = Math.max(1, Math.floor(allNumbers.length / 2));
+            this.shuffleArray(allNumbers);
+            const missingNumbers = allNumbers.slice(0, actualMissing).sort((a, b) => a - b);
+            const displayNumbers = allNumbers.slice(actualMissing);
             this.shuffleArray(displayNumbers);
             
             return {
                 type: 'missing',
                 displayNumbers,
                 correctAnswers: missingNumbers,
-                rangeStart: Math.min(...fullSequence),
-                rangeEnd: Math.max(...fullSequence)
+                rangeStart: Math.min(...allNumbers),
+                rangeEnd: Math.max(...allNumbers)
             };
         }
         
-        // Take the numbers we need
-        const fullSequence = allNumbers.slice(0, neededCount);
-        this.shuffleArray(fullSequence);
+        // Shuffle to select random numbers to remove
+        this.shuffleArray(allNumbers);
         
-        // Remove random numbers (these become missing)
-        const missingNumbers = fullSequence.slice(0, missingCount).sort((a, b) => a - b);
+        // Select random numbers to remove (these become the missing numbers)
+        const missingNumbers = allNumbers.slice(0, missingCount).sort((a, b) => a - b);
         
-        // Create display numbers (full - missing)
-        const displayNumbers = fullSequence.filter(n => !missingNumbers.includes(n));
+        // Create display numbers (all numbers except the missing ones)
+        const displayNumbers = allNumbers.filter(n => !missingNumbers.includes(n));
         this.shuffleArray(displayNumbers);
         
         return {
             type: 'missing',
             displayNumbers,
             correctAnswers: missingNumbers,
-            rangeStart: Math.min(...fullSequence),
-            rangeEnd: Math.max(...fullSequence)
+            rangeStart: Math.min(...allNumbers),
+            rangeEnd: Math.max(...allNumbers)
         };
     }
     
     generateExtraRound() {
-        const { roundSize, extraCount } = this.config;
+        const { extraCount } = this.config;
+        // Get all numbers from all ranges
         const allNumbers = this.getUnionNumbers();
         
-        // Shuffle all available numbers
-        this.shuffleArray(allNumbers);
-        
-        // Generate base numbers (unique)
-        const baseCount = roundSize - extraCount;
-        if (allNumbers.length < baseCount) {
-            // Not enough numbers, adjust
-            const available = Math.min(allNumbers.length, roundSize);
-            const actualBase = available - extraCount;
-            const baseNumbers = allNumbers.slice(0, actualBase);
-            
-            // Select numbers to duplicate
-            const extraNumbers = [];
-            this.shuffleArray(baseNumbers);
-            for (let i = 0; i < Math.min(extraCount, baseNumbers.length); i++) {
-                extraNumbers.push(baseNumbers[i]);
-            }
-            extraNumbers.sort((a, b) => a - b);
-            
-            // Create display numbers
-            const displayNumbers = [...baseNumbers, ...extraNumbers];
-            this.shuffleArray(displayNumbers);
-            
-            return {
-                type: 'extra',
-                displayNumbers,
-                correctAnswers: extraNumbers,
-                baseNumbers
-            };
-        }
-        
-        const baseNumbers = allNumbers.slice(0, baseCount);
-        
-        // Select numbers to duplicate
+        // Generate extra numbers (numbers outside the range)
         const extraNumbers = [];
-        this.shuffleArray(baseNumbers);
-        for (let i = 0; i < extraCount; i++) {
-            extraNumbers.push(baseNumbers[i]);
+        const minInRange = Math.min(...allNumbers);
+        const maxInRange = Math.max(...allNumbers);
+        
+        // Create a pool of numbers outside the range
+        const outsideNumbers = [];
+        // Add numbers below the range
+        for (let i = minInRange - 100; i < minInRange; i++) {
+            if (i > 0) outsideNumbers.push(i);
         }
+        // Add numbers above the range
+        for (let i = maxInRange + 1; i <= maxInRange + 100; i++) {
+            outsideNumbers.push(i);
+        }
+        
+        // Shuffle and select extraCount numbers from outside
+        this.shuffleArray(outsideNumbers);
+        for (let i = 0; i < Math.min(extraCount, outsideNumbers.length); i++) {
+            extraNumbers.push(outsideNumbers[i]);
+        }
+        
+        // If we don't have enough outside numbers, fill with random numbers
+        while (extraNumbers.length < extraCount) {
+            const randomNum = Math.floor(Math.random() * 10000) + maxInRange + 100;
+            if (!extraNumbers.includes(randomNum) && !allNumbers.includes(randomNum)) {
+                extraNumbers.push(randomNum);
+            }
+        }
+        
         extraNumbers.sort((a, b) => a - b);
         
-        // Create display numbers (base + duplicates)
-        const displayNumbers = [...baseNumbers, ...extraNumbers];
+        // Create display numbers (all numbers in range + extra numbers)
+        const displayNumbers = [...allNumbers, ...extraNumbers];
         this.shuffleArray(displayNumbers);
         
         return {
             type: 'extra',
             displayNumbers,
             correctAnswers: extraNumbers,
-            baseNumbers
+            allNumbers: allNumbers
         };
     }
     
@@ -689,7 +676,13 @@ class NumberHuntGame {
         const board = document.getElementById('numberBoard');
         board.innerHTML = '';
         
-        currentRoundData.displayNumbers.forEach(num => {
+        // Get numbers to display - shuffle or sort based on config
+        const numbersToDisplay = [...currentRoundData.displayNumbers];
+        if (!this.config.shuffleBoard) {
+            numbersToDisplay.sort((a, b) => a - b);
+        }
+        
+        numbersToDisplay.forEach(num => {
             const chip = document.createElement('div');
             chip.className = 'number-chip';
             chip.textContent = num;
@@ -744,6 +737,18 @@ class NumberHuntGame {
         const input = document.getElementById('numberInput');
         const value = input.value.trim();
         
+        // Get target count first
+        const targetCount = this.config.mode === 'missing' 
+            ? this.config.missingCount 
+            : this.config.extraCount;
+        
+        // Check if already reached maximum allowed
+        if (this.gameState.userAnswers.length >= targetCount) {
+            this.showInputError(`Maximum ${targetCount} numbers allowed`);
+            this.shakeInput();
+            return;
+        }
+        
         // Validate input
         if (!value) {
             this.showInputError('Please enter a number');
@@ -764,27 +769,7 @@ class NumberHuntGame {
             return;
         }
         
-        // Validate against range/rules
-        const isValid = this.validateNumber(number);
-        
-        if (!isValid.valid) {
-            this.showInputError(isValid.message);
-            this.shakeInput();
-            this.incrementWrongAttempt();
-            return;
-        }
-        
-        // Check if answer is correct
-        const isCorrect = this.gameState.currentRoundData.correctAnswers.includes(number);
-        
-        if (!isCorrect) {
-            this.showInputError('Wrong! This is not a correct answer');
-            this.shakeInput();
-            this.incrementWrongAttempt();
-            return;
-        }
-        
-        // Add to answers
+        // Add to answers without checking correctness
         this.gameState.userAnswers.push(number);
         this.hideInputError();
         input.value = '';
@@ -792,11 +777,7 @@ class NumberHuntGame {
         // Update UI
         this.updateAnswerList();
         
-        // Check if ready to submit
-        const targetCount = this.config.mode === 'missing' 
-            ? this.config.missingCount 
-            : this.config.extraCount;
-        
+        // Enable submit button when user has entered enough numbers
         if (this.gameState.userAnswers.length >= targetCount) {
             document.getElementById('submitBtn').disabled = false;
         }
@@ -851,10 +832,17 @@ class NumberHuntGame {
         this.gameState.userAnswers.forEach(num => {
             const chip = document.createElement('div');
             chip.className = 'answer-chip';
-            chip.innerHTML = `
-                <span>${num}</span>
-                <button class="chip-remove" onclick="game.removeAnswer(${num})">×</button>
-            `;
+            
+            const span = document.createElement('span');
+            span.textContent = num;
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'chip-remove';
+            removeBtn.textContent = '×';
+            removeBtn.addEventListener('click', () => this.removeAnswer(num));
+            
+            chip.appendChild(span);
+            chip.appendChild(removeBtn);
             container.appendChild(chip);
         });
         
@@ -881,12 +869,11 @@ class NumberHuntGame {
     }
     
     submitAnswer() {
-        this.stopTimer();
+        // Don't stop timer yet - only stop when round is complete or failed
         
-        // Disable input
-        document.getElementById('numberInput').disabled = true;
-        document.getElementById('addNumberBtn').disabled = true;
-        document.getElementById('submitBtn').disabled = true;
+        // Disable submit button temporarily
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
         
         // Check if correct
         const correctAnswers = this.gameState.currentRoundData.correctAnswers;
@@ -895,14 +882,61 @@ class NumberHuntGame {
         
         const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctSorted);
         
-        // Calculate score
+        // If wrong answer, increment wrong attempts and check if should fail
+        if (!isCorrect) {
+            this.gameState.wrongAttempts++;
+            document.getElementById('wrongCount').textContent = this.gameState.wrongAttempts;
+            
+            // Check if exceeded max wrong attempts
+            if (this.gameState.wrongAttempts >= this.config.maxWrongAttempts) {
+                // Failed the round - stop timer now
+                this.stopTimer();
+                
+                // Disable input
+                document.getElementById('numberInput').disabled = true;
+                document.getElementById('addNumberBtn').disabled = true;
+                
+                const timeSpent = Math.floor((Date.now() - this.gameState.roundStartTime) / 1000);
+                const score = { base: 0, timeBonus: 0, penalty: 0, total: 0 };
+                
+                this.gameState.roundResults.push({
+                    round: this.gameState.currentRound,
+                    isCorrect: false,
+                    userAnswers: [...this.gameState.userAnswers],
+                    correctAnswers: [...correctAnswers],
+                    timeSpent,
+                    wrongAttempts: this.gameState.wrongAttempts,
+                    score: score,
+                    failed: true
+                });
+                
+                this.showRoundResult(false, score, timeSpent);
+                return;
+            }
+            
+            // Allow user to try again - keep timer running
+            this.showInputError('Wrong answer! Try again.');
+            this.gameState.userAnswers = [];
+            this.updateAnswerList();
+            
+            // Keep input enabled, just clear the answer list
+            // Submit button will be re-enabled when user adds enough numbers again
+            return;
+        }
+        
+        // Correct answer - stop timer now
+        this.stopTimer();
+        
+        // Disable input
+        document.getElementById('numberInput').disabled = true;
+        document.getElementById('addNumberBtn').disabled = true;
+        
+        // Calculate score for correct answer
         const timeSpent = Math.floor((Date.now() - this.gameState.roundStartTime) / 1000);
         const score = this.calculateScore(isCorrect, timeSpent, this.gameState.wrongAttempts);
         
         // Update total score
-        if (isCorrect) {
-            this.gameState.totalScore += score.total;
-        }
+        this.gameState.totalScore += score.total;
         
         // Save result
         this.gameState.roundResults.push({
