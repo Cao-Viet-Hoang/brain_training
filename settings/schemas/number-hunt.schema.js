@@ -27,13 +27,15 @@ export const numberHuntSchema = {
     ranges: [{min: 1, max: 100}], // Default to one range
 
     // Round settings
-    roundSize: 20, // Total numbers displayed per round
     missingCount: 3, // How many missing numbers to find
     extraCount: 3, // How many extra/duplicate numbers to find
     totalRounds: 5,
 
     // Wrong attempts
     maxWrongAttempts: 3,
+
+    // Display settings
+    shuffleBoard: true, // Whether to shuffle numbers on board
 
     // Scoring system
     baseScore: 100,
@@ -59,11 +61,6 @@ export const numberHuntSchema = {
       );
     },
     
-    roundSize: createCombinedValidator(
-      createTypeValidator('number'),
-      createRangeValidator(10, 100)
-    ),
-    
     missingCount: createCombinedValidator(
       createTypeValidator('number'),
       createRangeValidator(1, 10)
@@ -83,6 +80,8 @@ export const numberHuntSchema = {
       createTypeValidator('number'),
       createRangeValidator(1, 10)
     ),
+    
+    shuffleBoard: createTypeValidator('boolean'),
     
     baseScore: createCombinedValidator(
       createTypeValidator('number'),

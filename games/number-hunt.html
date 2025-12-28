@@ -136,7 +136,7 @@
                                 <input type="number" class="minRange" value="1" min="0" max="999" placeholder="From" inputmode="numeric" pattern="[0-9]*">
                                 <span>to</span>
                                 <input type="number" class="maxRange" value="100" min="1" max="1000" placeholder="To" inputmode="numeric" pattern="[0-9]*">
-                                <button type="button" class="remove-range-btn" title="Remove range">✖</button>
+                                <button type="button" class="remove-range-btn" title="Remove range">−</button>
                             </div>
                         </div>
                         <button type="button" class="add-range-btn" id="addRangeBtn">+ Add Range</button>
@@ -351,19 +351,15 @@
 
     <!-- Settings Manager (must load before game script) -->
     <script type="module">
-        import { SettingsManager } from '../settings/settingsManager.js';
-        import { numberHuntSchema } from '../settings/schemas/number-hunt.schema.js';
-        
-        // Initialize settings manager
-        const settingsManager = new SettingsManager('number-hunt', numberHuntSchema);
+        import { loadGameSettings, updateGameSettings } from '../settings/index.js';
         
         // Load settings and make them globally available
-        window.GAME_SETTINGS = settingsManager.getSettings();
+        window.GAME_SETTINGS = loadGameSettings('number-hunt');
         
         // Expose update function
-        window.updateGameSettings = (newSettings) => {
-            settingsManager.updateSettings(newSettings);
-            window.GAME_SETTINGS = settingsManager.getSettings();
+        window.updateGameSettings = (gameId, newSettings) => {
+            updateGameSettings(gameId, newSettings);
+            window.GAME_SETTINGS = loadGameSettings(gameId);
         };
         
         console.log('[NumberHunt] Settings loaded:', window.GAME_SETTINGS);

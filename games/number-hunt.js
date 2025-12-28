@@ -143,7 +143,7 @@ class NumberHuntGame {
             <input type="number" class="minRange" value="" min="0" max="999" placeholder="From" inputmode="numeric" pattern="[0-9]*">
             <span>to</span>
             <input type="number" class="maxRange" value="" min="1" max="1000" placeholder="To" inputmode="numeric" pattern="[0-9]*">
-            <button type="button" class="remove-range-btn" title="Remove range">✖</button>
+            <button type="button" class="remove-range-btn" title="Remove range">−</button>
         `;
         
         container.appendChild(rangeDiv);
@@ -203,108 +203,6 @@ class NumberHuntGame {
         return ranges;
     }
     
-    addRange() {
-        const minInput = document.getElementById('newMinRange');
-        const maxInput = document.getElementById('newMaxRange');
-        
-        const min = parseInt(minInput.value);
-        const max = parseInt(maxInput.value);
-        
-        if (isNaN(min) || isNaN(max)) {
-            alert('Please enter valid numbers for both min and max!');
-            return;
-        }
-        
-        if (min >= max) {
-            alert('Minimum must be less than maximum!');
-            return;
-        }
-        
-        // Check for overlapping ranges
-        const newRange = { min, max };
-        if (this.hasOverlappingRanges([...this.config.ranges, newRange])) {
-            alert('This range overlaps with an existing range! Please enter a non-overlapping range.');
-            return;
-        }
-        
-        // Add to config
-        this.config.ranges.push(newRange);
-        
-        // Clear inputs
-        minInput.value = '';
-        maxInput.value = '';
-        
-        // Re-render ranges
-        this.renderRanges();
-    }
-    
-    removeRange(index) {
-        if (this.config.ranges.length <= 1) {
-            alert('You must have at least one range!');
-            return;
-        }
-        
-        this.config.ranges.splice(index, 1);
-        this.renderRanges();
-    }
-    
-    renderRanges() {
-        const container = document.getElementById('rangesList');
-        container.innerHTML = '';
-
-        if (this.config.ranges.length === 0) {
-            container.innerHTML = '<div class="empty-state">No ranges added yet</div>';
-            return;
-        }
-
-        // Check for overlaps
-        const hasOverlap = this.hasOverlappingRanges(this.config.ranges);
-
-        this.config.ranges.forEach((range, index) => {
-            const item = document.createElement('div');
-            item.className = 'range-row';
-            if (hasOverlap) {
-                item.classList.add('invalid');
-            }
-
-            item.innerHTML = `
-                <div class="range-inputs-inline">
-                    <input type="number" class="range-min-input" value="${range.min}" min="0" max="999" data-index="${index}" inputmode="numeric" pattern="[0-9]*">
-                    <span class="range-separator">to</span>
-                    <input type="number" class="range-max-input" value="${range.max}" min="1" max="1000" data-index="${index}" inputmode="numeric" pattern="[0-9]*">
-                </div>
-                <button class="btn-remove-range" onclick="game.removeRange(${index})">Remove</button>
-            `;
-
-            container.appendChild(item);
-
-            // Add event listeners for inline editing
-            const minInput = item.querySelector('.range-min-input');
-            const maxInput = item.querySelector('.range-max-input');
-
-            minInput.addEventListener('change', (e) => this.updateRangeValue(index, 'min', e.target.value));
-            maxInput.addEventListener('change', (e) => this.updateRangeValue(index, 'max', e.target.value));
-        });
-
-        // Show error if overlapping
-        if (hasOverlap) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'ranges-error';
-            errorDiv.textContent = '⚠️ Some ranges are overlapping! Please fix before starting the game.';
-            container.appendChild(errorDiv);
-        }
-    }
-
-    updateRangeValue(index, field, value) {
-        const numValue = parseInt(value);
-        if (isNaN(numValue)) return;
-
-        this.config.ranges[index][field] = numValue;
-
-        // Re-render to update validation state
-        this.renderRanges();
-    }
-    
     hasOverlappingRanges(ranges) {
         for (let i = 0; i < ranges.length; i++) {
             for (let j = i + 1; j < ranges.length; j++) {
@@ -345,7 +243,6 @@ class NumberHuntGame {
             console.log('[NumberHunt] No saved settings, using defaults');
             // Add default range to list
             this.config.ranges = [{min: 1, max: 100}];
-            this.renderRanges();
             return;
         }
         
@@ -364,11 +261,32 @@ class NumberHuntGame {
         // Load ranges
         if (settings.ranges && Array.isArray(settings.ranges) && settings.ranges.length > 0) {
             this.config.ranges = settings.ranges;
+            
+            // Update UI to show all saved ranges
+            const container = document.getElementById('rangesContainer');
+            container.innerHTML = ''; // Clear existing
+            
+            settings.ranges.forEach((range, index) => {
+                const rangeDiv = document.createElement('div');
+                rangeDiv.className = 'range-inputs';
+                rangeDiv.setAttribute('data-range-index', index);
+                
+                rangeDiv.innerHTML = `
+                    <input type="number" class="minRange" value="${range.min}" min="0" max="999" placeholder="From" inputmode="numeric" pattern="[0-9]*">
+                    <span>to</span>
+                    <input type="number" class="maxRange" value="${range.max}" min="1" max="1000" placeholder="To" inputmode="numeric" pattern="[0-9]*">
+                    <button type="button" class="remove-range-btn" title="Remove range">−</button>
+                `;
+                
+                container.appendChild(rangeDiv);
+            });
+            
+            // Update remove button states
+            this.updateRemoveButtonStates();
         } else {
             // No saved ranges, use default
             this.config.ranges = [{min: 1, max: 100}];
         }
-        this.renderRanges();
         
         // Load all other config values
         const configFields = [
@@ -403,9 +321,12 @@ class NumberHuntGame {
             const activeMode = document.querySelector('.mode-btn.active');
             const mode = activeMode ? activeMode.dataset.mode : 'missing';
             
+            // Get ranges from UI instead of this.config.ranges
+            const ranges = this.getAllRanges();
+            
             const settings = {
                 mode,
-                ranges: this.config.ranges,
+                ranges: ranges,
                 missingCount: parseInt(document.getElementById('missingCount').value),
                 extraCount: parseInt(document.getElementById('extraCount').value),
                 totalRounds: parseInt(document.getElementById('totalRounds').value),
@@ -413,7 +334,7 @@ class NumberHuntGame {
                 shuffleBoard: document.getElementById('shuffleBoard').checked
             };
             
-            window.updateGameSettings(settings);
+            window.updateGameSettings('number-hunt', settings);
             console.log('[NumberHunt] Settings saved:', settings);
         } catch (error) {
             console.error('[NumberHunt] Error saving settings:', error);
