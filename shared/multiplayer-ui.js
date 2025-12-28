@@ -159,6 +159,7 @@ class MultiplayerUI {
                         <option value="memory-matrix">🔲 Memory Matrix</option>
                         <option value="word-recall">💭 Word Recall</option>
                         <option value="maze-game">🗺️ Maze Runner</option>
+                        <option value="number-hunt">🔍 Number Hunt</option>
                     </select>
                 </div>
 
@@ -265,7 +266,9 @@ class MultiplayerUI {
             'expression-puzzle': '🧮 Expression Puzzle',
             'dual-n-back': '🔄 Dual N-Back',
             'memory-matrix': '🔲 Memory Matrix',
-            'word-recall': '💭 Word Recall'
+            'word-recall': '💭 Word Recall',
+            'maze-game': '🗺️ Maze Runner',
+            'number-hunt': '🔍 Number Hunt'
         };
         const gameName = gameNames[roomData.gameType] || '🎮 Game';
         

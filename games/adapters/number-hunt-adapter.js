@@ -109,7 +109,7 @@ class NumberHuntGameMultiplayerAdapter extends MultiplayerGameAdapter {
     }
 
     /**
-     * Intercept host's game start to publish rounds to Firebase
+     * Intercept host's game start to publish game data to Firebase
      */
     interceptHostGameStart() {
         // Save original startGame method
@@ -128,7 +128,7 @@ class NumberHuntGameMultiplayerAdapter extends MultiplayerGameAdapter {
             this.game.saveCurrentSettings();
 
             try {
-                // Generate rounds using game's logic
+                // Generate game data with seed
                 const gameData = await this.prepareMultiplayerGame();
                 
                 // Publish to Firebase
@@ -138,8 +138,13 @@ class NumberHuntGameMultiplayerAdapter extends MultiplayerGameAdapter {
                 // Update room status to 'playing'
                 await this.core.setRoomStatus(MP_CONSTANTS.ROOM_STATUS.PLAYING);
                 
-                // Continue with normal game start (use original method)
-                this.originalStartGame();
+                console.log('[NumberHuntAdapter] Game data published, starting host game');
+                
+                // Start multiplayer game with the SAME seed that was published
+                this.startMultiplayerGame(gameData);
+                
+                // Sync initial score
+                this.syncScore(0);
                 
             } catch (error) {
                 console.error('[NumberHuntAdapter] Error starting multiplayer game:', error);
@@ -184,42 +189,38 @@ class NumberHuntGameMultiplayerAdapter extends MultiplayerGameAdapter {
     }
 
     /**
-     * Wait for game data (seed + config) from host and generate rounds locally
+     * Wait for game data (seed + config) from host and auto-start game
      */
     async waitForRoundsAndStart() {
         console.log('[NumberHuntAdapter] Player waiting for game data from host...');
 
-        try {
-            const gameData = await this.core.waitForGameData();
-            
-            if (!gameData || !gameData.config || !gameData.gameSeed) {
-                throw new Error('Invalid game data received from host');
-            }
+        // Show loading overlay
+        this.showLoadingOverlay('Waiting for host to start game...');
 
-            console.log('[NumberHuntAdapter] Game data received:', {
-                gameSeed: gameData.gameSeed,
-                config: gameData.config
+        return new Promise((resolve) => {
+            // Listen for game data
+            const unsubscribe = this.core.onGameDataUpdate((gameData) => {
+                if (gameData && gameData.config && gameData.gameSeed) {
+                    console.log('[NumberHuntAdapter] Game data received:', {
+                        gameSeed: gameData.gameSeed,
+                        config: gameData.config
+                    });
+
+                    this.multiplayerState.roundsReceived = true;
+
+                    // Hide loading overlay
+                    this.hideLoadingOverlay();
+
+                    // Start game with received data
+                    this.startMultiplayerGame(gameData);
+
+                    // Unsubscribe from further updates
+                    unsubscribe();
+
+                    resolve();
+                }
             });
-
-            // Apply config from host (including the seed)
-            this.game.config = { ...gameData.config };
-            this.game.config.gameSeed = gameData.gameSeed;
-            
-            // Generate rounds locally using the same seed
-            // This will produce identical rounds for all players
-            this.game.gameState.rounds = [];
-            this.game.generateAllRounds();
-            
-            console.log('[NumberHuntAdapter] Generated', this.game.gameState.rounds.length, 'rounds using seed');
-            
-            // Skip config screen and go directly to game
-            this.game.showScreen('game');
-            this.game.startRound();
-            
-        } catch (error) {
-            console.error('[NumberHuntAdapter] Error receiving game data:', error);
-            alert('Failed to receive game data from host: ' + error.message);
-        }
+        });
     }
 
     /**
@@ -267,40 +268,157 @@ class NumberHuntGameMultiplayerAdapter extends MultiplayerGameAdapter {
      * Show multiplayer badge
      */
     showMultiplayerBadge(role) {
-        const header = document.querySelector('.game-header h1');
-        if (header && !header.querySelector('.mp-badge')) {
-            const badge = document.createElement('span');
-            badge.className = 'mp-badge';
-            badge.textContent = role;
-            badge.style.cssText = `
-                display: inline-block;
-                margin-left: 0.5rem;
-                padding: 0.25rem 0.75rem;
-                background: var(--primary-color);
-                color: white;
-                border-radius: var(--radius-sm);
-                font-size: 0.8rem;
-                font-weight: 600;
-            `;
-            header.appendChild(badge);
+        const badge = document.createElement('div');
+        badge.id = 'multiplayerBadge';
+        badge.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background: ${role === 'HOST' ? '#4a90a4' : '#70b088'};
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            z-index: 9999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        `;
+        badge.innerHTML = `
+            <span style="font-size: 1.2rem;">🎮</span>
+            <span>Multiplayer ${role}</span>
+        `;
+        document.body.appendChild(badge);
+    }
+
+    /**
+     * Show loading overlay for players waiting for host
+     */
+    showLoadingOverlay(message) {
+        const overlay = document.createElement('div');
+        overlay.id = 'multiplayerLoadingOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            color: white;
+            font-family: inherit;
+        `;
+        overlay.innerHTML = `
+            <style>
+                @keyframes hourglassRotate {
+                    0%, 100% { transform: rotate(0deg); }
+                    50% { transform: rotate(180deg); }
+                }
+                .hourglass-icon {
+                    display: inline-block;
+                    animation: hourglassRotate 2s ease-in-out infinite;
+                }
+            </style>
+            <div style="text-align: center;">
+                <div class="hourglass-icon" style="font-size: 3rem; margin-bottom: 1rem;">⌛</div>
+                <h2 style="margin: 0 0 0.5rem 0;">${message}</h2>
+                <p style="margin: 0; opacity: 0.7;">Please wait...</p>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    /**
+     * Hide loading overlay
+     */
+    hideLoadingOverlay() {
+        const overlay = document.getElementById('multiplayerLoadingOverlay');
+        if (overlay) {
+            overlay.remove();
         }
+    }
+
+    /**
+     * Start game with shared seed and config (ALL PLAYERS)
+     */
+    startMultiplayerGame(gameData) {
+        console.log('[NumberHuntAdapter] Starting multiplayer game with shared seed');
+
+        // Set game start time for tracking
+        this.setGameStartTime();
+
+        // Apply config from host (including the seed)
+        this.game.config = { ...gameData.config };
+        this.game.config.gameSeed = gameData.gameSeed;
+
+        // Reset game state
+        this.game.gameState = {
+            currentRound: 0,
+            totalScore: 0,
+            rounds: [],
+            currentRoundData: null,
+            userAnswers: [],
+            wrongAttempts: 0,
+            roundStartTime: null,
+            timer: null,
+            roundResults: []
+        };
+
+        // Generate rounds locally using the same seed
+        // This will produce identical rounds for all players
+        this.game.generateAllRounds();
+
+        console.log('[NumberHuntAdapter] Generated', this.game.gameState.rounds.length, 'rounds using seed:', gameData.gameSeed);
+
+        // Show game screen
+        this.game.showScreen('game');
+
+        // Start first round
+        this.game.startRound();
+
+        console.log('[NumberHuntAdapter] Game started');
+    }
+
+    /**
+     * Get current player score
+     * Required by MultiplayerGameAdapter
+     */
+    getCurrentScore() {
+        return {
+            score: this.game.gameState.totalScore,
+            round: this.game.gameState.currentRound,
+            totalRounds: this.game.config.totalRounds
+        };
+    }
+
+    /**
+     * Handle players list update
+     * Optional callback
+     */
+    onPlayersUpdate(players) {
+        console.log('[NumberHuntAdapter] Players updated:', Object.keys(players).length, 'players');
+        // Update any multiplayer UI elements (if needed)
+    }
+
+    /**
+     * Check if currently in multiplayer mode
+     */
+    isInMultiplayerMode() {
+        return this.multiplayerState.isMultiplayerMode;
+    }
+
+    /**
+     * Check if current player is host
+     */
+    isHost() {
+        return this.multiplayerState.role === 'host';
     }
 }
 
-// Auto-initialize for multiplayer if needed
-document.addEventListener('DOMContentLoaded', () => {
-    const roomId = sessionStorage.getItem('multiplayerRoomId');
-    const role = sessionStorage.getItem('multiplayerRole');
-    
-    if (roomId && role && typeof game !== 'undefined') {
-        console.log('[NumberHuntAdapter] Multiplayer mode detected:', role);
-        
-        const adapter = new NumberHuntGameMultiplayerAdapter(game);
-        
-        if (role === 'host') {
-            adapter.initAsHost(roomId);
-        } else if (role === 'player') {
-            adapter.initAsPlayer(roomId);
-        }
-    }
-});
+console.log('[NumberHuntAdapter] Adapter class loaded');

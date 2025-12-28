@@ -1101,8 +1101,71 @@ class NumberHuntGame {
     }
 }
 
-// Initialize game
-let game;
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize game when DOM is loaded
+let game = null; // Global reference for multiplayer adapter
+let gameInstance = null; // Alias for compatibility
+
+document.addEventListener('DOMContentLoaded', async () => {
     game = new NumberHuntGame();
+    gameInstance = game; // Alias
+    window.numberHuntGame = game; // Expose globally for debugging and multiplayer
+
+    // Check if this is multiplayer mode
+    const roomId = sessionStorage.getItem('multiplayerRoomId');
+    const role = sessionStorage.getItem('multiplayerRole');
+
+    if (roomId && typeof NumberHuntGameMultiplayerAdapter !== 'undefined') {
+        console.log('[NumberHunt] Checking multiplayer room validity:', { roomId, role });
+
+        // Initialize Firebase first
+        if (typeof initFirebase === 'function') {
+            initFirebase();
+        }
+
+        // Validate room exists and is still active
+        try {
+            if (!database) {
+                throw new Error('Firebase not initialized');
+            }
+            const roomRef = database.ref(`rooms/${roomId}`);
+            const snapshot = await roomRef.once('value');
+            const roomData = snapshot.val();
+
+            // Check if room exists and is in valid state
+            if (!roomData || roomData.meta.status === 'closed' || roomData.meta.status === 'finished') {
+                console.log('[NumberHunt] Room no longer valid, clearing multiplayer state');
+                sessionStorage.removeItem('multiplayerRoomId');
+                sessionStorage.removeItem('multiplayerRole');
+                console.log('[NumberHunt] Single player mode');
+                return; // Exit and let game run in single player mode
+            }
+
+            console.log('[NumberHunt] Room valid, initializing multiplayer mode');
+            const adapter = new NumberHuntGameMultiplayerAdapter(game);
+
+            if (role === 'host') {
+                // Initialize as host (will intercept game start)
+                adapter.initAsHost(roomId).catch(err => {
+                    console.error('[NumberHunt] Failed to initialize multiplayer as host:', err);
+                    alert('Failed to initialize multiplayer: ' + err.message);
+                });
+            } else if (role === 'player') {
+                // Initialize as player (will wait for game data and auto-start)
+                adapter.initAsPlayer(roomId).catch(err => {
+                    console.error('[NumberHunt] Failed to initialize multiplayer as player:', err);
+                    alert('Failed to initialize multiplayer: ' + err.message);
+                });
+            }
+
+            // Expose adapter globally
+            window.numberHuntAdapter = adapter;
+        } catch (error) {
+            console.error('[NumberHunt] Error checking room validity:', error);
+            sessionStorage.removeItem('multiplayerRoomId');
+            sessionStorage.removeItem('multiplayerRole');
+            console.log('[NumberHunt] Falling back to single player mode');
+        }
+    } else {
+        console.log('[NumberHunt] Single player mode');
+    }
 });
