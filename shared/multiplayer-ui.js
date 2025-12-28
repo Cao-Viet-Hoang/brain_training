@@ -207,7 +207,7 @@ class MultiplayerUI {
                 <div class="mp-form-group">
                     <label for="mpRoomCode">Room Code</label>
                     <input type="text" id="mpRoomCode" class="room-code-input"
-                           placeholder="XXXX" maxlength="6">
+                           placeholder="000000" maxlength="6" inputmode="numeric">
                 </div>
 
                 <div class="mp-form-group">
@@ -227,15 +227,15 @@ class MultiplayerUI {
         const nameInput = document.getElementById('mpPlayerNameJoin');
         const joinBtn = document.getElementById('mpJoinBtn');
 
-        // Auto uppercase and validate
+        // Validate numeric input
         const validate = () => {
             const code = codeInput.value.trim();
             const name = nameInput.value.trim();
-            joinBtn.disabled = code.length < 4 || name.length < 2;
+            joinBtn.disabled = code.length !== 6 || name.length < 2;
         };
 
         codeInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
             validate();
         });
         nameInput.addEventListener('input', validate);

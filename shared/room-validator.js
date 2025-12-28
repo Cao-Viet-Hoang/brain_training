@@ -17,16 +17,16 @@ class RoomValidator {
             return { valid: false, error: 'Room code is required' };
         }
 
-        const trimmedCode = code.trim().toUpperCase();
+        const trimmedCode = code.trim();
 
-        if (trimmedCode.length < 4 || trimmedCode.length > 6) {
-            return { valid: false, error: 'Room code must be 4-6 characters' };
+        if (trimmedCode.length !== 6) {
+            return { valid: false, error: 'Room code must be 6 digits' };
         }
 
-        // Check if contains only allowed characters
-        const validChars = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]+$/;
+        // Check if contains only digits
+        const validChars = /^[0-9]{6}$/;
         if (!validChars.test(trimmedCode)) {
-            return { valid: false, error: 'Invalid room code format' };
+            return { valid: false, error: 'Invalid room code format (must be 6 digits)' };
         }
 
         return { valid: true, code: trimmedCode };
