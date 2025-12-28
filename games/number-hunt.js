@@ -652,8 +652,8 @@ class NumberHuntGame {
         this.renderRound();
         this.startTimer();
         
-        // Hide result panel
-        document.getElementById('roundResult').classList.add('hidden');
+        // Hide result modal if it was open
+        document.getElementById('roundResultModal').classList.remove('active');
         
         // Enable input
         document.getElementById('numberInput').disabled = false;
@@ -1030,8 +1030,8 @@ class NumberHuntGame {
         // Update score display
         document.getElementById('currentScore').textContent = this.gameState.totalScore;
         
-        // Show panel
-        resultPanel.classList.remove('hidden');
+        // Show modal
+        document.getElementById('roundResultModal').classList.add('active');
     }
     
     highlightBoardAnswers() {
@@ -1078,6 +1078,9 @@ class NumberHuntGame {
     }
     
     nextRound() {
+        // Close modal
+        document.getElementById('roundResultModal').classList.remove('active');
+        
         if (this.gameState.currentRound >= this.config.totalRounds) {
             this.showFinalResults();
         } else {
