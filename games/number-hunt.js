@@ -20,7 +20,8 @@ class NumberHuntGame {
             timeBonusMax: 50,
             wrongPenalty: 10,
             timeTarget: 20,
-            minRoundScore: 0
+            minRoundScore: 0,
+            gameSeed: null // Seed for multiplayer synchronization
         };
         
         this.gameState = {
@@ -456,6 +457,14 @@ class NumberHuntGame {
     generateAllRounds() {
         this.gameState.rounds = [];
         
+        // Initialize seeded RNG if seed is provided (for multiplayer)
+        if (this.config.gameSeed !== null && typeof SeededRandom !== 'undefined') {
+            this.rng = new SeededRandom(this.config.gameSeed);
+            console.log('[NumberHunt] Using seeded RNG with seed:', this.config.gameSeed);
+        } else {
+            this.rng = null;
+        }
+        
         for (let i = 0; i < this.config.totalRounds; i++) {
             if (this.config.mode === 'missing') {
                 this.gameState.rounds.push(this.generateMissingRound());
@@ -535,7 +544,9 @@ class NumberHuntGame {
         
         // If we don't have enough outside numbers, fill with random numbers
         while (extraNumbers.length < extraCount) {
-            const randomNum = Math.floor(Math.random() * 10000) + maxInRange + 100;
+            const randomNum = this.rng 
+                ? Math.floor(this.rng.next() * 10000) + maxInRange + 100
+                : Math.floor(Math.random() * 10000) + maxInRange + 100;
             if (!extraNumbers.includes(randomNum) && !allNumbers.includes(randomNum)) {
                 extraNumbers.push(randomNum);
             }
@@ -557,7 +568,7 @@ class NumberHuntGame {
     
     shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
+            const j = this.rng ? Math.floor(this.rng.next() * (i + 1)) : Math.floor(Math.random() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
         }
     }

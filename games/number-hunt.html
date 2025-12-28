@@ -365,7 +365,20 @@
         console.log('[NumberHunt] Settings loaded:', window.GAME_SETTINGS);
     </script>
 
+    <!-- Seeded Random (for multiplayer sync) -->
+    <script src="../shared/seeded-random.js"></script>
+
+    <!-- Multiplayer Core -->
+    <script src="../shared/firebase-config.js"></script>
+    <script src="../shared/multiplayer-core.js"></script>
+    <script src="../shared/multiplayer-ui.js"></script>
+    <script src="../shared/multiplayer-result-modal.js"></script>
+    <script src="../shared/room-validator.js"></script>
+    <script src="../shared/room-cleanup.js"></script>
+
     <!-- Game Scripts -->
+    <script src="adapters/base-adapter.js"></script>
+    <script src="adapters/number-hunt-adapter.js"></script>
     <script src="number-hunt.js"></script>
 </body>
 </html>

@@ -150,6 +150,8 @@ class NumberHuntGameMultiplayerAdapter extends MultiplayerGameAdapter {
 
     /**
      * Prepare game data for multiplayer
+     * Instead of generating and sharing all rounds, we only share a seed
+     * Each client will use the same seed to generate identical rounds
      * @returns {Object} Game data to publish
      */
     async prepareMultiplayerGame() {
@@ -163,50 +165,59 @@ class NumberHuntGameMultiplayerAdapter extends MultiplayerGameAdapter {
         this.game.config.maxWrongAttempts = parseInt(document.getElementById('maxWrongAttempts').value);
         this.game.config.shuffleBoard = document.getElementById('shuffleBoard').checked;
 
-        // Generate all rounds
-        const rounds = [];
-        for (let i = 0; i < this.game.config.totalRounds; i++) {
-            if (this.game.config.mode === 'missing') {
-                rounds.push(this.game.generateMissingRound());
-            } else {
-                rounds.push(this.game.generateExtraRound());
-            }
-        }
+        // Generate a random seed for this game session
+        // All players will use this same seed to generate identical rounds
+        const gameSeed = typeof generateRandomSeed === 'function' 
+            ? generateRandomSeed() 
+            : Math.floor(Date.now() * Math.random());
+        
+        this.game.config.gameSeed = gameSeed;
+        
+        console.log('[NumberHuntAdapter] Generated game seed:', gameSeed);
 
+        // Return only config with seed - NO rounds data
         return {
             config: this.game.config,
-            rounds: rounds,
+            gameSeed: gameSeed,
             timestamp: Date.now()
         };
     }
 
     /**
-     * Wait for rounds from host and start game
+     * Wait for game data (seed + config) from host and generate rounds locally
      */
     async waitForRoundsAndStart() {
-        console.log('[NumberHuntAdapter] Player waiting for rounds from host...');
+        console.log('[NumberHuntAdapter] Player waiting for game data from host...');
 
         try {
             const gameData = await this.core.waitForGameData();
             
-            if (!gameData || !gameData.rounds) {
+            if (!gameData || !gameData.config || !gameData.gameSeed) {
                 throw new Error('Invalid game data received from host');
             }
 
-            console.log('[NumberHuntAdapter] Rounds received:', gameData);
+            console.log('[NumberHuntAdapter] Game data received:', {
+                gameSeed: gameData.gameSeed,
+                config: gameData.config
+            });
 
-            // Apply config from host
+            // Apply config from host (including the seed)
             this.game.config = { ...gameData.config };
+            this.game.config.gameSeed = gameData.gameSeed;
             
-            // Use rounds from host
-            this.game.gameState.rounds = gameData.rounds;
+            // Generate rounds locally using the same seed
+            // This will produce identical rounds for all players
+            this.game.gameState.rounds = [];
+            this.game.generateAllRounds();
+            
+            console.log('[NumberHuntAdapter] Generated', this.game.gameState.rounds.length, 'rounds using seed');
             
             // Skip config screen and go directly to game
             this.game.showScreen('game');
             this.game.startRound();
             
         } catch (error) {
-            console.error('[NumberHuntAdapter] Error receiving rounds:', error);
+            console.error('[NumberHuntAdapter] Error receiving game data:', error);
             alert('Failed to receive game data from host: ' + error.message);
         }
     }
