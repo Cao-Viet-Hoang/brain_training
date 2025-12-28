@@ -49,13 +49,3 @@ export function createCombinedValidator(...validators) {
     return validators.every(validator => validator(value));
   };
 }
-
-/**
- * Base schema structure
- */
-export const baseSchemaTemplate = {
-  version: 1,
-  defaults: {},
-  validators: {},
-  migrations: {}
-};

@@ -159,6 +159,7 @@ class MultiplayerUI {
                         <option value="memory-matrix">🔲 Memory Matrix</option>
                         <option value="word-recall">💭 Word Recall</option>
                         <option value="maze-game">🗺️ Maze Runner</option>
+                        <option value="number-hunt">🔍 Number Hunt</option>
                     </select>
                 </div>
 
@@ -206,7 +207,7 @@ class MultiplayerUI {
                 <div class="mp-form-group">
                     <label for="mpRoomCode">Room Code</label>
                     <input type="text" id="mpRoomCode" class="room-code-input"
-                           placeholder="XXXX" maxlength="6">
+                           placeholder="000000" maxlength="6" inputmode="numeric">
                 </div>
 
                 <div class="mp-form-group">
@@ -226,15 +227,15 @@ class MultiplayerUI {
         const nameInput = document.getElementById('mpPlayerNameJoin');
         const joinBtn = document.getElementById('mpJoinBtn');
 
-        // Auto uppercase and validate
+        // Validate numeric input
         const validate = () => {
             const code = codeInput.value.trim();
             const name = nameInput.value.trim();
-            joinBtn.disabled = code.length < 4 || name.length < 2;
+            joinBtn.disabled = code.length !== 6 || name.length < 2;
         };
 
         codeInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
             validate();
         });
         nameInput.addEventListener('input', validate);
@@ -265,7 +266,9 @@ class MultiplayerUI {
             'expression-puzzle': '🧮 Expression Puzzle',
             'dual-n-back': '🔄 Dual N-Back',
             'memory-matrix': '🔲 Memory Matrix',
-            'word-recall': '💭 Word Recall'
+            'word-recall': '💭 Word Recall',
+            'maze-game': '🗺️ Maze Runner',
+            'number-hunt': '🔍 Number Hunt'
         };
         const gameName = gameNames[roomData.gameType] || '🎮 Game';
         
@@ -351,6 +354,14 @@ class MultiplayerUI {
         } else {
             document.getElementById('mpReadyBtn')?.addEventListener('click', () => {
                 this.isReady = !this.isReady;
+                
+                // Update button state immediately for instant feedback
+                const readyBtn = document.getElementById('mpReadyBtn');
+                if (readyBtn) {
+                    readyBtn.className = `mp-ready-btn ${this.isReady ? 'is-ready' : 'not-ready'}`;
+                    readyBtn.textContent = this.isReady ? '⏳ Cancel Ready' : '✅ Ready';
+                }
+                
                 this.callbacks.onToggleReady?.(this.isReady);
             });
             

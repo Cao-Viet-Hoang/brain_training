@@ -22,6 +22,7 @@ import { wordRecallSchema } from './schemas/word-recall.schema.js';
 import { mazeGameSchema } from './schemas/maze-game.schema.js';
 import { expressionPuzzleSchema } from './schemas/expression-puzzle.schema.js';
 import { pixelGameSchema } from './schemas/pixel-game.schema.js';
+import { numberHuntSchema } from './schemas/number-hunt.schema.js';
 
 /**
  * Game ID to Schema mapping
@@ -33,7 +34,8 @@ const GAME_SCHEMAS = {
   'word-recall': wordRecallSchema,
   'maze-game': mazeGameSchema,
   'expression-puzzle': expressionPuzzleSchema,
-  'pixel-game': pixelGameSchema
+  'pixel-game': pixelGameSchema,
+  'number-hunt': numberHuntSchema
 };
 
 /**

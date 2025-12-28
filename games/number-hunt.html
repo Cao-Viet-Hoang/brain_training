@@ -1,0 +1,383 @@
+<!--
+  Brain Training Games
+  Author: Cao Viet Hoang
+  Created: 2025
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Hunt - Brain Training</title>
+    
+    <!-- Google Analytics -->
+    <script src="../js/analytics.js"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/number-hunt.css">
+    <link rel="stylesheet" href="../css/multiplayer.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="game-header">
+            <a href="../index.html" class="back-btn">← Back</a>
+            <h1>🔍 Number Hunt</h1>
+            <button class="help-btn" id="helpBtn">❓ How to Play</button>
+        </header>
+
+        <!-- How to Play Modal -->
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeHelpModal">&times;</span>
+                <h2>📖 How to Play</h2>
+                <div class="help-content">
+                    <div class="help-section">
+                        <h3>🎯 Objective</h3>
+                        <p>Find missing or extra numbers by typing them into the input field!</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>⚙️ Setup</h3>
+                        <ul>
+                            <li><strong>Mode:</strong> Choose between Missing (find missing numbers) or Extra (find numbers outside the range)</li>
+                            <li><strong>Number Range:</strong> Set the range of numbers that will be in the game</li>
+                            <li><strong>Missing Count:</strong> How many missing numbers to find in Missing mode (1-10)</li>
+                            <li><strong>Extra Count:</strong> How many numbers outside the range to find in Extra mode (1-10)</li>
+                            <li><strong>Total Rounds:</strong> Number of rounds to play (1-20)</li>
+                            <li><strong>Max Wrong:</strong> Maximum wrong answer submissions allowed per round (1-10)</li>
+                            <li><strong>Time Target:</strong> Target time in seconds to get full time bonus (10-60s)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 Gameplay</h3>
+                        <ul>
+                            <li>Numbers are displayed on the board (you cannot click them)</li>
+                            <li>Type a number into the input field</li>
+                            <li>Press Enter or click Add to add it to your answer list</li>
+                            <li>You can add multiple numbers to build your answer list</li>
+                            <li>Click Remove (×) to remove any number from your list</li>
+                            <li>Submit button enables when you've entered enough numbers</li>
+                            <li>Click Submit to check your answer - wrong submissions count as wrong attempts</li>
+                            <li>Too many wrong submissions fails the round</li>
+                            <li>Complete all rounds to see final results</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎯 Missing Mode</h3>
+                        <p>All numbers from your configured range are displayed EXCEPT for a few randomly selected missing numbers. Your task is to find and type the missing numbers!</p>
+                        <p><strong>Example:</strong> Range 1-10, missing count 3 → The board shows [1,2,4,5,7,9,10] → You need to find 3, 6, 8</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎯 Extra Mode</h3>
+                        <p>All numbers from your configured range are displayed PLUS some extra numbers that are outside the range. Your task is to find and type the numbers that don't belong!</p>
+                        <p><strong>Example:</strong> Range 1-10, extra count 2 → The board shows [1,2,3,4,5,6,7,8,9,10,25,103] → You need to find 25, 103</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>📊 Scoring System</h3>
+                        <ul>
+                            <li><strong>Base Score:</strong> Points for completing a round correctly (default 100)</li>
+                            <li><strong>Time Bonus:</strong> Extra points for being fast (up to 50 points)</li>
+                            <li><strong>Wrong Penalty:</strong> Points deducted for each wrong attempt (-10 per wrong)</li>
+                            <li><strong>Only correct rounds score points</strong> - must find all numbers correctly!</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>💡 Tips</h3>
+                        <ul>
+                            <li>Be accurate - wrong attempts reduce your score</li>
+                            <li>Work quickly to get time bonus</li>
+                            <li>You can remove answers before submitting</li>
+                            <li>Watch the wrong attempts counter!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main>
+            <!-- Config Screen -->
+            <div id="configScreen" class="game-screen active">
+                <div class="config-card">
+                    <h2>Game Configuration</h2>
+                    
+                    <div class="config-group">
+                        <label>Game Mode:</label>
+                        <div class="mode-buttons">
+                            <button type="button" class="mode-btn active" data-mode="missing">
+                                <span class="mode-icon">🔍</span>
+                                <span class="mode-name">Missing Numbers</span>
+                                <span class="mode-desc">Find numbers that are missing</span>
+                            </button>
+                            <button type="button" class="mode-btn" data-mode="extra">
+                                <span class="mode-icon">🔢</span>
+                                <span class="mode-name">Extra Numbers</span>
+                                <span class="mode-desc">Find duplicate/extra numbers</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="config-group">
+                        <label>Number Range:</label>
+                        <div id="rangesContainer" class="ranges-container">
+                            <div class="range-inputs" data-range-index="0">
+                                <input type="number" class="minRange" value="1" min="0" max="999" placeholder="From" inputmode="numeric" pattern="[0-9]*">
+                                <span>to</span>
+                                <input type="number" class="maxRange" value="100" min="1" max="1000" placeholder="To" inputmode="numeric" pattern="[0-9]*">
+                                <button type="button" class="remove-range-btn" title="Remove range">−</button>
+                            </div>
+                        </div>
+                        <button type="button" class="add-range-btn" id="addRangeBtn">+ Add Range</button>
+                    </div>
+
+                    <div class="config-group" id="missingCountGroup">
+                        <label for="missingCount">Missing Count (numbers to find):</label>
+                        <input type="number" id="missingCount" value="3" min="1" max="10" inputmode="numeric" pattern="[0-9]*">
+                    </div>
+
+                    <div class="config-group hidden" id="extraCountGroup">
+                        <label for="extraCount">Extra Count (duplicates to find):</label>
+                        <input type="number" id="extraCount" value="3" min="1" max="10" inputmode="numeric" pattern="[0-9]*">
+                    </div>
+
+                    <div class="config-group">
+                        <label for="totalRounds">Total Rounds:</label>
+                        <input type="number" id="totalRounds" value="5" min="1" max="20" inputmode="numeric" pattern="[0-9]*">
+                    </div>
+
+                    <div class="config-group">
+                        <label for="maxWrongAttempts">Max Wrong Attempts (per round):</label>
+                        <input type="number" id="maxWrongAttempts" value="3" min="1" max="10" inputmode="numeric" pattern="[0-9]*">
+                    </div>
+
+                    <div class="config-group">
+                        <label for="shuffleBoard">
+                            <input type="checkbox" id="shuffleBoard" checked>
+                            Shuffle numbers on board
+                        </label>
+                    </div>
+
+                    <button class="btn-primary" id="startGameBtn">Start Game</button>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="gameScreen" class="game-screen">
+                <div class="game-content">
+                    <!-- Game Header -->
+                    <div class="game-info-bar">
+                        <div class="info-item mode-item">
+                            <span class="info-label">Mode</span>
+                            <span class="info-value" id="currentMode">Missing</span>
+                        </div>
+                        <div class="info-divider"></div>
+                        <div class="info-item round-item">
+                            <span class="info-label">Round</span>
+                            <span class="info-value"><span id="currentRound">1</span>/<span id="totalRoundsDisplay">5</span></span>
+                        </div>
+                        <div class="info-divider"></div>
+                        <div class="info-item time-item">
+                            <span class="info-label">Time</span>
+                            <span class="info-value timer" id="roundTimer">00:00</span>
+                        </div>
+                        <div class="info-divider"></div>
+                        <div class="info-item wrong-item">
+                            <span class="info-label">Wrong</span>
+                            <span class="info-value wrong-counter"><span id="wrongCount">0</span>/<span id="maxWrongDisplay">3</span></span>
+                        </div>
+                        <div class="info-divider"></div>
+                        <div class="info-item range-item">
+                            <span class="info-label">Range</span>
+                            <span class="info-value" id="currentRange">1-100</span>
+                        </div>
+                        <div class="info-divider"></div>
+                        <div class="info-item score-item">
+                            <span class="info-label">Score</span>
+                            <span class="info-value score-display" id="currentScore">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Number Board (readonly display) -->
+                    <div class="number-board-container">
+                        <h3 class="board-title">Number Board</h3>
+                        <div id="numberBoard" class="number-board"></div>
+                    </div>
+
+                    <!-- Answer Input Panel -->
+                    <div class="answer-panel">
+                        <h3 class="panel-title">Your Answer</h3>
+                        
+                        <div class="input-section">
+                            <div class="input-wrapper">
+                                <input 
+                                    type="number" 
+                                    id="numberInput" 
+                                    class="number-input" 
+                                    placeholder="Type a number and press Enter..."
+                                    inputmode="numeric"
+                                    autocomplete="off"
+                                >
+                                <button id="addNumberBtn" class="btn-add" title="Add number">Add</button>
+                            </div>
+                            <div id="inputError" class="input-error hidden"></div>
+                        </div>
+
+                        <div class="answer-list-container">
+                            <div class="progress-info">
+                                <span id="answerProgress">Entered 0 / 3 numbers</span>
+                            </div>
+                            <div id="answerList" class="answer-chips"></div>
+                        </div>
+
+                        <div class="submit-section">
+                            <button id="submitBtn" class="btn-primary" disabled>Submit Answer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Round Result Modal -->
+            <div id="roundResultModal" class="modal">
+                <div class="modal-content result-modal-content">
+                    <div id="roundResult" class="round-result">
+                        <div class="result-header">
+                            <h3 id="resultTitle" class="result-title"></h3>
+                        </div>
+                        
+                        <div class="score-breakdown">
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">Base Score:</span>
+                                <span class="breakdown-value" id="breakdownBase">+100</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">Time Bonus:</span>
+                                <span class="breakdown-value" id="breakdownTime">+50</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="breakdown-label">Wrong Penalty:</span>
+                                <span class="breakdown-value" id="breakdownPenalty">-20</span>
+                            </div>
+                            <div class="breakdown-item total">
+                                <span class="breakdown-label">Round Score:</span>
+                                <span class="breakdown-value" id="breakdownTotal">+130</span>
+                            </div>
+                        </div>
+
+                        <div class="round-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Time Spent:</span>
+                                <span class="stat-value" id="roundTimeSpent">12s</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Wrong Attempts:</span>
+                                <span class="stat-value" id="roundWrongAttempts">2 / 3</span>
+                            </div>
+                        </div>
+
+                        <div class="correct-answer-section">
+                            <h4>Correct Answer:</h4>
+                            <div id="correctAnswers" class="answer-chips readonly"></div>
+                        </div>
+
+                        <button id="nextRoundBtn" class="btn-primary">Next Round</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="resultScreen" class="game-screen">
+                <div class="result-card">
+                    <h2>🎉 Game Complete!</h2>
+                    
+                    <div class="final-stats">
+                        <div class="stat-box highlight">
+                            <div class="stat-label">Total Score</div>
+                            <div class="stat-value big" id="finalScore">0</div>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-label">Rounds Completed</div>
+                                <div class="stat-value" id="roundsCompleted">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Correct Rounds</div>
+                                <div class="stat-value" id="correctRounds">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Failed Rounds</div>
+                                <div class="stat-value" id="failedRounds">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Accuracy</div>
+                                <div class="stat-value" id="accuracy">0%</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Total Time</div>
+                                <div class="stat-value" id="totalTime">0:00</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Avg Time/Round</div>
+                                <div class="stat-value" id="avgTime">0s</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="round-summary-section">
+                        <h3>Round Summary</h3>
+                        <div id="roundSummary" class="round-summary-list"></div>
+                    </div>
+
+                    <div class="result-actions">
+                        <button class="btn-primary" id="playAgainBtn">Play Again</button>
+                        <a href="../index.html" class="btn-secondary">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Manager (must load before game script) -->
+    <script type="module">
+        import { loadGameSettings, updateGameSettings } from '../settings/index.js';
+
+        // Load settings and make them globally available
+        window.GAME_SETTINGS = loadGameSettings('number-hunt');
+
+        // Expose update function (consistent with other games)
+        window.updateGameSettings = (patch) => {
+            window.GAME_SETTINGS = updateGameSettings('number-hunt', patch);
+            return window.GAME_SETTINGS;
+        };
+
+        console.log('[NumberHunt] Settings loaded:', window.GAME_SETTINGS);
+    </script>
+
+    <!-- Multiplayer Scripts (IN ORDER - same as math-game) -->
+    <script src="../shared/seeded-random.js"></script>
+    <script src="../shared/firebase-config.js"></script>
+    <script src="../shared/constants.js"></script>
+    <script src="../shared/room-validator.js"></script>
+    <script src="../shared/room-cleanup.js"></script>
+    <script src="../shared/multiplayer-core.js"></script>
+    <script src="../shared/multiplayer-ui.js"></script>
+    <script src="../shared/multiplayer-adapter.js"></script>
+    <script src="../shared/multiplayer-result-modal.js"></script>
+    <script src="adapters/number-hunt-adapter.js"></script>
+
+    <!-- Game Script -->
+    <script src="number-hunt.js"></script>
+</body>
+</html>

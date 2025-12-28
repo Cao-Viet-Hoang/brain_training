@@ -30,7 +30,7 @@ const MP_CONSTANTS = {
     // Limits
     MAX_PLAYERS: 10,
     MIN_PLAYERS_TO_START: 2,
-    ROOM_CODE_LENGTH: 4,
+    ROOM_CODE_LENGTH: 6,
     ROOM_EXPIRY_HOURS: 2,
 
     // Timeouts (ms)
@@ -46,12 +46,13 @@ const MP_CONSTANTS = {
         'dual-n-back': 'dual-n-back.html',
         'memory-matrix': 'memory-matrix.html',
         'word-recall': 'word-recall.html',
-        'maze-game': 'maze-game.html'
+        'maze-game': 'maze-game.html',
+        'number-hunt': 'number-hunt.html'
     }
 };
 
-// Room code characters (avoid confusing chars like 0/O, 1/I)
-const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+// Room code characters (6-digit numeric code)
+const ROOM_CODE_CHARS = '0123456789';
 
 // Export for use
 if (typeof module !== 'undefined' && module.exports) {

@@ -70,6 +70,20 @@ An interactive brain training application featuring multiple games designed to i
   - Keyboard navigation
   - Multiplayer support
 
+#### 🔍 Number Hunt
+- **Description**: Train attention to detail and number recognition by finding missing or extra numbers
+- **Features**:
+  - Two game modes: Missing (find absent numbers) or Extra (find out-of-range numbers)
+  - Customizable number ranges (single or multiple ranges)
+  - Adjustable difficulty: missing/extra count (1-10)
+  - Round-based gameplay (1-20 rounds)
+  - Wrong attempt limit to increase challenge
+  - Scoring system with time bonus and wrong penalties
+  - Shuffle board option for increased difficulty
+  - Type-based answer input with submission validation
+  - Multiplayer support with synchronized rounds
+  - Detailed statistics and round-by-round results
+
 ## 🚀 Installation & Setup
 
 1. Clone the repository:
@@ -82,7 +96,7 @@ cd pratice_brain
 
 ## ✨ Key Features
 
-- **🎯 7 Brain Training Games**: Math, Memory, Logic, Spatial reasoning, and more
+- **🎯 Brain Training Games**: Math, Memory, Logic, Spatial reasoning, and more
 - **👥 Multiplayer Mode**: Real-time multiplayer with Firebase Realtime Database
 - **⚙️ Customizable Settings**: Persistent settings for each game using localStorage
 - **📊 Progress Tracking**: Score, accuracy, and performance analytics
@@ -176,8 +190,6 @@ Each game implements a `MultiplayerGameAdapter` that handles:
 - Question/data generation (host only)
 - Score tracking and updates
 - Room lifecycle management
-
-See [games/adapters/README.md](games/adapters/README.md) for adapter development guide.
 
 See [games/adapters/README.md](games/adapters/README.md) for adapter development guide.
 
