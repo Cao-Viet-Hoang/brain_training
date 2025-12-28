@@ -334,7 +334,7 @@ class NumberHuntGame {
                 shuffleBoard: document.getElementById('shuffleBoard').checked
             };
             
-            window.updateGameSettings('number-hunt', settings);
+            window.updateGameSettings(settings);
             console.log('[NumberHunt] Settings saved:', settings);
         } catch (error) {
             console.error('[NumberHunt] Error saving settings:', error);

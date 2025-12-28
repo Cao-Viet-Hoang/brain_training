@@ -352,16 +352,16 @@
     <!-- Settings Manager (must load before game script) -->
     <script type="module">
         import { loadGameSettings, updateGameSettings } from '../settings/index.js';
-        
+
         // Load settings and make them globally available
         window.GAME_SETTINGS = loadGameSettings('number-hunt');
-        
-        // Expose update function
-        window.updateGameSettings = (gameId, newSettings) => {
-            updateGameSettings(gameId, newSettings);
-            window.GAME_SETTINGS = loadGameSettings(gameId);
+
+        // Expose update function (consistent with other games)
+        window.updateGameSettings = (patch) => {
+            window.GAME_SETTINGS = updateGameSettings('number-hunt', patch);
+            return window.GAME_SETTINGS;
         };
-        
+
         console.log('[NumberHunt] Settings loaded:', window.GAME_SETTINGS);
     </script>
 
