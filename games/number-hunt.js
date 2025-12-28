@@ -140,9 +140,9 @@ class NumberHuntGame {
         rangeDiv.setAttribute('data-range-index', rangeCount);
         
         rangeDiv.innerHTML = `
-            <input type="number" class="minRange" value="${rangeCount * 100 + 1}" min="0" max="999" placeholder="From" inputmode="numeric" pattern="[0-9]*">
+            <input type="number" class="minRange" value="" min="0" max="999" placeholder="From" inputmode="numeric" pattern="[0-9]*">
             <span>to</span>
-            <input type="number" class="maxRange" value="${(rangeCount + 1) * 100}" min="1" max="1000" placeholder="To" inputmode="numeric" pattern="[0-9]*">
+            <input type="number" class="maxRange" value="" min="1" max="1000" placeholder="To" inputmode="numeric" pattern="[0-9]*">
             <button type="button" class="remove-range-btn" title="Remove range">✖</button>
         `;
         
@@ -671,6 +671,12 @@ class NumberHuntGame {
         document.getElementById('maxWrongDisplay').textContent = this.config.maxWrongAttempts;
         document.getElementById('wrongCount').textContent = 0;
         document.getElementById('currentScore').textContent = this.gameState.totalScore;
+        
+        // Update range display
+        const rangeText = this.config.ranges.length === 1 
+            ? `${this.config.ranges[0].min}-${this.config.ranges[0].max}`
+            : this.config.ranges.map(r => `${r.min}-${r.max}`).join(', ');
+        document.getElementById('currentRange').textContent = rangeText;
         
         // Render number board
         const board = document.getElementById('numberBoard');
