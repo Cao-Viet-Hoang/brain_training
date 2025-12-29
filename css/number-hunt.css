@@ -972,7 +972,7 @@
 .stat-box.highlight .stat-label {
     color: rgba(255, 255, 255, 0.95);
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 1.05rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 0.2rem;
@@ -983,7 +983,7 @@
 }
 
 .stat-label {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     margin-bottom: 0.2rem;
     opacity: 0.8;
     color: var(--text-secondary);
@@ -1294,6 +1294,19 @@
     .stat-value.big {
         font-size: 2.5rem;
     }
+    
+    .stat-box {
+        padding: 0.5rem 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-box.highlight {
+        padding: 0.6rem 1rem;
+    }
+    
+    .stats-grid {
+        gap: 0.5rem;
+    }
 }
 
 /* Mobile Portrait (480px - 599px) */
@@ -1429,6 +1442,28 @@
         font-size: 0.9rem;
     }
     
+    .stat-box {
+        padding: 0.4rem 0.75rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    .stat-box.highlight {
+        padding: 0.5rem 0.85rem;
+    }
+    
+    .stats-grid {
+        gap: 0.4rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        margin-bottom: 0.15rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
     .answer-chips {
         gap: 0.35rem;
     }
@@ -1440,18 +1475,6 @@
     
     .stat-value.big {
         font-size: 2rem;
-    }
-    
-    .stat-value {
-        font-size: 1.3rem;
-    }
-    
-    .stat-label {
-        font-size: 0.8rem;
-    }
-    
-    .stat-box {
-        padding: 1rem;
     }
     
     .round-summary-section h3 {
