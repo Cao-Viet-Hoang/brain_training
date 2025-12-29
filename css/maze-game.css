@@ -249,7 +249,7 @@
     margin-top: 0.2rem;
 }
 
-.option-btn:hover:not(.disabled) {
+.option-btn:hover:not(.disabled):not(.active) {
     background: var(--border-color);
     transform: translateY(-2px);
 }
@@ -258,6 +258,11 @@
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
+}
+
+.option-btn.active:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
 }
 
 .option-btn.active small {
