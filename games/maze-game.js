@@ -2170,7 +2170,23 @@ class MazeGame {
                 // Go directly to next round or results
                 this.proceedToNextRoundOrResults();
             });
-            this.renderer.showOptimalPath(this.currentMaze.shortestPath, 50);
+            // Disable the continue button while path is being drawn
+            const continueBtn = document.querySelector('#optimalPathOverlay .optimal-path-continue-btn');
+            if (continueBtn) {
+                continueBtn.disabled = true;
+                continueBtn.style.opacity = '0.3';
+                continueBtn.style.cursor = 'not-allowed';
+                continueBtn.style.filter = 'grayscale(50%)';
+            }
+            // Draw the path and re-enable button when complete
+            this.renderer.showOptimalPath(this.currentMaze.shortestPath, 50).then(() => {
+                if (continueBtn) {
+                    continueBtn.disabled = false;
+                    continueBtn.style.opacity = '1';
+                    continueBtn.style.cursor = 'pointer';
+                    continueBtn.style.filter = 'none';
+                }
+            });
         } else {
             // Time's up - show time up overlay then proceed
             this.showTimeUpOverlay(scoreDetails, () => {
