@@ -1060,20 +1060,41 @@ class NumberHuntGame {
             const item = document.createElement('div');
             item.className = `summary-item ${result.isCorrect ? 'correct' : 'failed'}`;
             
-            const status = result.failed ? 'FAILED (Too many wrong attempts)' : 
-                          result.isCorrect ? 'CORRECT' : 'WRONG';
-            
             item.innerHTML = `
                 <div class="summary-header">
-                    <span>Round ${result.round}</span>
-                    <span>${status}</span>
+                    <span class="round-number">Round ${result.round}</span>
                 </div>
                 <div class="summary-details">
-                    Score: ${result.score.total} | 
-                    Time: ${result.timeSpent}s | 
-                    Wrong: ${result.wrongAttempts}/${this.config.maxWrongAttempts} |
-                    Your answer: [${result.userAnswers.join(', ')}] |
-                    Correct: [${result.correctAnswers.join(', ')}]
+                    <div class="summary-detail-item">
+                        <span>⭐ Score:</span>
+                        <strong>${result.score.total}</strong>
+                    </div>
+                    <div class="summary-detail-item">
+                        <span>⏱️ Time:</span>
+                        <strong>${result.timeSpent}s</strong>
+                    </div>
+                    <div class="summary-detail-item">
+                        <span>❌ Wrong:</span>
+                        <strong>${result.wrongAttempts}/${this.config.maxWrongAttempts}</strong>
+                    </div>
+                    <div class="summary-detail-item">
+                        <span>🎯 Accuracy:</span>
+                        <strong>${result.failed ? 'Failed' : (result.isCorrect ? '100%' : '0%')}</strong>
+                    </div>
+                </div>
+                <div class="summary-answers">
+                    <div class="answer-column">
+                        <strong>Your Answer:</strong>
+                        <div class="summary-answers-row">
+                            ${result.userAnswers.map(a => `<span class="answer-chip">${a}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="answer-column">
+                        <strong>Correct Answer:</strong>
+                        <div class="summary-answers-row">
+                            ${result.correctAnswers.map(a => `<span class="answer-chip">${a}</span>`).join('')}
+                        </div>
+                    </div>
                 </div>
             `;
             
