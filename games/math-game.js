@@ -556,9 +556,15 @@ class MathGame {
         // Clear and focus answer input
         const answerInput = document.getElementById('answerInput');
         answerInput.value = '';
-        // Trigger click first to ensure user interaction on mobile
+        // iOS-specific keyboard trigger techniques
+        answerInput.removeAttribute('readonly');
         answerInput.click();
         answerInput.focus();
+        answerInput.select();
+        // Force cursor position to trigger keyboard on iOS
+        if (answerInput.setSelectionRange) {
+            answerInput.setSelectionRange(0, 0);
+        }
     }
 
     /**
@@ -659,9 +665,15 @@ class MathGame {
         // Enable answer input
         answerInput.disabled = false;
         submitBtn.disabled = false;
-        // Trigger click first to ensure user interaction on mobile
+        // iOS-specific keyboard trigger techniques
+        answerInput.removeAttribute('readonly');
         answerInput.click();
         answerInput.focus();
+        answerInput.select();
+        // Force cursor position to trigger keyboard on iOS
+        if (answerInput.setSelectionRange) {
+            answerInput.setSelectionRange(0, 0);
+        }
 
         // Clear revealing state
         this.gameState.isRevealingSequence = false;
@@ -898,8 +910,13 @@ class MathGame {
                             // Ensure input is focused after transition on mobile
                             setTimeout(() => {
                                 const input = document.getElementById('answerInput');
+                                input.removeAttribute('readonly');
                                 input.click();
                                 input.focus();
+                                input.select();
+                                if (input.setSelectionRange) {
+                                    input.setSelectionRange(0, 0);
+                                }
                             }, 50);
                         });
                     }
