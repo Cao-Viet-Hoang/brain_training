@@ -556,10 +556,9 @@ class MathGame {
         // Clear and focus answer input
         const answerInput = document.getElementById('answerInput');
         answerInput.value = '';
-        // Use timeout to ensure focus works on mobile devices
-        setTimeout(() => {
-            answerInput.focus();
-        }, 100);
+        // Trigger click first to ensure user interaction on mobile
+        answerInput.click();
+        answerInput.focus();
     }
 
     /**
@@ -660,10 +659,9 @@ class MathGame {
         // Enable answer input
         answerInput.disabled = false;
         submitBtn.disabled = false;
-        // Use timeout to ensure focus works on mobile devices
-        setTimeout(() => {
-            answerInput.focus();
-        }, 100);
+        // Trigger click first to ensure user interaction on mobile
+        answerInput.click();
+        answerInput.focus();
 
         // Clear revealing state
         this.gameState.isRevealingSequence = false;
@@ -899,7 +897,9 @@ class MathGame {
                             this.startTimer();
                             // Ensure input is focused after transition on mobile
                             setTimeout(() => {
-                                document.getElementById('answerInput').focus();
+                                const input = document.getElementById('answerInput');
+                                input.click();
+                                input.focus();
                             }, 50);
                         });
                     }
