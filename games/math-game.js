@@ -376,6 +376,12 @@ class MathGame {
         } else {
             this.displayQuestion();
             this.startTimer();
+            // Focus input on game start (user interaction context)
+            setTimeout(() => {
+                const answerInput = document.getElementById('answerInput');
+                answerInput.click();
+                answerInput.focus();
+            }, 100);
         }
     }
     
@@ -553,18 +559,9 @@ class MathGame {
 
         this.updateStats();
 
-        // Clear and focus answer input
+        // Clear answer input but keep it focused (don't blur/refocus on mobile)
         const answerInput = document.getElementById('answerInput');
         answerInput.value = '';
-        // iOS-specific keyboard trigger techniques
-        answerInput.removeAttribute('readonly');
-        answerInput.click();
-        answerInput.focus();
-        answerInput.select();
-        // Force cursor position to trigger keyboard on iOS
-        if (answerInput.setSelectionRange) {
-            answerInput.setSelectionRange(0, 0);
-        }
     }
 
     /**
@@ -662,18 +659,12 @@ class MathGame {
         questionEl.classList.remove('sequential-mode-reveal');
         questionEl.classList.add('sequential-mode-answer');
 
-        // Enable answer input
+        // Enable answer input and focus (first time only in sequential mode)
         answerInput.disabled = false;
         submitBtn.disabled = false;
-        // iOS-specific keyboard trigger techniques
         answerInput.removeAttribute('readonly');
         answerInput.click();
         answerInput.focus();
-        answerInput.select();
-        // Force cursor position to trigger keyboard on iOS
-        if (answerInput.setSelectionRange) {
-            answerInput.setSelectionRange(0, 0);
-        }
 
         // Clear revealing state
         this.gameState.isRevealingSequence = false;
@@ -907,17 +898,6 @@ class MathGame {
                         requestAnimationFrame(() => {
                             questionCard.classList.remove('transitioning');
                             this.startTimer();
-                            // Ensure input is focused after transition on mobile
-                            setTimeout(() => {
-                                const input = document.getElementById('answerInput');
-                                input.removeAttribute('readonly');
-                                input.click();
-                                input.focus();
-                                input.select();
-                                if (input.setSelectionRange) {
-                                    input.setSelectionRange(0, 0);
-                                }
-                            }, 50);
                         });
                     }
                 });
