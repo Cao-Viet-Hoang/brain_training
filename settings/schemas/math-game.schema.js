@@ -17,12 +17,15 @@ import {
 } from './base.schema.js';
 
 export const mathGameSchema = {
-  version: 1,
+  version: 2,
 
   defaults: {
     // Number range
     minNumber: 1,
     maxNumber: 100,
+
+    // Game mode
+    gameMode: 'classic', // 'classic' or 'sequential'
 
     // Operations
     operations: ['+'], // Can use '+', '-', '*', '/', 'mixed'
@@ -31,6 +34,9 @@ export const mathGameSchema = {
     // Game settings
     questionCount: 10,
     timePerQuestion: 10, // seconds
+
+    // Sequential mode settings
+    displayTimePerOperand: 2, // seconds - how long each number/operator is shown
 
     // Difficulty
     difficulty: 'medium', // 'easy', 'medium', 'hard'
@@ -50,6 +56,7 @@ export const mathGameSchema = {
       createTypeValidator('number'),
       createRangeValidator(1, 1000)
     ),
+    gameMode: createEnumValidator(['classic', 'sequential']),
     operations: (value) => {
       if (!Array.isArray(value)) return false;
       if (value.length === 0) return false;
@@ -68,6 +75,10 @@ export const mathGameSchema = {
       createTypeValidator('number'),
       createRangeValidator(5, 60)
     ),
+    displayTimePerOperand: createCombinedValidator(
+      createTypeValidator('number'),
+      createRangeValidator(0, 10)
+    ),
     difficulty: createEnumValidator(['easy', 'medium', 'hard']),
     sound: createTypeValidator('boolean'),
     showTimer: createTypeValidator('boolean'),
@@ -75,6 +86,13 @@ export const mathGameSchema = {
   },
 
   migrations: {
-    // Future migrations can be added here
+    // Migration from version 1 to version 2: add gameMode and displayTimePerOperand
+    1: (settings) => {
+      return {
+        ...settings,
+        gameMode: 'classic',
+        displayTimePerOperand: 2
+      };
+    }
   }
 };

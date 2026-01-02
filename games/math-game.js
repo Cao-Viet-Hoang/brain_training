@@ -10,10 +10,12 @@ class MathGame {
         this.config = {
             minNumber: 1,
             maxNumber: 100,
+            gameMode: 'classic', // 'classic' or 'sequential'
             operations: [],
             operandCount: 2,
             questionCount: 10,
-            timePerQuestion: 10
+            timePerQuestion: 10,
+            displayTimePerOperand: 2 // for sequential mode
         };
         
         this.gameState = {
@@ -33,7 +35,10 @@ class MathGame {
                 master: 0,
                 comeback: 0
             },
-            wrongStreak: 0
+            wrongStreak: 0,
+            // Memory mode state
+            isRevealingSequence: false,
+            revealTimeout: null
         };
         
         this.screens = {
@@ -75,7 +80,15 @@ class MathGame {
     setupEventListeners() {
         // Load saved settings into UI
         this.loadSavedSettings();
-        
+
+        // Game mode buttons
+        const modeBtns = document.querySelectorAll('.mode-btn');
+        modeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.toggleGameMode(btn);
+            });
+        });
+
         // Operation buttons
         const operationBtns = document.querySelectorAll('.operation-btn');
         operationBtns.forEach(btn => {
@@ -107,11 +120,29 @@ class MathGame {
         document.getElementById('playAgainBtn').addEventListener('click', () => this.resetGame());
     }
     
+    toggleGameMode(btn) {
+        const mode = btn.dataset.mode;
+
+        // Deselect all mode buttons
+        document.querySelectorAll('.mode-btn').forEach(b => {
+            b.classList.remove('active');
+        });
+
+        // Select the clicked button
+        btn.classList.add('active');
+
+        // Show/hide sequential mode settings
+        const sequentialSettings = document.getElementById('sequentialModeSettings');
+        if (sequentialSettings) {
+            sequentialSettings.style.display = mode === 'sequential' ? 'block' : 'none';
+        }
+    }
+
     toggleOperation(btn) {
         const operation = btn.dataset.operation;
         const isMixed = operation === 'mixed';
         const isCurrentlyActive = btn.classList.contains('active');
-        
+
         if (isMixed) {
             // If clicking on mixed, deselect all other operations
             if (!isCurrentlyActive) {
@@ -129,7 +160,7 @@ class MathGame {
             if (mixedBtn && mixedBtn.classList.contains('active')) {
                 mixedBtn.classList.remove('active');
             }
-            
+
             // Toggle the clicked button
             btn.classList.toggle('active');
         }
@@ -140,9 +171,9 @@ class MathGame {
      */
     loadSavedSettings() {
         if (!window.GAME_SETTINGS) return;
-        
+
         const settings = window.GAME_SETTINGS;
-        
+
         // Load number inputs
         if (settings.minNumber !== undefined) {
             document.getElementById('minNumber').value = settings.minNumber;
@@ -159,14 +190,36 @@ class MathGame {
         if (settings.timePerQuestion !== undefined) {
             document.getElementById('timePerQuestion').value = settings.timePerQuestion;
         }
-        
+        if (settings.displayTimePerOperand !== undefined) {
+            const displayTimeInput = document.getElementById('displayTimePerOperand');
+            if (displayTimeInput) {
+                displayTimeInput.value = settings.displayTimePerOperand;
+            }
+        }
+
+        // Load game mode
+        if (settings.gameMode) {
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const modeBtn = document.querySelector(`.mode-btn[data-mode="${settings.gameMode}"]`);
+            if (modeBtn) {
+                modeBtn.classList.add('active');
+            }
+            // Show/hide sequential mode settings
+            const sequentialSettings = document.getElementById('sequentialModeSettings');
+            if (sequentialSettings) {
+                sequentialSettings.style.display = settings.gameMode === 'sequential' ? 'block' : 'none';
+            }
+        }
+
         // Load operations
         if (settings.operations && Array.isArray(settings.operations)) {
             // First, deselect all
             document.querySelectorAll('.operation-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             // Then select the saved ones
             settings.operations.forEach(op => {
                 const btn = document.querySelector(`.operation-btn[data-operation="${op}"]`);
@@ -175,7 +228,7 @@ class MathGame {
                 }
             });
         }
-        
+
         console.log('[MathGame] Settings restored:', settings);
     }
     
@@ -184,25 +237,29 @@ class MathGame {
      */
     saveCurrentSettings() {
         if (typeof window.updateGameSettings !== 'function') return;
-        
+
         try {
             const minNumber = parseInt(document.getElementById('minNumber').value);
             const maxNumber = parseInt(document.getElementById('maxNumber').value);
             const operandCount = parseInt(document.getElementById('operandCount').value);
             const questionCount = parseInt(document.getElementById('questionCount').value);
             const timePerQuestion = parseInt(document.getElementById('timePerQuestion').value);
+            const displayTimePerOperand = parseFloat(document.getElementById('displayTimePerOperand')?.value) || 2;
             const operations = Array.from(document.querySelectorAll('.operation-btn.active'))
                 .map(btn => btn.dataset.operation);
-            
+            const gameMode = document.querySelector('.mode-btn.active')?.dataset.mode || 'classic';
+
             // Only save if valid
             if (!isNaN(minNumber) && !isNaN(maxNumber) && operations.length > 0) {
                 window.updateGameSettings({
                     minNumber,
                     maxNumber,
+                    gameMode,
                     operations,
                     operandCount: isNaN(operandCount) ? 2 : operandCount,
                     questionCount: isNaN(questionCount) ? 10 : questionCount,
-                    timePerQuestion: isNaN(timePerQuestion) ? 10 : timePerQuestion
+                    timePerQuestion: isNaN(timePerQuestion) ? 10 : timePerQuestion,
+                    displayTimePerOperand: isNaN(displayTimePerOperand) ? 2 : displayTimePerOperand
                 });
                 console.log('[MathGame] Settings saved');
             }
@@ -217,57 +274,66 @@ class MathGame {
         const operandCount = parseInt(document.getElementById('operandCount').value);
         const questionCount = parseInt(document.getElementById('questionCount').value);
         const timePerQuestion = parseInt(document.getElementById('timePerQuestion').value);
+        const displayTimePerOperand = parseFloat(document.getElementById('displayTimePerOperand')?.value) || 2;
         const selectedOperations = Array.from(document.querySelectorAll('.operation-btn.active'))
             .map(btn => btn.dataset.operation);
-        
+        const gameMode = document.querySelector('.mode-btn.active')?.dataset.mode || 'classic';
+
         if (isNaN(minNumber) || isNaN(maxNumber)) {
             alert('Please enter a valid number range!');
             return false;
         }
-        
+
         if (minNumber >= maxNumber) {
             alert('Minimum must be less than maximum!');
             return false;
         }
-        
+
         if (selectedOperations.length === 0) {
             alert('Please select at least one operation!');
             return false;
         }
-        
+
         if (isNaN(operandCount) || operandCount < 2 || operandCount > 20) {
             alert('Number of operands must be between 2 and 20!');
             return false;
         }
-        
+
         if (isNaN(questionCount) || questionCount < 1 || questionCount > 100) {
             alert('Number of questions must be between 1 and 100!');
             return false;
         }
-        
+
         if (isNaN(timePerQuestion) || timePerQuestion < 5 || timePerQuestion > 60) {
             alert('Time per question must be between 5 and 60 seconds!');
             return false;
         }
-        
+
+        if (gameMode === 'sequential' && (isNaN(displayTimePerOperand) || displayTimePerOperand < 0 || displayTimePerOperand > 10)) {
+            alert('Display time per operand must be between 0 and 10 seconds!');
+            return false;
+        }
+
         this.config = {
             minNumber,
             maxNumber,
+            gameMode,
             operations: selectedOperations,
             operandCount,
             questionCount,
-            timePerQuestion
+            timePerQuestion,
+            displayTimePerOperand
         };
-        
+
         return true;
     }
     
     startGame() {
         if (!this.validateConfig()) return;
-        
+
         // Save settings when starting game
         this.saveCurrentSettings();
-        
+
         // Reset game state
         this.gameState = {
             currentQuestionIndex: 0,
@@ -286,26 +352,31 @@ class MathGame {
                 master: 0,
                 comeback: 0
             },
-            wrongStreak: 0
+            wrongStreak: 0,
+            // Sequential mode state
+            isRevealingSequence: false,
+            revealTimeout: null
         };
-        
+
         // Generate questions
         this.generateQuestions();
-        
+
         // Show game screen
         this.showScreen('game');
-        
-        // Display first question
-        this.displayQuestion();
-        
-        // Start timer
-        this.startTimer();
-        
+
         // Update progress
         this.updateProgress();
-        
+
         // Show initial tip
         this.updateTip();
+
+        // Display first question (sequential mode will handle timer differently)
+        if (this.config.gameMode === 'sequential') {
+            this.displayQuestionSequentialMode();
+        } else {
+            this.displayQuestion();
+            this.startTimer();
+        }
     }
     
     generateQuestions() {
@@ -464,7 +535,7 @@ class MathGame {
             '*': '×',
             '/': '÷'
         };
-        
+
         // Build equation string with multiple numbers and operations
         const equationParts = [];
         for (let i = 0; i < question.numbers.length; i++) {
@@ -473,19 +544,144 @@ class MathGame {
                 equationParts.push(operationSymbol[question.operations[i]]);
             }
         }
-        
-        document.getElementById('question').textContent = 
+
+        document.getElementById('question').textContent =
             `${equationParts.join(' ')} = ?`;
-        
+
         document.getElementById('currentQuestion').textContent = this.gameState.currentQuestionIndex + 1;
         document.getElementById('totalQuestions').textContent = this.config.questionCount;
-        
+
         this.updateStats();
-        
+
         // Clear and focus answer input
         const answerInput = document.getElementById('answerInput');
         answerInput.value = '';
-        answerInput.focus();
+        // Use timeout to ensure focus works on mobile devices
+        setTimeout(() => {
+            answerInput.focus();
+        }, 100);
+    }
+
+    /**
+     * Display question in Sequential Mode - sequential reveal of operands
+     * Numbers and operations are shown one by one, then hidden
+     * Timer only starts after all elements are revealed
+     */
+    displayQuestionSequentialMode() {
+        const question = this.gameState.questions[this.gameState.currentQuestionIndex];
+        const operationSymbol = {
+            '+': '+',
+            '-': '−',
+            '*': '×',
+            '/': '÷'
+        };
+
+        // Update question counter
+        document.getElementById('currentQuestion').textContent = this.gameState.currentQuestionIndex + 1;
+        document.getElementById('totalQuestions').textContent = this.config.questionCount;
+
+        this.updateStats();
+
+        // Reset timer display and ring immediately (show full time, ring at 0)
+        this.gameState.timeRemaining = this.config.timePerQuestion;
+        this.updateTimerDisplay();
+        this.resetTimerRing();
+
+        // Set revealing state
+        this.gameState.isRevealingSequence = true;
+
+        // Disable answer input during reveal
+        const answerInput = document.getElementById('answerInput');
+        const submitBtn = document.getElementById('submitAnswerBtn');
+        answerInput.value = '';
+        answerInput.disabled = true;
+        submitBtn.disabled = true;
+
+        const questionEl = document.getElementById('question');
+        questionEl.classList.add('sequential-mode-reveal');
+
+        // Build sequence of elements to reveal: [number, operation, number, operation, ...]
+        const sequence = [];
+        for (let i = 0; i < question.numbers.length; i++) {
+            sequence.push({ type: 'number', value: question.numbers[i] });
+            if (i < question.numbers.length - 1) {
+                sequence.push({ type: 'operation', value: operationSymbol[question.operations[i]] });
+            }
+        }
+
+        const displayTime = this.config.displayTimePerOperand * 1000; // Convert to milliseconds
+        let currentIndex = 0;
+
+        // Function to reveal next element in sequence
+        const revealNext = () => {
+            if (currentIndex >= sequence.length) {
+                // All elements revealed - show "= ?" and start timer
+                this.finishSequentialReveal();
+                return;
+            }
+
+            const element = sequence[currentIndex];
+            questionEl.textContent = element.value;
+            questionEl.classList.add('sequential-reveal-animation');
+
+            // Remove animation class after it completes
+            setTimeout(() => {
+                questionEl.classList.remove('sequential-reveal-animation');
+            }, 300);
+
+            currentIndex++;
+
+            // Schedule next reveal or finish
+            this.gameState.revealTimeout = setTimeout(revealNext, displayTime);
+        };
+
+        // Start showing "Get Ready..." message, then begin sequence
+        questionEl.textContent = 'Get Ready...';
+
+        this.gameState.revealTimeout = setTimeout(() => {
+            revealNext();
+        }, 1000);
+    }
+
+    /**
+     * Called when all operands have been revealed in Sequential Mode
+     * Shows "= ?" and starts the timer
+     */
+    finishSequentialReveal() {
+        const questionEl = document.getElementById('question');
+        const answerInput = document.getElementById('answerInput');
+        const submitBtn = document.getElementById('submitAnswerBtn');
+
+        // Show final state
+        questionEl.textContent = '= ?';
+        questionEl.classList.remove('sequential-mode-reveal');
+        questionEl.classList.add('sequential-mode-answer');
+
+        // Enable answer input
+        answerInput.disabled = false;
+        submitBtn.disabled = false;
+        // Use timeout to ensure focus works on mobile devices
+        setTimeout(() => {
+            answerInput.focus();
+        }, 100);
+
+        // Clear revealing state
+        this.gameState.isRevealingSequence = false;
+        this.gameState.revealTimeout = null;
+
+        // Now start the timer
+        this.startTimer();
+    }
+
+    /**
+     * Cancel any ongoing sequential mode reveal sequence
+     */
+    cancelSequentialReveal() {
+        if (this.gameState.revealTimeout) {
+            clearTimeout(this.gameState.revealTimeout);
+            this.gameState.revealTimeout = null;
+        }
+        this.gameState.isRevealingSequence = false;
     }
     
     updateStats() {
@@ -607,11 +803,22 @@ class MathGame {
     }
     
     submitAnswer(timeout = false) {
-        this.stopTimer();
-        
+        // Don't allow submission while revealing sequence in sequential mode
+        if (this.gameState.isRevealingSequence) {
+            return;
+        }
+
         const answerInput = document.getElementById('answerInput');
-        let userAnswer = null;
         
+        // Prevent submission when input is empty (unless timeout)
+        if (!timeout && answerInput.value.trim() === '') {
+            return;
+        }
+
+        this.stopTimer();
+
+        let userAnswer = null;
+
         if (!timeout && answerInput.value.trim() !== '') {
             userAnswer = this.parseFraction(answerInput.value);
         }
@@ -664,20 +871,38 @@ class MathGame {
             // Add transition class
             const questionCard = document.querySelector('.question-card');
             questionCard.classList.add('transitioning');
-            
+
             // Update all elements after a short delay for smooth transition
             setTimeout(() => {
                 // Update everything in one batch using requestAnimationFrame
                 requestAnimationFrame(() => {
                     this.updateProgress();
                     this.updateTip();
-                    this.displayQuestion();
-                    
-                    // Remove transition class and start timer
-                    requestAnimationFrame(() => {
+
+                    // Handle based on game mode
+                    if (this.config.gameMode === 'sequential') {
+                        // Remove sequential mode answer class
+                        const questionEl = document.getElementById('question');
+                        questionEl.classList.remove('sequential-mode-answer');
+
+                        // Remove transition class first
                         questionCard.classList.remove('transitioning');
-                        this.startTimer();
-                    });
+
+                        // Start sequential mode sequence (timer starts after reveal)
+                        this.displayQuestionSequentialMode();
+                    } else {
+                        this.displayQuestion();
+
+                        // Remove transition class and start timer
+                        requestAnimationFrame(() => {
+                            questionCard.classList.remove('transitioning');
+                            this.startTimer();
+                            // Ensure input is focused after transition on mobile
+                            setTimeout(() => {
+                                document.getElementById('answerInput').focus();
+                            }, 50);
+                        });
+                    }
                 });
             }, 200);
         } else {
@@ -864,6 +1089,20 @@ class MathGame {
     
     resetGame() {
         this.stopTimer();
+        this.cancelSequentialReveal();
+
+        // Clean up sequential mode classes
+        const questionEl = document.getElementById('question');
+        if (questionEl) {
+            questionEl.classList.remove('sequential-mode-reveal', 'sequential-mode-answer', 'sequential-reveal-animation');
+        }
+
+        // Re-enable answer input if it was disabled
+        const answerInput = document.getElementById('answerInput');
+        const submitBtn = document.getElementById('submitAnswerBtn');
+        if (answerInput) answerInput.disabled = false;
+        if (submitBtn) submitBtn.disabled = false;
+
         this.showScreen('config');
     }
     

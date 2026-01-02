@@ -237,6 +237,69 @@
     font-size: 1rem;
 }
 
+/* Game Mode Selection */
+.mode-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+}
+
+.mode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    background: var(--secondary-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: 'Quicksand', sans-serif;
+}
+
+.mode-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.mode-btn:hover .mode-desc {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.mode-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.mode-btn.active .mode-desc {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.mode-icon {
+    font-size: 2rem;
+}
+
+.mode-name {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.mode-desc {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Sequential Mode Settings Hint */
+.setting-hint {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
 #startGameBtn {
     width: 100%;
     margin-top: var(--spacing-md);
@@ -624,6 +687,58 @@
     font-family: monospace;
     font-weight: 600;
     border: 1px solid var(--border-color);
+}
+
+/* ===== Sequential Mode Styles ===== */
+.question.sequential-mode-reveal {
+    background: linear-gradient(135deg, #E6F4FF, #E8F8ED);
+    font-size: 4rem;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.question.sequential-mode-answer {
+    background: linear-gradient(135deg, #FFF4E6, #FFE8E8);
+    animation: pulseReady 1s ease infinite;
+}
+
+@keyframes pulseReady {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(82, 179, 181, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 15px rgba(82, 179, 181, 0);
+    }
+}
+
+.question.sequential-reveal-animation {
+    animation: revealPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes revealPop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Disabled state for answer input during sequential reveal */
+#answerInput:disabled {
+    background-color: var(--secondary-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+#submitAnswerBtn:disabled {
+    background-color: var(--border-color);
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 /* Achievements Panel */

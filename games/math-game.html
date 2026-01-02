@@ -48,10 +48,25 @@
                         <h3>⚙️ Setup</h3>
                         <ul>
                             <li><strong>Number Range:</strong> Set the minimum and maximum numbers for the problems</li>
+                            <li><strong>Game Mode:</strong> Choose between Classic (see full equation) or Sequential (numbers revealed one by one)</li>
                             <li><strong>Operations:</strong> Choose from addition (+), subtraction (-), multiplication (×), division (÷), or mixed operations</li>
                             <li><strong>Operands:</strong> Select how many numbers should be in each problem (2-20)</li>
                             <li><strong>Questions:</strong> Set how many problems you want to solve (1-100)</li>
                             <li><strong>Time Limit:</strong> Choose how many seconds you have for EACH question (5-60 seconds per question)</li>
+                            <li><strong>Display Time (Sequential Mode):</strong> How long each number is shown before hiding (0-10 seconds)</li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>➡️ Sequential Mode</h3>
+                        <p>In Sequential Mode, the equation is revealed step by step - calculate as numbers appear:</p>
+                        <ul>
+                            <li>First number appears, then hides</li>
+                            <li>Operation symbol appears, then hides</li>
+                            <li>Second number appears, then hides</li>
+                            <li>This continues for all operands in the equation</li>
+                            <li>Calculate the running total as each number appears!</li>
+                            <li>Timer starts ONLY after all numbers are revealed</li>
                         </ul>
                     </div>
                     
@@ -118,6 +133,22 @@
                     </div>
 
                     <div class="config-group">
+                        <label>Game Mode:</label>
+                        <div class="mode-buttons">
+                            <button type="button" class="mode-btn active" data-mode="classic" title="See the full equation and solve it">
+                                <span class="mode-icon">📝</span>
+                                <span class="mode-name">Classic</span>
+                                <span class="mode-desc">See full equation</span>
+                            </button>
+                            <button type="button" class="mode-btn" data-mode="sequential" title="Numbers appear one by one - calculate as you go!">
+                                <span class="mode-icon">➡️</span>
+                                <span class="mode-name">Sequential</span>
+                                <span class="mode-desc">Numbers appear step-by-step</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="config-group">
                         <label>Operations:</label>
                         <div class="operation-buttons">
                             <button type="button" class="operation-btn" data-operation="+" title="Addition">+</button>
@@ -141,6 +172,13 @@
                     <div class="config-group">
                         <label for="timePerQuestion">Time per question (seconds):</label>
                         <input type="number" id="timePerQuestion" value="10" min="5" max="60" inputmode="numeric" pattern="[0-9]*">
+                    </div>
+
+                    <!-- Sequential Mode Settings -->
+                    <div class="config-group sequential-mode-settings" id="sequentialModeSettings" style="display: none;">
+                        <label for="displayTimePerOperand">Display time per operand (seconds):</label>
+                        <input type="number" id="displayTimePerOperand" value="2" min="0" max="10" step="0.5" inputmode="decimal" pattern="[0-9.]*">
+                        <small class="setting-hint">How long each number/operator is shown before hiding</small>
                     </div>
 
                     <button class="btn-primary" id="startGameBtn">Start</button>
