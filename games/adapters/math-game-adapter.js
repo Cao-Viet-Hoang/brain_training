@@ -327,7 +327,7 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
                 comeback: 0
             },
             wrongStreak: 0,
-            // Memory mode state
+            // Sequential mode state
             isRevealingSequence: false,
             revealTimeout: null
         };
@@ -398,7 +398,7 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
         this.game.gameState.maxStreak = 0;
         this.game.gameState.recentAnswers = [];
         this.game.gameState.wrongStreak = 0;
-        // Memory mode state
+        // Sequential mode state
         this.game.gameState.isRevealingSequence = false;
         this.game.gameState.revealTimeout = null;
 
@@ -412,9 +412,9 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
         this.game.updateTip();
 
         // Display first question based on game mode
-        if (this.game.config.gameMode === 'memory') {
-            // Memory mode: show sequential reveal, timer starts after reveal
-            this.game.displayQuestionMemoryMode();
+        if (this.game.config.gameMode === 'sequential') {
+            // Sequential mode: show sequential reveal, timer starts after reveal
+            this.game.displayQuestionSequentialMode();
         } else {
             // Classic mode: show full question, start timer immediately
             this.game.displayQuestion();

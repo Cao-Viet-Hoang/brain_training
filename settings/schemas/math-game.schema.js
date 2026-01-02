@@ -25,7 +25,7 @@ export const mathGameSchema = {
     maxNumber: 100,
 
     // Game mode
-    gameMode: 'classic', // 'classic' or 'memory'
+    gameMode: 'classic', // 'classic' or 'sequential'
 
     // Operations
     operations: ['+'], // Can use '+', '-', '*', '/', 'mixed'
@@ -35,7 +35,7 @@ export const mathGameSchema = {
     questionCount: 10,
     timePerQuestion: 10, // seconds
 
-    // Memory mode settings
+    // Sequential mode settings
     displayTimePerOperand: 2, // seconds - how long each number/operator is shown
 
     // Difficulty
@@ -56,7 +56,7 @@ export const mathGameSchema = {
       createTypeValidator('number'),
       createRangeValidator(1, 1000)
     ),
-    gameMode: createEnumValidator(['classic', 'memory']),
+    gameMode: createEnumValidator(['classic', 'sequential']),
     operations: (value) => {
       if (!Array.isArray(value)) return false;
       if (value.length === 0) return false;
