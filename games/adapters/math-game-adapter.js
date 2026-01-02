@@ -75,6 +75,9 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
         if (settings.maxNumber !== undefined) {
             this.game.config.maxNumber = settings.maxNumber;
         }
+        if (settings.gameMode !== undefined) {
+            this.game.config.gameMode = settings.gameMode;
+        }
         if (settings.operations !== undefined && Array.isArray(settings.operations)) {
             this.game.config.operations = settings.operations;
         }
@@ -86,6 +89,9 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
         }
         if (settings.timePerQuestion !== undefined) {
             this.game.config.timePerQuestion = settings.timePerQuestion;
+        }
+        if (settings.displayTimePerOperand !== undefined) {
+            this.game.config.displayTimePerOperand = settings.displayTimePerOperand;
         }
 
         console.log('[MathGameAdapter] Config after loading settings:', this.game.config);
@@ -285,10 +291,12 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
         return {
             minNumber: this.game.config.minNumber,
             maxNumber: this.game.config.maxNumber,
+            gameMode: this.game.config.gameMode || 'classic',
             operations: this.game.config.operations,
             operandCount: this.game.config.operandCount,
             questionCount: this.game.config.questionCount,
-            timePerQuestion: this.game.config.timePerQuestion
+            timePerQuestion: this.game.config.timePerQuestion,
+            displayTimePerOperand: this.game.config.displayTimePerOperand || 2
         };
     }
 
@@ -318,7 +326,10 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
                 master: 0,
                 comeback: 0
             },
-            wrongStreak: 0
+            wrongStreak: 0,
+            // Memory mode state
+            isRevealingSequence: false,
+            revealTimeout: null
         };
         
         // Generate questions using game's logic
@@ -359,6 +370,7 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
      */
     startMultiplayerGame(gameData) {
         console.log('[MathGameAdapter] Starting multiplayer game with shared questions');
+        console.log('[MathGameAdapter] Game mode:', gameData.config.gameMode);
 
         // Set game start time for tracking
         this.setGameStartTime();
@@ -386,15 +398,12 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
         this.game.gameState.maxStreak = 0;
         this.game.gameState.recentAnswers = [];
         this.game.gameState.wrongStreak = 0;
+        // Memory mode state
+        this.game.gameState.isRevealingSequence = false;
+        this.game.gameState.revealTimeout = null;
 
         // Show game screen
         this.game.showScreen('game');
-
-        // Display first question
-        this.game.displayQuestion();
-
-        // Start timer
-        this.game.startTimer();
 
         // Update progress
         this.game.updateProgress();
@@ -402,7 +411,17 @@ class MathGameMultiplayerAdapter extends MultiplayerGameAdapter {
         // Show initial tip
         this.game.updateTip();
 
-        console.log('[MathGameAdapter] Game started with', gameData.questions.length, 'questions');
+        // Display first question based on game mode
+        if (this.game.config.gameMode === 'memory') {
+            // Memory mode: show sequential reveal, timer starts after reveal
+            this.game.displayQuestionMemoryMode();
+        } else {
+            // Classic mode: show full question, start timer immediately
+            this.game.displayQuestion();
+            this.game.startTimer();
+        }
+
+        console.log('[MathGameAdapter] Game started with', gameData.questions.length, 'questions in', this.game.config.gameMode, 'mode');
     }
 
     /**
